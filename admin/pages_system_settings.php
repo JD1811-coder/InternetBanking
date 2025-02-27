@@ -85,15 +85,21 @@ if (isset($_POST['systemSettings'])) {
                   <form method="post" enctype="multipart/form-data" role="form">
                     <div class="card-body">
                       <div class="row">
-                        <div class="form-group col-md-12">
-                          <label for="">Company Name</label>
-                          <input type="text" required name="sys_name" value="<?php echo $sys->sys_name; ?>" class="form-control">
-                          <input type="hidden" required name="id" value="<?php echo $sys->id ?>" class="form-control">
-                        </div>
-                        <div class="form-group col-md-12">
-                          <label for="">Company Tagline</label>
-                          <input type="text" required name="sys_tagline" value="<?php echo $sys->sys_tagline; ?>" class="form-control">
-                        </div>
+                      <div class="form-group col-md-12">
+    <label for="sys_name">Company Name</label>
+    <input type="text" required name="sys_name" value="<?php echo $sys->sys_name; ?>" 
+           class="form-control" 
+           pattern="^[a-zA-Z\s]{2,50}$" 
+           title="Company Name should only contain letters and spaces (2-50 characters).">
+</div>
+
+<div class="form-group col-md-12">
+    <label for="sys_tagline">Company Tagline</label>
+    <input type="text" required name="sys_tagline" value="<?php echo $sys->sys_tagline; ?>" 
+           class="form-control" 
+           pattern="^[a-zA-Z0-9\s,.!'-]{2,100}$" 
+           title="Tagline should only contain letters, numbers, spaces, and punctuation (2-100 characters).">
+</div>
                         <div class="form-group col-md-12">
                           <label for="">System Logo</label>
                           <div class="input-group">

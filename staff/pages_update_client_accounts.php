@@ -160,10 +160,11 @@ if (isset($_POST['update_account'])) {
                                             <!--Bank Account Details-->
 
                                             <div class="row">
-                                                <div class="col-md-6 form-group">
-                                                    <label for="exampleInputEmail1">Account Name</label>
-                                                    <input type="text" name="acc_name" value="<?php echo $row->acc_name; ?>" required class="form-control" id="exampleInputEmail1">
-                                                </div>
+                                            <div class="col-md-6 form-group">
+    <label for="acc_name">Account Name</label>
+    <input type="text" name="acc_name" id="acc_name" value="<?php echo $row->acc_name; ?>" required class="form-control" pattern="^[a-zA-Z\s]{3,50}$" title="Account Name should only contain alphabets and be 3-50 characters long.">
+</div>
+
 
                                                 <div class="col-md-6 form-group">
                                                     <label for="exampleInputEmail1">Account Number</label>

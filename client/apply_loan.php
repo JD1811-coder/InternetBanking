@@ -117,8 +117,10 @@ if (isset($_POST['apply_for_loan'])) {
                                         <div class="col-md-6 form-group">
     <label for="applicant_name">Applicant Name</label>
     <input type="text" name="applicant_name" id="applicant_name" class="form-control" 
-           required pattern="[a-zA-Z\s]{}" title="not in formate">
+           required pattern="^[a-zA-Z\s]{2,50}$" 
+           title="Applicant name should only contain letters and spaces, and be 2 to 50 characters long.">
 </div>
+
 
                                             <div class="col-md-6 form-group">
                                                 <label for="loan_type_id">Loan Type</label>

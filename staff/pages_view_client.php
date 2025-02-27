@@ -209,12 +209,21 @@ if (isset($_POST['change_client_password'])) {
                                             <!-- / Update Profile -->
                                             <div class="tab-pane active" id="update_Profile">
                                                 <form method="post" enctype="multipart/form-data" class="form-horizontal">
-                                                    <div class="form-group row">
-                                                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-                                                        <div class="col-sm-10">
-                                                            <input type="text" name="name" required class="form-control" value="<?php echo $row->name; ?>" id="inputName">
-                                                        </div>
-                                                    </div>
+                                                <div class="form-group row">
+        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+        <div class="col-sm-10">
+            <input 
+                type="text" 
+                name="name" 
+                required 
+                class="form-control" 
+                value="<?php echo $row->name; ?>" 
+                id="inputName" 
+                pattern="[A-Za-z\s]{2,50}" 
+                title="Name should only contain letters and spaces (2-50 characters)."
+            >
+        </div>
+    </div>
                                                     <div class="form-group row">
                                                         <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
                                                         <div class="col-sm-10">
@@ -222,11 +231,20 @@ if (isset($_POST['change_client_password'])) {
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="inputName2" class="col-sm-2 col-form-label">Contact</label>
-                                                        <div class="col-sm-10">
-                                                            <input type="text" class="form-control" required name="phone" value="<?php echo $row->phone; ?>" id="inputName2">
-                                                        </div>
-                                                    </div>
+        <label for="inputPhone" class="col-sm-2 col-form-label">Contact</label>
+        <div class="col-sm-10">
+            <input 
+                type="text" 
+                class="form-control" 
+                required 
+                name="phone" 
+                value="<?php echo $row->phone; ?>" 
+                id="inputPhone" 
+                pattern="^\d{10,15}$" 
+                title="Contact number should only contain 10 to 15 digits."
+            >
+        </div>
+    </div>
                                                     
                                                     <div class="form-group row">
                                                         <label for="inputName2" class="col-sm-2 col-form-label">Address</label>
@@ -315,6 +333,26 @@ if (isset($_POST['change_client_password'])) {
     <script src="dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
+    <script>
+    document.getElementById('inputName').addEventListener('input', function() {
+        const pattern = /^[A-Za-z\s]{2,50}$/;
+        if (!pattern.test(this.value)) {
+            this.setCustomValidity('Name should only contain letters and spaces (2-50 characters).');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    document.getElementById('inputPhone').addEventListener('input', function() {
+        const pattern = /^\d{10,15}$/;
+        if (!pattern.test(this.value)) {
+            this.setCustomValidity('Contact number should only contain 10 to 15 digits.');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+</script>
+
 </body>
 
 </html>
