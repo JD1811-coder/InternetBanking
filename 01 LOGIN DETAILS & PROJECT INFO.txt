@@ -13,3 +13,18 @@ Password: admin@123
 Email	: dharmika192@gmail.com
 Password: jENIL@1811
 
+
+**Database Name: internetbanking**
+
+
+**Admin Login Details**
+
+Email	: dholajenil2024.katargam@gmail.com
+Password: admin@123
+
+
+**Staff Login Details**
+
+Email	: dharmika192@gmail.com
+Password: jENIL@1811
+
