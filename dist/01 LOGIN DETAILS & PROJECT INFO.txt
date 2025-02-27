@@ -1,0 +1,21 @@
+**Log on to codeastro.com for more projects!***
+
+**Database Name: internetbanking**
+
+**Developed by MDND**
+
+**Recommended PHP Version 5, 7, 8**
+
+
+**Admin Login Details**
+
+Email	: admin@mail.com
+Password: codeastro.com
+
+
+**Staff Login Details**
+
+Email	: staff@mail.com
+Password: codeastro.com
+
+

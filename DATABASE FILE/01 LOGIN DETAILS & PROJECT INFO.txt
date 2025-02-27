@@ -1,0 +1,16 @@
+**Database Name: internetbanking**
+
+**Recommended PHP Version 5, 7, 8**
+
+
+**Admin Login Details**
+
+Email	: admin@mail.com
+Password: admin@123
+
+**Staff Login Details**
+
+Email	: staff@mail.com
+Password: staff@123
+
+
