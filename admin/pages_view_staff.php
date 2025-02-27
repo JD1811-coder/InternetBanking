@@ -4,33 +4,40 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
-//update logged in user account
+
 if (isset($_POST['update_staff_account'])) {
-    //Register  Staff
     $name = $_POST['name'];
     $staff_number = $_GET['staff_number'];
     $phone = $_POST['phone'];
     $email = $_POST['email'];
-    //$password = sha1(md5($_POST['password']));
     $sex  = $_POST['sex'];
 
-    $profile_pic  = $_FILES["profile_pic"]["name"];
-    move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "dist/img/" . $_FILES["profile_pic"]["name"]);
+    // Profile Picture Validation
+    $profile_pic = $_FILES["profile_pic"]["name"];
+    $allowed_extensions = ['jpg', 'jpeg', 'png'];
+    $file_extension = pathinfo($profile_pic, PATHINFO_EXTENSION);
 
-    //Insert Captured information to a database table
-    $query = "UPDATE iB_staff SET name=?, phone=?, email=?, sex=?, profile_pic=? WHERE staff_number=?";
-    $stmt = $mysqli->prepare($query);
-    //bind parameters
-    $rc = $stmt->bind_param('ssssss', $name, $phone, $email, $sex, $profile_pic, $staff_number);
-    $stmt->execute();
-
-    //declare a variable which will be passed to alert function
-    if ($stmt) {
-        $success = "Staff Account Updated";
+    if (!in_array(strtolower($file_extension), $allowed_extensions)) {
+        $_SESSION['error'] = "Invalid file format. Only JPG, JPEG, and PNG allowed.";
     } else {
-        $err = "Please Try Again Or Try Later";
+        move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "dist/img/" . $profile_pic);
+
+        // Update database
+        $query = "UPDATE iB_staff SET name=?, phone=?, email=?, sex=?, profile_pic=? WHERE staff_number=?";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('ssssss', $name, $phone, $email, $sex, $profile_pic, $staff_number);
+        $stmt->execute();
+
+        if ($stmt) {
+            $_SESSION['success'] = "Staff Account Updated Successfully!";
+            header("Location: " . $_SERVER['PHP_SELF'] . "?staff_number=" . $staff_number); // Avoid resubmission
+            exit();
+        } else {
+            $_SESSION['error'] = "Please Try Again Or Try Later.";
+        }
     }
 }
+
 //change password
 if (isset($_POST['change_staff_password'])) {
     $new_password = $_POST['password'];
@@ -178,8 +185,8 @@ if (isset($_POST['change_staff_password'])) {
                                                         <label for="inputName2" class="col-sm-2 col-form-label">Profile Picture</label>
                                                         <div class="input-group col-sm-10">
                                                             <div class="custom-file">
-                                                                <input type="file" name="profile_pic" class=" form-control custom-file-input" id="exampleInputFile">
-                                                                <label class="custom-file-label  col-form-label" for="exampleInputFile">Choose file</label>
+                                                                <<input type="file" name="profile_pic" id="profilePic" class="form-control custom-file-input" onchange="validateFile()">
+                                                                    <label class="custom-file-label  col-form-label" for="exampleInputFile">Choose file</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -260,6 +267,7 @@ if (isset($_POST['change_staff_password'])) {
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
     <!-- Custom script for password validation -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.getElementById('changePasswordForm').addEventListener('submit', function(event) {
             var newPassword = document.getElementById('newPassword').value;
@@ -270,6 +278,46 @@ if (isset($_POST['change_staff_password'])) {
                 alert("New password and confirm password do not match");
             }
         });
-    </script>
+
+
+    function validateFile() {
+        var fileInput = document.getElementById('profilePic');
+        var filePath = fileInput.value;
+        var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+
+        if (!allowedExtensions.exec(filePath)) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Only JPG, JPEG, and PNG formats are allowed.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            fileInput.value = '';
+            return false;
+        }
+    }
+    // Show success message
+    <?php if (isset($_SESSION['success'])) { ?>
+        Swal.fire({
+            title: 'Success!',
+            text: '<?php echo $_SESSION['success']; ?>',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        });
+        <?php unset($_SESSION['success']); // Clear session message ?>
+    <?php } ?>
+
+    // Show error message
+    <?php if (isset($_SESSION['error'])) { ?>
+        Swal.fire({
+            title: 'Error!',
+            text: '<?php echo $_SESSION['error']; ?>',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        <?php unset($_SESSION['error']); // Clear session message ?>
+    <?php } ?>
+</script>
+
 </body>
 </html>

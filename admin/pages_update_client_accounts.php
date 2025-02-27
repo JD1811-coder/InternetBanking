@@ -5,7 +5,6 @@ include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
 
-// Register new account
 if (isset($_POST['update_account'])) {
     // Client open account
     $acc_name = $_POST['acc_name'];
@@ -16,21 +15,35 @@ if (isset($_POST['update_account'])) {
     $acc_amount = $_POST['acc_amount'];
     $account_id  = $_GET['account_id'];
 
-    // Update only fields that exist in iB_bankAccounts
-    // Insert Captured information to a database table
-    $query = "UPDATE iB_bankAccounts SET acc_name=?, acc_type=?, acc_rates=?, acc_status=?, acc_amount=? WHERE account_id=?";
-    $stmt = $mysqli->prepare($query);
-    // Bind parameters
-    $stmt->bind_param('sssssi', $acc_name, $acc_type, $acc_rates, $acc_status, $acc_amount, $account_id);
-    $stmt->execute();
-
-    // Declare a variable which will be passed to alert function
-    if ($stmt) {
-        $success = "iBank Account Updated";
+    // Validate that acc_name contains only letters
+    if (!preg_match("/^[a-zA-Z ]*$/", $acc_name)) {
+        $err = "Account Name should contain only alphabets!";
     } else {
-        $err = "Please Try Again Or Try Later";
+        // Update only fields that exist in iB_bankAccounts
+        $query = "UPDATE iB_bankAccounts SET acc_name=?, acc_type=?, acc_rates=?, acc_status=?, acc_amount=? WHERE account_id=?";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('sssssi', $acc_name, $acc_type, $acc_rates, $acc_status, $acc_amount, $account_id);
+        $stmt->execute();
+
+        if ($stmt) {
+            echo "<script>
+                setTimeout(() => {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'iBank Account Updated Successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = 'pages_open_acc.php';
+                    });
+                }, 500);
+            </script>";
+        } else {
+            $err = "Please Try Again Or Try Later";
+        }
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -211,5 +224,26 @@ if (isset($_POST['update_account'])) {
     <script src="dist/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- AdminLTE App -->
     <script src="dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.querySelector("form").addEventListener("submit", function (event) {
+    let accNameInput = document.getElementById("accName").value;
+    
+    // Regular expression to check for alphabets and spaces only
+    let nameRegex = /^[a-zA-Z ]+$/;
+    
+    if (!nameRegex.test(accNameInput)) {
+        Swal.fire({
+            title: "Error!",
+            text: "Account Name should contain only alphabets!",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+        event.preventDefault(); // Stop form submission
+    }
+});
+</script>
+
+    
 </body>
 </html>

@@ -4,33 +4,50 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $staff_id = $_SESSION['staff_id'];
-//update logged in user account
 if (isset($_POST['update_staff_account'])) {
-    //Register  Staff
     $name = $_POST['name'];
     $staff_id = $_SESSION['staff_id'];
     $phone = $_POST['phone'];
     $email = $_POST['email'];
-    //$password = sha1(md5($_POST['password']));
     $sex  = $_POST['sex'];
 
-    $profile_pic  = $_FILES["profile_pic"]["name"];
-    move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "../admin/dist/img/" . $_FILES["profile_pic"]["name"]);
+    if (!empty($_FILES["profile_pic"]["name"])) {
+        $allowedTypes = array('jpg', 'jpeg', 'png');
+        $fileExtension = strtolower(pathinfo($_FILES["profile_pic"]["name"], PATHINFO_EXTENSION));
 
-    //Insert Captured information to a database table
-    $query = "UPDATE iB_staff SET name=?, phone=?, email=?, sex=?, profile_pic=? WHERE staff_id=?";
-    $stmt = $mysqli->prepare($query);
-    //bind parameters
-    $rc = $stmt->bind_param('sssssi', $name, $phone, $email, $sex, $profile_pic, $staff_id);
-    $stmt->execute();
+        if (!in_array($fileExtension, $allowedTypes)) {
+            $err = "Only JPG, JPEG, and PNG files are allowed.";
+        } else {
+            $profile_pic = $_FILES["profile_pic"]["name"];
+            move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "../admin/dist/img/" . $profile_pic);
 
-    //declare a variable which will be passed to alert function
-    if ($stmt) {
-        $success = "Staff Account Updated";
+            // Update the database
+            $query = "UPDATE iB_staff SET name=?, phone=?, email=?, sex=?, profile_pic=? WHERE staff_id=?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('sssssi', $name, $phone, $email, $sex, $profile_pic, $staff_id);
+            $stmt->execute();
+
+            if ($stmt) {
+                $success = "Staff Account Updated";
+            } else {
+                $err = "Please Try Again Or Try Later";
+            }
+        }
     } else {
-        $err = "Please Try Again Or Try Later";
+        // If no file is uploaded, update other details without changing the profile picture
+        $query = "UPDATE iB_staff SET name=?, phone=?, email=?, sex=? WHERE staff_id=?";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('ssssi', $name, $phone, $email, $sex, $staff_id);
+        $stmt->execute();
+
+        if ($stmt) {
+            $success = "Staff Account Updated";
+        } else {
+            $err = "Please Try Again Or Try Later";
+        }
     }
 }
+
 //change password
 if (isset($_POST['change_staff_password'])) {
     $password = sha1(md5($_POST['password']));
@@ -230,6 +247,8 @@ if (isset($_POST['change_staff_password'])) {
                                                                 <input type="file" name="profile_pic" class=" form-control custom-file-input" id="exampleInputFile">
                                                                 <label class="custom-file-label  col-form-label" for="exampleInputFile">Choose file</label>
                                                             </div>
+                                                            <div id="fileError" class="text-danger"></div>
+
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -340,6 +359,32 @@ if (isset($_POST['change_staff_password'])) {
                 passwordError.textContent = "";
             }
         });
+        document.getElementById('updateProfileForm').addEventListener('submit', function(event) {
+    var phoneInput = document.getElementById('inputPhone');
+    var phoneError = document.getElementById('phoneError');
+    var phoneRegex = /^\d{10}$/;
+    var profilePicInput = document.getElementById('exampleInputFile');
+    var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+    var fileError = document.getElementById('fileError');
+
+    if (!phoneRegex.test(phoneInput.value)) {
+        phoneError.textContent = "Phone number should be exactly 10 digits.";
+        event.preventDefault();
+    } else {
+        phoneError.textContent = "";
+    }
+
+    if (profilePicInput.files.length > 0) {
+        var fileName = profilePicInput.files[0].name;
+        if (!allowedExtensions.test(fileName)) {
+            fileError.textContent = "Only JPG, JPEG, and PNG files are allowed.";
+            event.preventDefault();
+        } else {
+            fileError.textContent = "";
+        }
+    }
+});
+
     </script>
 </body>
 
