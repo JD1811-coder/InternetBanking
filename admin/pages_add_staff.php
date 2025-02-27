@@ -5,7 +5,7 @@ include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
 
-$success = $err = ""; 
+$success = $err = "";
 
 // Register new staff
 if (isset($_POST['create_staff_account'])) {
@@ -22,18 +22,31 @@ if (isset($_POST['create_staff_account'])) {
     $target_file = $target_dir . basename($_FILES["profile_pic"]["name"]);
     move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file);
 
-    // Insert into database
-    $query = "INSERT INTO iB_staff (name, staff_number, phone, email, password, sex, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $mysqli->prepare($query);
-    $stmt->bind_param('sssssss', $name, $staff_number, $phone, $email, $password, $sex, $profile_pic);
-    $stmt->execute();
+    // Check if the staff name already exists
+    $check_query = "SELECT name FROM iB_staff WHERE name = ?";
+    $check_stmt = $mysqli->prepare($check_query);
+    $check_stmt->bind_param('s', $name);
+    $check_stmt->execute();
+    $check_stmt->store_result();
 
-    if ($stmt) {
-        $success = "Staff Account Created Successfully!";
+    if ($check_stmt->num_rows > 0) {
+        $err = "Staff name already exists! Please use a different name.";
     } else {
-        $err = "Error! Please Try Again Later.";
+        // Proceed with insertion
+        $query = "INSERT INTO iB_staff (name, staff_number, phone, email, password, sex, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('sssssss', $name, $staff_number, $phone, $email, $password, $sex, $profile_pic);
+        $stmt->execute();
+
+        if ($stmt) {
+            $success = "Staff Account Created Successfully!";
+        } else {
+            $err = "Error! Please Try Again Later.";
+        }
+        $stmt->close();
     }
-    $stmt->close();
+    $check_stmt->close();
+
 }
 ?>
 
@@ -50,7 +63,9 @@ if (isset($_POST['create_staff_account'])) {
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
-                        <div class="col-sm-6"><h1>Create Staff Account</h1></div>
+                        <div class="col-sm-6">
+                            <h1>Create Staff Account</h1>
+                        </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="pages_dashboard.php">Dashboard</a></li>
@@ -66,8 +81,10 @@ if (isset($_POST['create_staff_account'])) {
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card card-purple">
-                                <div class="card-header"><h3 class="card-title">Fill All Fields</h3></div>
-                                
+                                <div class="card-header">
+                                    <h3 class="card-title">Fill All Fields</h3>
+                                </div>
+
                                 <form method="post" enctype="multipart/form-data" role="form" id="staffForm">
                                     <div class="card-body">
                                         <div class="row">
@@ -77,14 +94,17 @@ if (isset($_POST['create_staff_account'])) {
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Staff Number</label>
-                                                <input type="text" readonly name="staff_number" value="iBank-STAFF-<?php echo substr(str_shuffle('0123456789'), 1, 4); ?>" class="form-control">
+                                                <input type="text" readonly name="staff_number"
+                                                    value="iBank-STAFF-<?php echo substr(str_shuffle('0123456789'), 1, 4); ?>"
+                                                    class="form-control">
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Phone Number</label>
-                                                <input type="text" name="phone" required pattern="[0-9]{10}" class="form-control" id="phone">
+                                                <input type="text" name="phone" required pattern="[0-9]{10}"
+                                                    class="form-control" id="phone">
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Gender</label>
@@ -99,22 +119,26 @@ if (isset($_POST['create_staff_account'])) {
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Email</label>
-                                                <input type="email" name="email" required class="form-control" id="email">
+                                                <input type="email" name="email" required class="form-control"
+                                                    id="email">
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Password</label>
-                                                <input type="password" name="password" required class="form-control" id="password">
+                                                <input type="password" name="password" required class="form-control"
+                                                    id="password">
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label>Profile Picture</label>
-                                            <input type="file" name="profile_pic" class="form-control-file" id="profile_pic">
+                                            <input type="file" name="profile_pic" class="form-control-file"
+                                                id="profile_pic">
                                         </div>
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="create_staff_account" class="btn btn-success" onclick="return validateForm()">Add Staff</button>
+                                        <button type="submit" name="create_staff_account" class="btn btn-success"
+                                            onclick="return validateForm()">Add Staff</button>
                                     </div>
                                 </form>
                             </div>
@@ -133,7 +157,7 @@ if (isset($_POST['create_staff_account'])) {
     <script src="plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap -->
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         function validateForm() {
             var name = document.getElementById("name").value.trim();
@@ -181,7 +205,29 @@ if (isset($_POST['create_staff_account'])) {
         <?php } elseif (!empty($err)) { ?>
             Swal.fire("Error", "<?php echo $err; ?>", "error");
         <?php } ?>
+        $(document).ready(function () {
+            $("#name").keyup(function () {
+                var name = $(this).val().trim();
+                if (name.length > 0) {
+                    $.ajax({
+                        url: "check_staff_name.php",
+                        method: "POST",
+                        data: { name: name },
+                        success: function (response) {
+                            if (response.trim() === "exists") {
+                                Swal.fire("Error", "Staff name already exists!", "error");
+                                $("#name").addClass("is-invalid");
+                            } else {
+                                $("#name").removeClass("is-invalid");
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
     </script>
 
 </body>
+
 </html>
