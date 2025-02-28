@@ -11,6 +11,8 @@ if (isset($_POST['update_client_account'])) {
     $phone = trim($_POST['phone']);
     $email = trim($_POST['email']);
     $address = trim($_POST['address']);
+    $aadhar_number = $_POST['aadhar_number'];
+    $pan_number = $_POST['pan_number'];
 
     // Image validation
     $allowed_extensions = ['jpg', 'jpeg', 'png'];
@@ -28,19 +30,20 @@ if (isset($_POST['update_client_account'])) {
         $_SESSION['swal_message'] = ['error', 'Invalid email format!'];
     } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
         $_SESSION['swal_message'] = ['error', 'Phone number must be 10 digits!'];
+    } elseif (!preg_match('/^[0-9]{12}$/', $aadhar_number)) {
+        $_SESSION['swal_message'] = ['error', 'Aadhaar number must be exactly 12 digits!'];
+    } elseif (!preg_match('/^[[A-Z]{5}[0-9]{4}[A-Z]{1}$/', $pan_number)) {
+        $_SESSION['swal_message'] = ['error', 'Invalid PAN number format!'];
+
+
     } else {
         move_uploaded_file($profile_pic_tmp, "dist/img/" . $profile_pic);
 
-        $query = "UPDATE iB_clients SET name=?, phone=?, email=?, address=?, profile_pic=? WHERE client_number=?";
+        $query = "UPDATE iB_clients SET name=?, phone=?, email=?, address=?, aadhar_number=?, pan_number=?, profile_pic=? WHERE client_number = ?";
         $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssssss', $name, $phone, $email, $address, $profile_pic, $client_number);
+        $stmt->bind_param('ssssssss', $name, $phone, $email, $address, $aadhar_number, $pan_number, $profile_pic, $client_number);
         $stmt->execute();
 
-        if ($stmt) {
-            $_SESSION['swal_message'] = ['success', 'Client Account Updated!'];
-        } else {
-            $_SESSION['swal_message'] = ['error', 'Please try again later!'];
-        }
     }
     header("Location: " . $_SERVER['PHP_SELF'] . "?client_number=$client_number");
     exit();
@@ -218,6 +221,20 @@ if (isset($_POST['change_client_password'])) {
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
+                                                        <label class="col-sm-2 col-form-label">Aadhaar Number</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="aadhar_number" class="form-control"
+                                                                value="<?php echo $row->aadhar_number; ?>">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <label class="col-sm-2 col-form-label">PAN Number</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="pan_number" class="form-control"
+                                                                value="<?php echo $row->pan_number; ?>">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
                                                         <label for="inputName2" class="col-sm-2 col-form-label">Profile
                                                             Picture</label>
                                                         <div class="input-group col-sm-10">
@@ -285,13 +302,21 @@ if (isset($_POST['change_client_password'])) {
                 </section><!-- /.content -->
             <?php } ?>
             <?php
-            // Display SweetAlert message if set
-            if (isset($_SESSION['swal_message'])) {
-                list($type, $message) = $_SESSION['swal_message'];
-                echo "<script>Swal.fire({icon: '$type', text: '$message'});</script>";
-                unset($_SESSION['swal_message']); // Clear message after showing
-            }
-            ?>
+          if (isset($_SESSION['swal_message'])) {
+              list($type, $message) = $_SESSION['swal_message'];
+              echo "<script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                      Swal.fire({
+                          icon: '$type',
+                          title: '$message',
+                          showConfirmButton: false,
+                          timer: 2000
+                      });
+                  });
+              </script>";
+              unset($_SESSION['swal_message']);
+          }
+          ?>
         </div><!-- /.content-wrapper -->
         <?php include("dist/_partials/footer.php"); ?>
         <!-- Control Sidebar -->
@@ -308,6 +333,23 @@ if (isset($_POST['change_client_password'])) {
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector("form").addEventListener("submit", function (e) {
+        let aadhar = document.querySelector("input[name='aadhar_number']").value;
+        let pan = document.querySelector("input[name='pan_number']").value;
+        
+        if (!/^[0-9]{12}$/.test(aadhar)) {
+            Swal.fire("Error", "Aadhaar number must be exactly 12 digits!", "error");
+            e.preventDefault();
+        } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+            Swal.fire("Error", "Invalid PAN number format!", "error");
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
 </body>
 
 </html>

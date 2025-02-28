@@ -3,55 +3,82 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$staff_id = $_SESSION['staff_id'];
+$admin_id = $_SESSION['admin_id'];
 
 if (isset($_POST['update_client_account'])) {
-    //update client
-    $name = $_POST['name'];
-    // $national_id = $_POST['national_id'];
+    $name = trim($_POST['name']);
     $client_number = $_GET['client_number'];
-    $phone = $_POST['phone'];
-    $email = $_POST['email'];
-    //$password = sha1(md5($_POST['password']));
-    $address  = $_POST['address'];
+    $phone = trim($_POST['phone']);
+    $email = trim($_POST['email']);
+    $address = trim($_POST['address']);
+    $aadhar_number = $_POST['aadhar_number'];
+    $pan_number = $_POST['pan_number'];
 
-    $profile_pic  = $_FILES["profile_pic"]["name"];
-    move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "../admin/dist/img/" . $_FILES["profile_pic"]["name"]);
+    // Image validation
+    $allowed_extensions = ['jpg', 'jpeg', 'png'];
+    $profile_pic = $_FILES["profile_pic"]["name"];
+    $profile_pic_tmp = $_FILES["profile_pic"]["tmp_name"];
+    $profile_pic_ext = strtolower(pathinfo($profile_pic, PATHINFO_EXTENSION));
 
-    //Insert Captured information to a database table
-    $query = "UPDATE  iB_clients SET name=?, phone=?, email=?, address=?, profile_pic=? WHERE client_number = ?";
-    $stmt = $mysqli->prepare($query);
-    //bind paramaters
-    $rc = $stmt->bind_param('ssssss', $name, $phone, $email,  $address, $profile_pic, $client_number);
-    $stmt->execute();
+    if (empty($name) || empty($phone) || empty($email) || empty($address)) {
+        $_SESSION['swal_message'] = ['error', 'All fields are required!'];
+    } elseif (empty($profile_pic)) {  // Ensure profile pic is selected
+        $_SESSION['swal_message'] = ['error', 'Profile picture is required!'];
+    } elseif (!in_array($profile_pic_ext, $allowed_extensions)) { // Check image format
+        $_SESSION['swal_message'] = ['error', 'Only JPG, JPEG, and PNG files are allowed!'];
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['swal_message'] = ['error', 'Invalid email format!'];
+    } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
+        $_SESSION['swal_message'] = ['error', 'Phone number must be 10 digits!'];
+    } elseif (!preg_match('/^[0-9]{12}$/', $aadhar_number)) {
+        $_SESSION['swal_message'] = ['error', 'Aadhaar number must be exactly 12 digits!'];
+    } elseif (!preg_match('/^[[A-Z]{5}[0-9]{4}[A-Z]{1}$/', $pan_number)) {
+        $_SESSION['swal_message'] = ['error', 'Invalid PAN number format!'];
 
-    //declare a varible which will be passed to alert function
-    if ($stmt) {
-        $success = "Client Account Updated";
+
     } else {
-        $err = "Please Try Again Or Try Later";
+        move_uploaded_file($profile_pic_tmp, "dist/img/" . $profile_pic);
+
+        $query = "UPDATE iB_clients SET name=?, phone=?, email=?, address=?, aadhar_number=?, pan_number=?, profile_pic=? WHERE client_number = ?";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('ssssssss', $name, $phone, $email, $address, $aadhar_number, $pan_number, $profile_pic, $client_number);
+        $stmt->execute();
+
     }
+    header("Location: " . $_SERVER['PHP_SELF'] . "?client_number=$client_number");
+    exit();
 }
-//change password
+
 if (isset($_POST['change_client_password'])) {
-    $password = sha1(md5($_POST['password']));
-    $client_number = $_GET['client_number'];
-    //insert unto certain table in database
-    $query = "UPDATE iB_clients  SET password=? WHERE  client_number=?";
-    $stmt = $mysqli->prepare($query);
-    //bind paramaters
-    $rc = $stmt->bind_param('ss', $password, $client_number);
-    $stmt->execute();
-    //declare a varible which will be passed to alert function
-    if ($stmt) {
-        $success = "Client Password Updated";
+    $new_password = trim($_POST['password']);
+    $confirm_password = trim($_POST['confirm_password']);
+
+    if (empty($new_password) || empty($confirm_password)) {
+        $_SESSION['swal_message'] = ['error', 'All fields are required!'];
+    } elseif ($new_password !== $confirm_password) {
+        $_SESSION['swal_message'] = ['error', 'Passwords do not match!'];
+    } elseif (strlen($new_password) < 6) {
+        $_SESSION['swal_message'] = ['error', 'Password must be at least 6 characters!'];
     } else {
-        $err = "Please Try Again Or Try Later";
+        $password = sha1(md5($new_password));
+        $client_number = $_GET['client_number'];
+
+        $query = "UPDATE iB_clients SET password=? WHERE client_number=?";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('ss', $password, $client_number);
+        $stmt->execute();
+
+        if ($stmt) {
+            $_SESSION['swal_message'] = ['success', 'Password Updated!'];
+        } else {
+            $_SESSION['swal_message'] = ['error', 'Please try again later!'];
+        }
     }
+    header("Location: " . $_SERVER['PHP_SELF'] . "?client_number=$client_number");
+    exit();
 }
-
-
 ?>
+
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
@@ -80,24 +107,18 @@ if (isset($_POST['change_client_password'])) {
                 //set automatically logged in user default image if they have not updated their pics
                 if ($row->profile_pic == '') {
                     $profile_picture = "
-
                         <img class='img-fluid'
-                        src='../admin/dist/img/user_icon.png'
+                        src='dist/img/user_icon.png'
                         alt='User profile picture'>
-
                         ";
                 } else {
                     $profile_picture = "
-
                         <img class=' img-fluid'
-                        src='../admin/dist/img/$row->profile_pic'
+                        src='dist/img/$row->profile_pic'
                         alt='User profile picture'>
-
                         ";
                 }
-
-
-            ?>
+                ?>
                 <section class="content-header">
                     <div class="container-fluid">
                         <div class="row mb-2">
@@ -121,20 +142,16 @@ if (isset($_POST['change_client_password'])) {
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-3">
-
                                 <!-- Profile Image -->
                                 <div class="card card-purple card-outline">
                                     <div class="card-body box-profile">
                                         <div class="text-center">
                                             <?php echo $profile_picture; ?>
                                         </div>
-
                                         <h3 class="profile-username text-center"><?php echo $row->name; ?></h3>
-
                                         <p class="text-muted text-center">Client @iBanking </p>
-
                                         <ul class="list-group list-group-unbordered mb-3">
-                                           
+
                                             <li class="list-group-item">
                                                 <b>Email: </b> <a class="float-right"><?php echo $row->email; ?></a>
                                             </li>
@@ -142,66 +159,24 @@ if (isset($_POST['change_client_password'])) {
                                                 <b>Phone: </b> <a class="float-right"><?php echo $row->phone; ?></a>
                                             </li>
                                             <li class="list-group-item">
-                                                <b>ClientNo: </b> <a class="float-right"><?php echo $row->client_number; ?></a>
+                                                <b>ClientNo: </b> <a
+                                                    class="float-right"><?php echo $row->client_number; ?></a>
                                             </li>
                                             <li class="list-group-item">
                                                 <b>Address: </b> <a class="float-right"><?php echo $row->address; ?></a>
                                             </li>
-
                                         </ul>
-
-                                    </div>
-                                    <!-- /.card-body -->
-                                </div>
-                                <!-- /.card -->
-
-                                <!-- About Me Box 
-                    <div class="card card-purple">
-                    <div class="card-header">
-                        <h3 class="card-title">About Me</h3>
-                    </div>
-                    <div class="card-body">
-                        <strong><i class="fas fa-book mr-1"></i> Education</strong>
-
-                        <p class="text-muted">
-                        B.S. in Computer Science from the University of Tennessee at Knoxville
-                        </p>
-
-                        <hr>
-
-                        <strong><i class="fas fa-map-marker-alt mr-1"></i> Location</strong>
-
-                        <p class="text-muted">Malibu, California</p>
-
-                        <hr>
-
-                        <strong><i class="fas fa-pencil-alt mr-1"></i> Skills</strong>
-
-                        <p class="text-muted">
-                        <span class="tag tag-danger">UI Design</span>
-                        <span class="tag tag-success">Coding</span>
-                        <span class="tag tag-info">Javascript</span>
-                        <span class="tag tag-warning">PHP</span>
-                        <span class="tag tag-primary">Node.js</span>
-                        </p>
-
-                        <hr>
-
-                        <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
-
-                        <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p>
-                    </div>
-                    </div>
-                    <!-- /.card -->
-                            </div>
-
-                            <!-- /.col -->
+                                    </div><!-- /.card-body -->
+                                </div><!-- /.card -->
+                            </div><!-- /.col -->
                             <div class="col-md-9">
                                 <div class="card">
                                     <div class="card-header p-2">
                                         <ul class="nav nav-pills">
-                                            <li class="nav-item"><a class="nav-link active" href="#update_Profile" data-toggle="tab">Update Profile</a></li>
-                                            <li class="nav-item"><a class="nav-link" href="#Change_Password" data-toggle="tab">Change Password</a></li>
+                                            <li class="nav-item"><a class="nav-link active" href="#update_Profile"
+                                                    data-toggle="tab">Update Profile</a></li>
+                                            <li class="nav-item"><a class="nav-link" href="#Change_Password"
+                                                    data-toggle="tab">Change Password</a></li>
                                         </ul>
                                     </div><!-- /.card-header -->
                                     <div class="card-body">
@@ -209,61 +184,73 @@ if (isset($_POST['change_client_password'])) {
                                             <!-- / Update Profile -->
                                             <div class="tab-pane active" id="update_Profile">
                                                 <form method="post" enctype="multipart/form-data" class="form-horizontal">
-                                                <div class="form-group row">
-        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-        <div class="col-sm-10">
-            <input 
-                type="text" 
-                name="name" 
-                required 
-                class="form-control" 
-                value="<?php echo $row->name; ?>" 
-                id="inputName" 
-                pattern="[A-Za-z\s]{2,50}" 
-                title="Name should only contain letters and spaces (2-50 characters)."
-            >
-        </div>
-    </div>
                                                     <div class="form-group row">
-                                                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                                                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
                                                         <div class="col-sm-10">
-                                                            <input type="email" name="email" required value="<?php echo $row->email; ?>" class="form-control" id="inputEmail">
+                                                            <input type="text" name="name" required readonly
+                                                                class="form-control" value="<?php echo $row->name; ?>"
+                                                                id="inputName">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-        <label for="inputPhone" class="col-sm-2 col-form-label">Contact</label>
-        <div class="col-sm-10">
-            <input 
-                type="text" 
-                class="form-control" 
-                required 
-                name="phone" 
-                value="<?php echo $row->phone; ?>" 
-                id="inputPhone" 
-                pattern="^\d{10,15}$" 
-                title="Contact number should only contain 10 to 15 digits."
-            >
-        </div>
-    </div>
-                                                    
-                                                    <div class="form-group row">
-                                                        <label for="inputName2" class="col-sm-2 col-form-label">Address</label>
+                                                        <label for="inputEmail"
+                                                            class="col-sm-2 col-form-label">Email</label>
                                                         <div class="col-sm-10">
-                                                            <input type="text" class="form-control" required name="address" value="<?php echo $row->address; ?>" id="inputName2">
+                                                            <input type="email" name="email" required
+                                                                value="<?php echo $row->email; ?>" class="form-control"
+                                                                id="inputEmail">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="inputName2" class="col-sm-2 col-form-label">Profile Picture</label>
+                                                        <label for="inputName2"
+                                                            class="col-sm-2 col-form-label">Contact</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" class="form-control" required name="phone"
+                                                                value="<?php echo $row->phone; ?>" id="inputName2"
+                                                                pattern="[0-9]{10}"
+                                                                title="Please enter a 10-digit phone number">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row">
+                                                        <label for="inputName2"
+                                                            class="col-sm-2 col-form-label">Address</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" class="form-control" required name="address"
+                                                                value="<?php echo $row->address; ?>" id="inputName2">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <label class="col-sm-2 col-form-label">Aadhaar Number</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="aadhar_number" class="form-control"
+                                                                value="<?php echo $row->aadhar_number; ?>">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <label class="col-sm-2 col-form-label">PAN Number</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="pan_number" class="form-control"
+                                                                value="<?php echo $row->pan_number; ?>">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <label for="inputName2" class="col-sm-2 col-form-label">Profile
+                                                            Picture</label>
                                                         <div class="input-group col-sm-10">
                                                             <div class="custom-file">
-                                                                <input type="file" name="profile_pic" class=" form-control custom-file-input" id="exampleInputFile">
-                                                                <label class="custom-file-label  col-form-label" for="exampleInputFile">Choose file</label>
+                                                                <input type="file" name="profile_pic"
+                                                                    class="form-control custom-file-input"
+                                                                    id="exampleInputFile">
+                                                                <label class="custom-file-label col-form-label"
+                                                                    for="exampleInputFile">Choose file</label>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="offset-sm-2 col-sm-10">
-                                                            <button name="update_client_account" type="submit" class="btn btn-outline-success">Update Account</button>
+                                                            <button name="update_client_account" type="submit"
+                                                                class="btn btn-outline-success">Update Account</button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -273,58 +260,70 @@ if (isset($_POST['change_client_password'])) {
                                             <div class="tab-pane" id="Change_Password">
                                                 <form method="post" class="form-horizontal">
                                                     <div class="form-group row">
-                                                        <label for="inputName" class="col-sm-2 col-form-label">Old Password</label>
+                                                        <label for="inputName" class="col-sm-2 col-form-label">Old
+                                                            Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" class="form-control" required id="inputName">
+                                                            <input type="password" class="form-control" required
+                                                                id="inputName">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="inputEmail" class="col-sm-2 col-form-label">New Password</label>
+                                                        <label for="inputEmail" class="col-sm-2 col-form-label">New
+                                                            Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" name="password" class="form-control" required id="inputEmail">
+                                                            <input type="password" name="password" class="form-control"
+                                                                required id="inputEmail">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="inputName2" class="col-sm-2 col-form-label">Confirm New Password</label>
+                                                        <label for="inputName2" class="col-sm-2 col-form-label">Confirm New
+                                                            Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" class="form-control" required id="inputName2">
+                                                            <input type="password" name="confirm_password"
+                                                                class="form-control" required id="inputName2">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="offset-sm-2 col-sm-10">
-                                                            <button type="submit" name="change_client_password" class="btn btn-outline-success">Change Password</button>
+                                                            <button type="submit" name="change_client_password"
+                                                                class="btn btn-outline-success">Change Password</button>
                                                         </div>
                                                     </div>
-
                                                 </form>
                                             </div>
                                             <!-- /.tab-pane -->
                                         </div>
                                         <!-- /.tab-content -->
                                     </div><!-- /.card-body -->
-                                </div>
-                                <!-- /.nav-tabs-custom -->
-                            </div>
-                            <!-- /.col -->
-                        </div>
-                        <!-- /.row -->
+                                </div><!-- /.card -->
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
                     </div><!-- /.container-fluid -->
-                </section>
-                <!-- /.content -->
-
+                </section><!-- /.content -->
             <?php } ?>
-        </div>
-        <!-- /.content-wrapper -->
+            <?php
+          if (isset($_SESSION['swal_message'])) {
+              list($type, $message) = $_SESSION['swal_message'];
+              echo "<script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                      Swal.fire({
+                          icon: '$type',
+                          title: '$message',
+                          showConfirmButton: false,
+                          timer: 2000
+                      });
+                  });
+              </script>";
+              unset($_SESSION['swal_message']);
+          }
+          ?>
+        </div><!-- /.content-wrapper -->
         <?php include("dist/_partials/footer.php"); ?>
-
         <!-- Control Sidebar -->
         <aside class="control-sidebar control-sidebar-dark">
             <!-- Control sidebar content goes here -->
-        </aside>
-        <!-- /.control-sidebar -->
-    </div>
-    <!-- ./wrapper -->
-
+        </aside><!-- /.control-sidebar -->
+    </div><!-- ./wrapper -->
     <!-- jQuery -->
     <script src="plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
@@ -333,24 +332,22 @@ if (isset($_POST['change_client_password'])) {
     <script src="dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-    document.getElementById('inputName').addEventListener('input', function() {
-        const pattern = /^[A-Za-z\s]{2,50}$/;
-        if (!pattern.test(this.value)) {
-            this.setCustomValidity('Name should only contain letters and spaces (2-50 characters).');
-        } else {
-            this.setCustomValidity('');
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector("form").addEventListener("submit", function (e) {
+        let aadhar = document.querySelector("input[name='aadhar_number']").value;
+        let pan = document.querySelector("input[name='pan_number']").value;
+        
+        if (!/^[0-9]{12}$/.test(aadhar)) {
+            Swal.fire("Error", "Aadhaar number must be exactly 12 digits!", "error");
+            e.preventDefault();
+        } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+            Swal.fire("Error", "Invalid PAN number format!", "error");
+            e.preventDefault();
         }
     });
-
-    document.getElementById('inputPhone').addEventListener('input', function() {
-        const pattern = /^\d{10,15}$/;
-        if (!pattern.test(this.value)) {
-            this.setCustomValidity('Contact number should only contain 10 to 15 digits.');
-        } else {
-            this.setCustomValidity('');
-        }
-    });
+});
 </script>
 
 </body>

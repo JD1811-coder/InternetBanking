@@ -6,45 +6,60 @@ if (!isset($_SESSION['client_id'])) {
     header("Location: client_login.php");
     exit();
 }
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
     $client_id = $_SESSION['client_id'];
-    $nominee_name = trim($_POST['nominee_name']);
-    $relation = trim($_POST['relation']);
-    $nominee_email = trim($_POST['nominee_email']);
-    $nominee_phone = trim($_POST['nominee_phone']);
-    $nominee_address = trim($_POST['nominee_address']);
-    $aadhar_number = trim($_POST['aadhar_number']);
-    $pan_number = trim($_POST['pan_number']);
 
-    // Validation checks (Server-side)
-    if (!preg_match("/^[a-zA-Z ]+$/", $nominee_name)) {
-        $err = "Nominee name should contain only letters and spaces.";
-    } elseif (!preg_match("/^[a-zA-Z ]+$/", $relation)) {
-        $err = "Relation should only contain letters and spaces.";
-    } elseif (!filter_var($nominee_email, FILTER_VALIDATE_EMAIL)) {
-        $err = "Invalid email format.";
-    } elseif (!preg_match("/^[0-9]{10}$/", $nominee_phone)) {
-        $err = "Phone number must be exactly 10 digits.";
-    } elseif (!preg_match("/^[0-9]{12}$/", $aadhar_number)) {
-        $err = "Aadhar number must be exactly 12 digits.";
-    } elseif (!preg_match("/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/", $pan_number)) {
-        $err = "Invalid PAN number format.";
+    // Check if client already has 2 nominees
+    $countQuery = "SELECT COUNT(*) AS nominee_count FROM iB_nominees WHERE client_id = ?";
+    $stmt = $mysqli->prepare($countQuery);
+    $stmt->bind_param('i', $client_id);
+    $stmt->execute();
+    $stmt->bind_result($nominee_count);
+    $stmt->fetch();
+    $stmt->close();
+
+    if ($nominee_count >= 2) {
+        $err = "You can only add up to 2 nominees.";
     } else {
-        // Insert into database
-        $query = "INSERT INTO iB_nominees (client_id, nominee_name, relation, nominee_email, nominee_phone, nominee_address, aadhar_number, pan_number) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('isssssss', $client_id, $nominee_name, $relation, $nominee_email, $nominee_phone, $nominee_address, $aadhar_number, $pan_number);
+        // Proceed with inserting new nominee
+        $nominee_name = trim($_POST['nominee_name']);
+        $relation = trim($_POST['relation']);
+        $nominee_email = trim($_POST['nominee_email']);
+        $nominee_phone = trim($_POST['nominee_phone']);
+        $nominee_address = trim($_POST['nominee_address']);
+        $aadhar_number = trim($_POST['aadhar_number']);
+        $pan_number = trim($_POST['pan_number']);
 
-        if ($stmt->execute()) {
-            $success = "Nominee added successfully!";
+        // Validation checks (Server-side)
+        if (!preg_match("/^[a-zA-Z ]+$/", $nominee_name)) {
+            $err = "Nominee name should contain only letters and spaces.";
+        } elseif (!preg_match("/^[a-zA-Z ]+$/", $relation)) {
+            $err = "Relation should only contain letters and spaces.";
+        } elseif (!filter_var($nominee_email, FILTER_VALIDATE_EMAIL)) {
+            $err = "Invalid email format.";
+        } elseif (!preg_match("/^[0-9]{10}$/", $nominee_phone)) {
+            $err = "Phone number must be exactly 10 digits.";
+        } elseif (!preg_match("/^[0-9]{12}$/", $aadhar_number)) {
+            $err = "Aadhar number must be exactly 12 digits.";
+        } elseif (!preg_match("/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/", $pan_number)) {
+            $err = "Invalid PAN number format.";
         } else {
-            $err = "Something went wrong. Please try again.";
+            // Insert into database
+            $query = "INSERT INTO iB_nominees (client_id, nominee_name, relation, nominee_email, nominee_phone, nominee_address, aadhar_number, pan_number) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('isssssss', $client_id, $nominee_name, $relation, $nominee_email, $nominee_phone, $nominee_address, $aadhar_number, $pan_number);
+
+            if ($stmt->execute()) {
+                $success = "Nominee added successfully!";
+            } else {
+                $err = "Something went wrong. Please try again.";
+            }
+            $stmt->close();
         }
-        $stmt->close();
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -178,6 +193,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
 
             return isValid;
         }
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("check_nominee_limit.php")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.nominee_count >= 2) {
+                        document.querySelector("form").style.display = "none";
+                        let message = document.createElement("div");
+                        message.className = "alert alert-warning";
+                        message.innerText = "You can only add up to 2 nominees.";
+                        document.querySelector(".content").prepend(message);
+                    }
+                });
+        });
+
+
     </script>
 </body>
 
