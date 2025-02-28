@@ -13,9 +13,9 @@ function validateEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
-// Function to validate client contact number
+// Function to validate phone number (10-digit format)
 function validatePhoneNumber($phone) {
-    return preg_match("/^\d{10}$/", $phone); // 10-digit phone number validation
+    return preg_match("/^\d{10}$/", $phone);
 }
 
 // Function to validate client name (only letters and spaces allowed)
@@ -26,29 +26,35 @@ function validate_client_name($name) {
 // Function to validate password strength
 function validatePassword($password) {
     $min_length = 8;
-    $uppercase_regex = '/[A-Z]/';
-    $lowercase_regex = '/[a-z]/';
-    $number_regex = '/[0-9]/';
-    $special_char_regex = '/[^A-Za-z0-9]/';
-
     if (strlen($password) < $min_length) return "Password must be at least $min_length characters long";
-    if (!preg_match($uppercase_regex, $password)) return "Password must contain at least one uppercase letter";
-    if (!preg_match($lowercase_regex, $password)) return "Password must contain at least one lowercase letter";
-    if (!preg_match($number_regex, $password)) return "Password must contain at least one number";
-    if (!preg_match($special_char_regex, $password)) return "Password must contain at least one special character";
-
+    if (!preg_match('/[A-Z]/', $password)) return "Password must contain at least one uppercase letter";
+    if (!preg_match('/[a-z]/', $password)) return "Password must contain at least one lowercase letter";
+    if (!preg_match('/[0-9]/', $password)) return "Password must contain at least one number";
+    if (!preg_match('/[^A-Za-z0-9]/', $password)) return "Password must contain at least one special character";
     return true;
+}
+
+// Function to validate Aadhar number (exactly 12 digits)
+function validateAadhar($aadhar) {
+    return preg_match("/^\d{12}$/", $aadhar);
+}
+
+// Function to validate PAN number (exactly 10 characters, no special characters)
+function validatePan($pan) {
+    return preg_match("/^[A-Z]{5}[0-9]{4}[A-Z]$/", $pan);
 }
 
 // Register new account
 if (isset($_POST['create_account'])) {
-    $errors = []; // Array to store error messages
+    $errors = [];
 
-    $name = $_POST['name'];
-    $phone = $_POST['phone'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $address  = $_POST['address'];
+    $name = trim($_POST['name']);
+    $phone = trim($_POST['phone']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    $address = trim($_POST['address']);
+    $aadhar_number = trim($_POST['aadhar_number']);
+    $pan_number = trim($_POST['pan_number']);
     $client_number = generateClientNumber();
 
     // Validate name
@@ -66,6 +72,16 @@ if (isset($_POST['create_account'])) {
         $errors[] = "Invalid contact number. Please enter a 10-digit phone number.";
     }
 
+    // Validate Aadhar number
+    if (!validateAadhar($aadhar_number)) {
+        $errors[] = "Aadhar number must be exactly 12 digits.";
+    }
+
+    // Validate PAN number
+    if (!validatePan($pan_number)) {
+        $errors[] = "Invalid PAN number format. Example: ABCDE1234F";
+    }
+
     // Validate password
     $password_validation = validatePassword($password);
     if ($password_validation !== true) {
@@ -76,9 +92,10 @@ if (isset($_POST['create_account'])) {
     if (empty($errors)) {
         $hashed_password = sha1(md5($password)); // Secure hashing (Consider using password_hash)
 
-        $query = "INSERT INTO iB_clients (name, client_number, phone, email, password, address) VALUES (?,?,?,?,?,?)";
+        $query = "INSERT INTO iB_clients (name, client_number, phone, email, password, address, aadhar_number, pan_number) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssssss', $name, $client_number, $phone, $email, $hashed_password, $address);
+        $stmt->bind_param('ssssssss', $name, $client_number, $phone, $email, $hashed_password, $address, $aadhar_number, $pan_number);
 
         if ($stmt->execute()) {
             $success = "Account Created Successfully!";
@@ -89,7 +106,7 @@ if (isset($_POST['create_account'])) {
 }
 
 // Retrieve system settings
-$ret = "SELECT * FROM iB_SystemSettings ";
+$ret = "SELECT * FROM iB_SystemSettings";
 $stmt = $mysqli->prepare($ret);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -102,41 +119,14 @@ while ($auth = $res->fetch_object()) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><?php echo $auth->sys_name; ?> - Sign Up</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        .login-box {
-            width: 400px;
-            margin: auto;
-            margin-top: 100px;
-        }
-        .login-logo {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .login-card-body {
-            padding: 20px;
-        }
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-        }
-    </style>
 </head>
 <body>
-    <div class="login-box">
-        <div class="login-logo">
-            <?php echo $auth->sys_name; ?> - Sign Up
-        </div>
-        <div class="card">
-            <div class="card-body login-card-body">
-                <p class="login-box-msg">Sign Up</p>
+    <div class="container mt-5">
+        <div class="card mx-auto" style="max-width: 500px;">
+            <div class="card-body">
+                <h3 class="text-center"><?php echo $auth->sys_name; ?> - Sign Up</h3>
 
-                <!-- Display all errors -->
+                <!-- Display Errors -->
                 <?php if (!empty($errors)) { ?>
                     <div class="alert alert-danger">
                         <ul>
@@ -147,45 +137,42 @@ while ($auth = $res->fetch_object()) {
                     </div>
                 <?php } ?>
 
-                <!-- Display success message -->
+                <!-- Display Success Message -->
                 <?php if (isset($success)) { ?>
                     <div class="alert alert-success"><?php echo $success; ?></div>
                 <?php } ?>
 
                 <form method="post">
-                    <div class="input-group mb-3">
+                    <div class="form-group">
                         <input type="text" name="name" required class="form-control" placeholder="Full Name">
                     </div>
-                    <div class="input-group mb-3">
+                    <div class="form-group">
                         <input type="text" name="phone" required class="form-control" placeholder="Phone Number">
                     </div>
-                    <div class="input-group mb-3">
+                    <div class="form-group">
                         <input type="text" name="address" required class="form-control" placeholder="Address">
                     </div>
-                    <div class="input-group mb-3">
+                    <div class="form-group">
                         <input type="email" name="email" required class="form-control" placeholder="Email Id">
                     </div>
-                    <div class="input-group mb-3">
+                    <div class="form-group">
                         <input type="password" name="password" required class="form-control" placeholder="Password">
                     </div>
-                    <div class="row">
-                        <div class="col-8"></div>
-                        <div class="col-4">
-                            <button type="submit" name="create_account" class="btn btn-success btn-block">Sign Up</button>
-                        </div>
+                    <div class="form-group">
+                        <input type="text" name="aadhar_number" required class="form-control" placeholder="Aadhar Card Number (12 Digits)">
                     </div>
+                    <div class="form-group">
+                        <input type="text" name="pan_number" required class="form-control" placeholder="PAN Card Number (e.g. ABCDE1234F)">
+                    </div>
+                    <button type="submit" name="create_account" class="btn btn-success btn-block">Sign Up</button>
                 </form>
 
-                <p class="mb-0">
-                    <a href="pages_client_index.php" class="text-center">Login</a>
+                <p class="text-center mt-3">
+                    <a href="pages_client_index.php">Login</a>
                 </p>
             </div>
         </div>
     </div>
-    
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
 <?php

@@ -230,7 +230,7 @@
               <a href="pages_feedback_view.php" class="nav-link">
                 <i class="nav-icon fas fa-comments"></i>
                 <p>
-                  Feedback
+                  Complain
                 </p>
               </a>
             </li>

@@ -45,7 +45,7 @@ function truncateText($text, $length = 50) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Client Feedback</title>
+    <title>Client Complaint</title>
     <?php include("dist/_partials/head.php"); ?>
 </head>
 
@@ -61,12 +61,12 @@ function truncateText($text, $length = 50) {
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Client Feedback</h1>
+                            <h1>Client Complaint</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="pages_dashboard.php">Dashboard</a></li>
-                                <li class="breadcrumb-item active">Client Feedback</li>
+                                <li class="breadcrumb-item active">Client Complaint</li>
                             </ol>
                         </div>
                     </div>
@@ -79,7 +79,7 @@ function truncateText($text, $length = 50) {
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Client Feedback History</h3>
+                                <h3 class="card-title">Client Complaint History</h3>
                             </div>
                             <div class="card-body">
                                 <table id="feedbackTable" class="table table-bordered table-hover table-striped">
@@ -89,7 +89,7 @@ function truncateText($text, $length = 50) {
                                             <th>Client Name</th>
                                             <th>Client Email</th>
                                             <th>Subject</th>
-                                            <th>Feedback</th>
+                                            <th>Complaint</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>

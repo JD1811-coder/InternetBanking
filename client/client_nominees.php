@@ -95,36 +95,37 @@ $result = $stmt->get_result();
                                 <h3 class="card-title">Show nominees</h3>
                             </div>
                             <div class="card-body">
-                            <table id="example1" class="table table-hover table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Relation</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Aadhar Number</th>
-            <th>PAN Number</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        $cnt = 1;
-        while ($row = $result->fetch_object()) { ?>
-            <tr>
-                <td><?php echo $cnt; ?></td>
-                <td><?php echo $row->nominee_name; ?></td>
-                <td><?php echo $row->relation; ?></td>
-                <td><?php echo $row->nominee_email; ?></td>
-                <td><?php echo $row->nominee_phone; ?></td>
-                <td><?php echo $row->nominee_address; ?></td>
-                <td><?php echo $row->aadhar_number ? $row->aadhar_number : 'N/A'; ?></td>
-                <td><?php echo $row->pan_number ? $row->pan_number : 'N/A'; ?></td>
-            </tr>
-        <?php $cnt++; } ?>
-    </tbody>
-</table>
+                                <table id="example1" class="table table-hover table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Relation</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Address</th>
+                                            <th>Aadhar Number</th>
+                                            <th>PAN Number</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $cnt = 1;
+                                        while ($row = $result->fetch_object()) { ?>
+                                            <tr>
+                                                <td><?php echo $cnt; ?></td>
+                                                <td><?php echo $row->nominee_name; ?></td>
+                                                <td><?php echo $row->relation; ?></td>
+                                                <td><?php echo $row->nominee_email; ?></td>
+                                                <td><?php echo $row->nominee_phone; ?></td>
+                                                <td><?php echo $row->nominee_address; ?></td>
+                                                <td><?php echo $row->aadhar_number;   ?></td>
+                                                <td><?php echo $row->pan_number;  ?></td>
+                                            </tr>
+                                            <?php $cnt++;
+                                        } ?>
+                                    </tbody>
+                                </table>
 
                             </div>
                         </div>
@@ -132,7 +133,7 @@ $result = $stmt->get_result();
                 </div>
             </section>
         </div>
-        
+
         <!-- Footer -->
         <?php include("dist/_partials/footer.php"); ?>
 
@@ -150,9 +151,10 @@ $result = $stmt->get_result();
     <script src="dist/js/adminlte.min.js"></script>
     <!-- DataTable Initialization -->
     <script>
-        $(function() {
+        $(function () {
             $("#example1").DataTable();
         });
     </script>
 </body>
+
 </html>

@@ -11,8 +11,8 @@ if (isset($_GET['toggleClient'])) {
   $currentStatus = intval($_GET['status']);
   $newStatus = $currentStatus === 1 ? 0 : 1;
 
-  $query = "UPDATE iB_clients SET is_active = ? WHERE client_id = ?";
-  $stmt = $mysqli->prepare($query);
+  $adn = "UPDATE ib_clients SET is_active = ? WHERE client_id = ?";
+  $stmt = $mysqli->prepare($adn);
   $stmt->bind_param('ii', $newStatus, $id);
   $stmt->execute();
   $stmt->close();
@@ -27,8 +27,8 @@ if (isset($_GET['toggleClient'])) {
 // Delete Client
 if (isset($_GET['deleteClient'])) {
   $id = intval($_GET['deleteClient']);
-  $query = "DELETE FROM iB_clients WHERE client_id = ?";
-  $stmt = $mysqli->prepare($query);
+  $adn = "DELETE FROM iB_clients WHERE client_id = ?";
+  $stmt = $mysqli->prepare($adn);
   $stmt->bind_param('i', $id);
   $stmt->execute();
   $stmt->close();
@@ -56,7 +56,7 @@ if (isset($_GET['deleteClient'])) {
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-6">
-              <h1>Manage Clients</h1>
+              <h1>iBanking Clients</h1>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
@@ -73,70 +73,77 @@ if (isset($_GET['deleteClient'])) {
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Manage Client Accounts</h3>
+                <h3 class="card-title">Select on any action options to manage your clients</h3>
               </div>
               <div class="card-body">
-                <table id="example1" class="table table-hover table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Client Number</th>
-                      <th>Contact</th>
-                      <th>Email</th>
-                      <th>Address</th>
-                      <th>Nominee Name</th> <!-- Added Nominee Column -->
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    // Fetch Clients with Nominee Data
-                    $query = "SELECT c.client_id, c.name, c.client_number, c.phone, c.email, c.address, c.is_active, 
-                                     n.nominee_name 
-                              FROM iB_clients c
-                              LEFT JOIN iB_nominees n ON c.client_id = n.client_id
-                              ORDER BY c.name ASC;";
+                <div class="table-responsive">
 
-                    $stmt = $mysqli->prepare($query);
-                    $stmt->execute();
-                    $res = $stmt->get_result();
-                    $cnt = 1;
-                    while ($row = $res->fetch_object()) {
-                      ?>
+                  <table id="example1" class="table table-hover table-bordered table-striped">
+                    <thead>
                       <tr>
-                        <td><?php echo $cnt; ?></td>
-                        <td><?php echo htmlspecialchars($row->name); ?></td>
-                        <td><?php echo htmlspecialchars($row->client_number); ?></td>
-                        <td><?php echo htmlspecialchars($row->phone); ?></td>
-                        <td><?php echo htmlspecialchars($row->email); ?></td>
-                        <td><?php echo htmlspecialchars($row->address); ?></td>
-                        <td><?php echo htmlspecialchars($row->nominee_name ?? 'N/A'); ?></td> <!-- Display Nominee -->
-                        <td>
-                          <div class="btn-group" role="group">
-                            <a class="btn btn-success btn-sm"
-                              href="pages_view_client.php?client_number=<?php echo $row->client_number; ?>">
-                              <i class="fas fa-cogs"></i> Manage
-                            </a>
-                            <a class="btn btn-<?php echo $row->is_active ? 'warning' : 'primary'; ?> btn-sm" href="#"
-                              onclick="toggleClient(<?php echo $row->client_id; ?>, <?php echo $row->is_active; ?>)">
-                              <i class="fas fa-<?php echo $row->is_active ? 'times' : 'check'; ?>"></i>
-                              <?php echo $row->is_active ? 'Disable' : 'Enable'; ?>
-                            </a>
-
-                            <a class="btn btn-danger btn-sm" href="#"
-                              onclick="deleteClient(<?php echo $row->client_id; ?>)">
-                              <i class="fas fa-trash"></i> Delete
-                            </a>
-
-                          </div>
-                        </td>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Client Number</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Aadhar Card</th>
+                        <th>PAN Card</th>
+                        <th>Nominee Name</th>
+                        <th>Actions</th>
 
                       </tr>
-                      <?php $cnt++;
-                    } ?>
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $ret = "SELECT c.client_id, c.name, c.client_number, c.phone, c.email, c.address, c.aadhar_number, c.pan_number, c.is_active, 
+    n.nominee_name 
+FROM iB_clients c
+LEFT JOIN iB_nominees n ON c.client_id = n.client_id
+ORDER BY c.name ASC";
+
+                      $stmt = $mysqli->prepare($ret);
+                      $stmt->execute();
+                      $res = $stmt->get_result();
+                      $cnt = 1;
+                      while ($row = $res->fetch_object()) {
+                        ?>
+                        <tr>
+                          <td><?php echo $cnt; ?></td>
+                          <td><?php echo htmlspecialchars($row->name); ?></td>
+                          <td><?php echo htmlspecialchars($row->client_number); ?></td>
+                          <td><?php echo htmlspecialchars($row->phone); ?></td>
+                          <td><?php echo htmlspecialchars($row->email); ?></td>
+                          <td><?php echo htmlspecialchars($row->address); ?></td>
+                          <td><?php echo htmlspecialchars($row->aadhar_number ?? 'N/A'); ?></td>
+                          <td><?php echo htmlspecialchars($row->pan_number ?? 'N/A'); ?></td>
+
+                          <td><?php echo htmlspecialchars($row->nominee_name ?? 'N/A'); ?></td>
+                          <td>
+                            <div class="btn-group" role="group">
+                              <a class="btn btn-success btn-sm"
+                                href="pages_view_client.php?client_number=<?php echo $row->client_number; ?>">
+                                <i class="fas fa-cogs"></i> Manage
+                              </a>
+                              <a class="btn btn-<?php echo $row->is_active ? 'warning' : 'primary'; ?> btn-sm"
+                                href="pages_manage_clients.php?toggleClient=<?php echo $row->client_id; ?>&status=<?php echo $row->is_active; ?> }}"
+                                onclick="return confirm('Are you sure you want to <?php echo $row->is_active ? 'disable' : 'enable'; ?> this client?');">
+                                <i class="fas fa-<?php echo $row->is_active ? 'times' : 'check'; ?>"></i>
+                                <?php echo $row->is_active ? 'Disable' : 'Enable'; ?>
+                              </a>
+                              <a class="btn btn-danger btn-sm"
+                                href="pages_manage_clients.php?deleteClient=<?php echo $row->client_id; ?> }}"
+                                onclick="return confirm('Are you sure you want to delete this client?');">
+                                <i class="fas fa-trash"></i> Delete
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                        <?php $cnt++;
+                      } ?>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -157,41 +164,6 @@ if (isset($_GET['deleteClient'])) {
       $("#example1").DataTable();
     });
   </script>
-  <script>
-  function toggleClient(clientId, currentStatus) {
-    let action = currentStatus ? "disable" : "enable";
-    Swal.fire({
-      title: `Are you sure?`,
-      text: `You are about to ${action} this client.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: `Yes, ${action} it!`
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = `pages_manage_clients.php?toggleClient=${clientId}&status=${currentStatus}`;
-      }
-    });
-  }
-
-  function deleteClient(clientId) {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone!",
-      icon: "error",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = `pages_manage_clients.php?deleteClient=${clientId}`;
-      }
-    });
-  }
-</script>
-
 </body>
 
 </html>

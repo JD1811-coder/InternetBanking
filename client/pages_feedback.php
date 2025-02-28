@@ -105,14 +105,14 @@ if (isset($_POST['submit_feedback'])) {
 
                                         <div class="row">
                                             <div class="col-md-12 form-group">
-                                                <label for="feedback_message">Your Feedback</label>
+                                                <label for="feedback_message">Your Complain</label>
                                                 <textarea name="feedback_message" id="feedback_message" class="form-control" rows="5" required></textarea>
                                             </div>
                                         </div>
                                     </div>
                                     <!-- /.card-body -->
                                     <div class="card-footer">
-                                        <button type="submit" name="submit_feedback" class="btn btn-success">Submit Feedback</button>
+                                        <button type="submit" name="submit_feedback" class="btn btn-success">Submit Complain</button>
                                     </div>
                                 </form>
                             </div>
