@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Feb 25, 2025 at 08:59 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1
+-- Generation Time: Feb 28, 2025 at 08:45 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -93,7 +93,7 @@ CREATE TABLE `ib_admin` (
 --
 
 INSERT INTO `ib_admin` (`admin_id`, `name`, `email`, `number`, `password`, `profile_pic`, `is_active`, `otp`, `otp_expiry`) VALUES
-(2, 'System Administrator', 'dholajenil2024.katargam@gmail.com', 'iBank-ADM-0516', '$2y$10$jahdlQB9wxGjbIrq2ZgJteKStOf8E6O5vAJblpWXadOhCUXkRBPlG', 'admin-icn.png', 1, NULL, NULL);
+(2, 'system administrater ', 'dholajenil2024.katargam@gmail.com', 'iBank-ADM-0516', '$2y$10$jahdlQB9wxGjbIrq2ZgJteKStOf8E6O5vAJblpWXadOhCUXkRBPlG', 'admin-icn.png', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -120,8 +120,8 @@ CREATE TABLE `ib_bankaccounts` (
 
 INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type`, `acc_rates`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
 (14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 70361.00, 5, '2025-02-25 07:56:15.621750', 1),
-(15, 'Arin Gabani', '287359614', 'Savings ', '20', 'Active', 2004000.00, 8, '2025-02-25 07:55:18.818226', 1),
-(16, 'Vraj Gujrati', '705239816', ' Retirement ', '10', 'Active', 10339.00, 6, '2025-02-23 14:25:50.735691', 1),
+(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 0.00, 8, '2025-02-27 13:37:40.759333', 1),
+(16, 'Vraj Gujrati', '705239816', ' Retirement ', '10', 'Active', 10239.00, 6, '2025-02-25 08:52:27.969449', 1),
 (19, 'Jenil Dhola', '864790325', 'Current account  ', '19', 'Active', 2000.00, 10, '2025-02-25 07:55:01.008708', 1),
 (20, 'kirtan moradiya', '730459816', 'Recurring deposit', '15', 'Active', 921340.00, 10, '2025-02-25 07:55:18.819070', 1),
 (23, 'Yashpal Chavda', '573608192', 'Savings', '15', 'Active', 26486.00, 11, '2025-02-25 06:05:18.844339', 1),
@@ -155,10 +155,11 @@ INSERT INTO `ib_clients` (`client_id`, `name`, `phone`, `address`, `email`, `pas
 (3, 'Babar Azam', '9897890089', '127007 Localhost', 'johndoe@gmail.com', 'a69681bcf334ae130217fea4505fd3c994f5683f', '', 'iBank-CLIENT-8127', 1, NULL, NULL),
 (5, 'Harry Den', '7412560000', '114 Allace Avenue', 'harryden@mail.com', '55c3b5386c486feb662a0785f340938f518d547f', '', 'iBank-CLIENT-7014', 1, NULL, NULL),
 (6, 'Harshit Rana', '7412545454', '23 Hinkle Deegan Lake Road', 'reyes@mail.com', '55c3b5386c486feb662a0785f340938f518d547f', 'user-profile-min.png', 'iBank-CLIENT-1698', 1, NULL, NULL),
-(8, 'Arin Gabani', '7850000014', '92 Maple Street', 'amanda@mail.com', '55c3b5386c486feb662a0785f340938f518d547f', 'user-profile-min.png', 'iBank-CLIENT-0423', 1, NULL, NULL),
-(9, 'Aakash Chopra', '7014569696', '46 Timberbrook Lane', 'Achopra@mail.com', '55c3b5386c486feb662a0785f340938f518d547f', '', 'iBank-CLIENT-4716', 1, NULL, NULL),
-(10, 'Utsav Chheta', '8799050118', 'A/2 -203,devi complex,dabholi char rasta,ved road,surat', 'jenildhola1811@gmail.com', '$2y$10$5JzYj7ScY6LnJw/gLWKM5eWjNc1BJZfz3IuskJ8RYKgRLtLHUCW1y', '', 'iBank-CLIENT-6482', 1, '181001', '2025-02-20 11:23:59'),
-(11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '$2y$10$TJhMZCz1DCdTDSGoKgD9le9MZx/vpCumj9WPxCwY2oVza3w9YkP06', '', 'iBank-CLIENT-2438', 1, '762044', '2025-02-20 11:36:16');
+(8, 'Arin gabani', '7850000014', '92 Maple Street', 'amanda@mail.com', '55c3b5386c486feb662a0785f340938f518d547f', '', 'iBank-CLIENT-0423', 1, NULL, NULL),
+(9, 'Aakash chopra', '1236598545', '46 Timberbrook Lane', 'Achopmai@l.com', '55c3b5386c486feb662a0785f340938f518d547f', '', 'iBank-CLIENT-4716', 1, NULL, NULL),
+(10, 'Utsav Chheta', '8799050118', 'A/2 -203,devi complex,dabholi char rasta,ved road,surat', 'jenildhola1811@gmail.com', '$2y$10$k2oOmyXtNm2EUKpA7Dd8OeTNF9cCfOEMe8VJJTcQHSNsJSOi.QrxK', '', 'iBank-CLIENT-6482', 1, '952485', '2025-02-27 19:29:15'),
+(11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'dharmika@gmail.com', '1a16dbaa6231c778d30ff9b93eec31a184c46a64', '', 'iBank-CLIENT-2438', 1, '762044', '2025-02-20 11:36:16'),
+(13, 'darshan lakhani', '9714783225', 'DK NAGAR SOC VED ROAD KATARGAM 19', 'utkarsh.diam09@gmail.com', 'a40ed2eb4f420cecfc40eb2d3ee25af2c0366751', '', 'iBank-CLIENT-9847', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -175,15 +176,19 @@ CREATE TABLE `ib_nominees` (
   `nominee_phone` varchar(20) DEFAULT NULL,
   `nominee_address` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `is_active` tinyint(1) NOT NULL DEFAULT 1
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `aadhar_number` varchar(12) NOT NULL,
+  `pan_number` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `ib_nominees`
 --
 
-INSERT INTO `ib_nominees` (`id`, `client_id`, `nominee_name`, `relation`, `nominee_email`, `nominee_phone`, `nominee_address`, `created_at`, `is_active`) VALUES
-(1, 11, 'Bhavnaben Dhola', 'Mother', 'jenildhola1811@gmail.com', '99025063124', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-20 06:29:08', 1);
+INSERT INTO `ib_nominees` (`id`, `client_id`, `nominee_name`, `relation`, `nominee_email`, `nominee_phone`, `nominee_address`, `created_at`, `is_active`, `aadhar_number`, `pan_number`) VALUES
+(1, 11, 'Bhavnaben Dhola', 'Mother', 'jenildhola1811@gmail.com', '99025063124', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-20 06:29:08', 1, '', ''),
+(4, 10, 'darshan', 'brother', 'darshanlakhani@gmail.com', '8326566665', 'DK NAGAR SOC VED ROAD KATARGAM 19', '2025-02-27 15:13:05', 1, '', ''),
+(5, 10, 'sonal gadhiya', 'sister', 'darshanlakhan@gmail.com', '9563332569', 'DK NAGAR SOC VED ROAD KATARGAM 19', '2025-02-28 06:38:13', 1, '987654321111', 'ADRHG5525A');
 
 -- --------------------------------------------------------
 
@@ -281,8 +286,9 @@ CREATE TABLE `ib_staff` (
 --
 
 INSERT INTO `ib_staff` (`staff_id`, `name`, `staff_number`, `phone`, `email`, `password`, `sex`, `profile_pic`, `is_active`, `otp`, `otp_expiry`) VALUES
-(3, 'Jay Shah', 'iBank-STAFF-6785', '7049757429', 'dharmika192@gmail.com', '$2y$10$Kh5mefahn9r3uUbthwxXi.XuCSOV9Y5Nsk8SrhT82uFR15pufqYz6', 'Male', '', 1, '719130', '2025-02-20 10:48:33'),
-(4, 'Rahul Dravid', 'iBank-STAFF-6724', '9265460571', 'wall@gmail.com', 'd95d3bbedb4dcba5a8e891968853002354b028e9', 'Male', 'rahul.jpg', 1, NULL, NULL);
+(3, 'jay shah', 'iBank-STAFF-6785', '7049757429', 'dharmika192@gmail.com', '$2y$10$Kh5mefahn9r3uUbthwxXi.XuCSOV9Y5Nsk8SrhT82uFR15pufqYz6', 'Male', '', 1, '719130', '2025-02-20 10:48:33'),
+(4, 'Rahul Dravid', 'iBank-STAFF-6724', '9265460571', 'wall@gmail.com', 'd95d3bbedb4dcba5a8e891968853002354b028e9', 'Male', 'rahul.jpg', 1, NULL, NULL),
+(6, 'jeff besos', 'iBank-STAFF-0974', '7049757429', 'jenildhola1811@gmail.com', '2b76cc7ede474c4bdd63b8b26929625b6e6441d7', 'Male', 'aadu.jpg', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -303,7 +309,7 @@ CREATE TABLE `ib_systemsettings` (
 --
 
 INSERT INTO `ib_systemsettings` (`id`, `sys_name`, `sys_tagline`, `sys_logo`, `is_active`) VALUES
-(1, 'DigiBankX', 'Digital banking revolution', 'bank.png', 1);
+(1, 'DigitalBankx', 'Digital banking revolution', 'AdminLTELogo.png', 1);
 
 -- --------------------------------------------------------
 
@@ -379,7 +385,8 @@ INSERT INTO `ib_transactions` (`tr_id`, `tr_code`, `account_id`, `tr_type`, `tr_
 (151, 'HJ74caPU2iXYfbkDL6Eo', 24, 'Transfer', 'Success', 11, '800', '287359614', '2025-02-25 07:55:09.000000', 1),
 (152, 'hQR23ziWvyEAeUZmtMrN', 15, 'Transfer', 'Success', 8, '18000', '730459816', '2025-02-25 07:55:18.000000', 1),
 (153, 'jJKdkWTtnmchzbHQXg8Y', 14, 'Deposit', 'Success', 5, '18000', NULL, '2025-02-25 07:56:06.176874', 1),
-(154, 'OtXrJaKoAG6uvDR37BeM', 14, 'Deposit', 'Success', 5, '52000', NULL, '2025-02-25 07:56:15.623547', 1);
+(154, 'OtXrJaKoAG6uvDR37BeM', 14, 'Deposit', 'Success', 5, '52000', NULL, '2025-02-25 07:56:15.623547', 1),
+(155, 'rHSMnDi7cXoEZhFIJwut', 16, 'Transfer', 'Success', 6, '100', '287359614', '2025-02-25 08:52:27.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -412,7 +419,17 @@ INSERT INTO `loan_applications` (`id`, `applicant_name`, `loan_amount`, `applica
 (8, 'Darshan', 300000.00, '2025-02-04 12:59:46', 'rejected', 3, 2, '2025-02-17 13:18:49', 'yoo', 'sadssdsdsdf', 11, 10, 0, 60000.00),
 (13, 'Jenil Dineshbhai dhola', 10000.00, '2025-02-16 18:36:01', 'approved', 3, 2, '2025-02-17 13:20:03', 'GOOD', 'reject', 10, 3, 0, 10000.00),
 (14, 'utsav cheta', 100000.00, '2025-02-16 18:55:04', 'pending', 3, 2, NULL, 'HEYY', '', 10, 2, 0, 50000.00),
-(16, 'HARH ', 1000.00, '2025-02-19 11:03:50', 'approved', 3, 2, '2025-02-19 11:04:33', 'good', 'approved', 10, 9, 0, 50000.00);
+(16, 'HARH ', 1000.00, '2025-02-19 11:03:50', 'approved', 3, 2, '2025-02-19 11:04:33', 'good', 'approved', 10, 9, 0, 50000.00),
+(17, '2222', 100000.00, '2025-02-26 18:22:34', 'pending', NULL, NULL, NULL, 'adf', 'Pending Review', 11, 6, 0, 1000.00),
+(18, '2222555', 50000.00, '2025-02-26 18:24:31', 'pending', NULL, NULL, NULL, 'WAESDFHG ', 'Pending Review', 11, 7, 0, 12000.00),
+(19, 'fdff', 50000.00, '2025-02-26 18:26:10', 'pending', NULL, NULL, NULL, 'qwsdfvc', 'Pending Review', 11, 7, 0, 1000.00),
+(20, '2222555', 10000.00, '2025-02-27 20:36:35', 'pending', NULL, NULL, NULL, 'fgh', 'Pending Review', 10, 4, 0, 5000.00),
+(21, '2222555', 10000.00, '2025-02-27 20:38:49', 'pending', NULL, NULL, NULL, 'fgh', 'Pending Review', 10, 4, 0, 5000.00),
+(22, '2222555', 10000.00, '2025-02-27 20:39:15', 'pending', NULL, NULL, NULL, 'fgh', 'Pending Review', 10, 4, 0, 5000.00),
+(23, '2222555', 10000.00, '2025-02-27 20:39:22', 'pending', NULL, NULL, NULL, 'fgh', 'Pending Review', 10, 4, 0, 5000.00),
+(24, '2222555', 10000.00, '2025-02-27 20:39:47', 'pending', NULL, NULL, NULL, 'fgh', 'Pending Review', 10, 4, 0, 5000.00),
+(25, '2222555', 10000.00, '2025-02-27 20:41:07', 'pending', NULL, NULL, NULL, 'fgh', 'Pending Review', 10, 4, 0, 5000.00),
+(26, '2222555', 10000.00, '2025-02-27 20:41:32', 'pending', NULL, NULL, NULL, 'fgh', 'Pending Review', 10, 4, 0, 5000.00);
 
 -- --------------------------------------------------------
 
@@ -592,13 +609,13 @@ ALTER TABLE `ib_bankaccounts`
 -- AUTO_INCREMENT for table `ib_clients`
 --
 ALTER TABLE `ib_clients`
-  MODIFY `client_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `client_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `ib_nominees`
 --
 ALTER TABLE `ib_nominees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `ib_notifications`
@@ -610,7 +627,7 @@ ALTER TABLE `ib_notifications`
 -- AUTO_INCREMENT for table `ib_staff`
 --
 ALTER TABLE `ib_staff`
-  MODIFY `staff_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `staff_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `ib_systemsettings`
@@ -622,13 +639,13 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=156;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`
 --
 ALTER TABLE `loan_applications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `loan_types`

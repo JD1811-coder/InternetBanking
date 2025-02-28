@@ -45,8 +45,8 @@ if (isset($_GET['deleteNominee'])) {
     }
 }
 
-// Fetch nominees
-$query = "SELECT * FROM iB_nominees WHERE client_id = ?";
+// Fetch nominees with additional columns
+$query = "SELECT id, nominee_name, relation, nominee_email, nominee_phone, nominee_address, aadhar_number, pan_number FROM iB_nominees WHERE client_id = ?";
 $stmt = $mysqli->prepare($query);
 $stmt->bind_param('i', $client_id);
 $stmt->execute();
@@ -95,46 +95,37 @@ $result = $stmt->get_result();
                                 <h3 class="card-title">Show nominees</h3>
                             </div>
                             <div class="card-body">
-                                <table id="example1" class="table table-hover table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Name</th>
-                                            <th>Relation</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Address</th>
-                                            <!-- <th>Actions</th> -->
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $cnt = 1;
-                                        while ($row = $result->fetch_object()) { ?>
-                                            <tr>
-                                                <td><?php echo $cnt; ?></td>
-                                                <td><?php echo $row->nominee_name; ?></td>
-                                                <td><?php echo $row->relation; ?></td>
-                                                <td><?php echo $row->nominee_email; ?></td>
-                                                <td><?php echo $row->nominee_phone; ?></td>
-                                                <td><?php echo $row->nominee_address; ?></td>
-                                                <!-- <td>
-                                                    <a class="btn btn-success btn-sm" href="pages_view_nominee.php?nominee_id=<?php echo $row->nominee_id; ?>">
-                                                        <i class="fas fa-cogs"></i> Manage
-                                                    </a>
-                                                    <a class="btn btn-<?php echo $row->is_active ? 'warning' : 'primary'; ?> btn-sm" 
-                                                        href="client_nominees.php?toggleNominee=<?php echo $row->nominee_id; ?>&status=<?php echo $row->is_active; ?>">
-                                                        <i class="fas fa-<?php echo $row->is_active ? 'times' : 'check'; ?>"></i> 
-                                                        <?php echo $row->is_active ? 'Disable' : 'Enable'; ?>
-                                                    </a>
-                                                    <a class="btn btn-danger btn-sm" href="client_nominees.php?deleteNominee=<?php echo $row->nominee_id; ?>" onclick="return confirm('Are you sure you want to delete this nominee?');">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </a>
-                                                </td> -->
-                                            </tr>
-                                        <?php $cnt++; } ?>
-                                    </tbody>
-                                </table>
+                            <table id="example1" class="table table-hover table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Relation</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Aadhar Number</th>
+            <th>PAN Number</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $cnt = 1;
+        while ($row = $result->fetch_object()) { ?>
+            <tr>
+                <td><?php echo $cnt; ?></td>
+                <td><?php echo $row->nominee_name; ?></td>
+                <td><?php echo $row->relation; ?></td>
+                <td><?php echo $row->nominee_email; ?></td>
+                <td><?php echo $row->nominee_phone; ?></td>
+                <td><?php echo $row->nominee_address; ?></td>
+                <td><?php echo $row->aadhar_number ? $row->aadhar_number : 'N/A'; ?></td>
+                <td><?php echo $row->pan_number ? $row->pan_number : 'N/A'; ?></td>
+            </tr>
+        <?php $cnt++; } ?>
+    </tbody>
+</table>
+
                             </div>
                         </div>
                     </div>
