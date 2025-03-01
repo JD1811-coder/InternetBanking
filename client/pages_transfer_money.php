@@ -298,11 +298,6 @@ if (isset($_POST['deposit'])) {
             });
         });
 
-
-
-    </script>
-
-    <script>
         $(document).ready(function () {
             $("#receiving_acc_no").change(function () {
                 var accountNumber = $(this).val();

@@ -11,65 +11,64 @@ if (isset($_POST['withdrawal'])) {
     $acc_name = $_POST['acc_name'];
     $account_number = $_GET['account_number'];
     $acc_type = $_POST['acc_type'];
-    $tr_type  = $_POST['tr_type'];
+    $tr_type = $_POST['tr_type'];
     $tr_status = $_POST['tr_status'];
-    $client_id  = $_GET['client_id'];
-    $client_name  = $_POST['client_name'];
+    $client_id = $_GET['client_id'];
+    $client_name = $_POST['client_name'];
     $transaction_amt = $_POST['transaction_amt'];
     $client_phone = $_POST['client_phone'];
-    
-    // Notification message
-    $notification_details = "$client_name has withdrawn Rs. $transaction_amt from Bank Account $account_number";
 
-    // Start database transaction
-    $mysqli->autocommit(FALSE);
-
-    // Fetch current account balance
-    $query = "SELECT acc_amount FROM ib_bankaccounts WHERE account_id = ?";
+    // Fetch account balance and account type's min balance
+    $query = "SELECT a.acc_amount, t.min_balance 
+FROM ib_bankaccounts a 
+JOIN ib_acc_types t ON a.acc_type = t.name 
+WHERE a.account_id = ?";
     $stmt = $mysqli->prepare($query);
     $stmt->bind_param('i', $account_id);
     $stmt->execute();
-    $stmt->bind_result($acc_amount);
+    $stmt->bind_result($acc_amount, $min_balance);
     $stmt->fetch();
     $stmt->close();
 
-    // Check if there are sufficient funds before withdrawal
-    if ($transaction_amt <= 0) {
-        $err = "Invalid withdrawal amount! Please enter a positive amount.";
-    } elseif ($transaction_amt > $acc_amount) {
+    // Check if balance is sufficient and does not go below min_balance
+    $remaining_balance = $acc_amount - $transaction_amt;
+
+    if ($transaction_amt > $acc_amount) {
         $err = "Insufficient Balance! Your Current Balance is Rs. $acc_amount";
+    } elseif ($remaining_balance < $min_balance) {
+        $err = "Minimum balance of Rs. $min_balance is required in your account. Your withdrawal exceeds this limit.";
     } else {
         // Deduct withdrawal amount from account balance
-        $new_balance = $acc_amount - $transaction_amt;
         $update_balance_query = "UPDATE ib_bankaccounts SET acc_amount = ? WHERE account_id = ?";
         $stmt = $mysqli->prepare($update_balance_query);
-        $stmt->bind_param('di', $new_balance, $account_id);
+        $stmt->bind_param('di', $remaining_balance, $account_id);
         $stmt->execute();
         $stmt->close();
 
         // Insert transaction record
-        $insert_transaction = "INSERT INTO iB_Transactions (tr_code, account_id, tr_type, tr_status, client_id, transaction_amt) 
-                               VALUES (?, ?, 'Withdrawal', 'Success', ?, ?)";
+        $insert_transaction = "INSERT INTO iB_Transactions (tr_code, account_id, tr_type, tr_status, client_id, transaction_amt) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $mysqli->prepare($insert_transaction);
-        $stmt->bind_param('ssii', $tr_code, $account_id, $client_id, $transaction_amt);
+        $stmt->bind_param('sssssi', $tr_code, $account_id, $tr_type, $tr_status, $client_id, $transaction_amt);
         $stmt->execute();
         $stmt->close();
 
         // Insert notification
+        $notification_details = "$client_name Has Withdrawn Rs. $transaction_amt From Bank Account $account_number";
         $notification = "INSERT INTO iB_notifications (notification_details) VALUES (?)";
         $stmt = $mysqli->prepare($notification);
         $stmt->bind_param('s', $notification_details);
         $stmt->execute();
         $stmt->close();
 
-        // Commit transaction if everything is successful
-        $mysqli->commit();
+        // Success message
         $success = "Funds Withdrawn Successfully!";
     }
 
-    // Enable autocommit again
-    $mysqli->autocommit(TRUE);
 }
+
+// Enable autocommit again
+$mysqli->autocommit(TRUE);
+
 ?>
 
 <!DOCTYPE html>
@@ -292,6 +291,25 @@ if (isset($_POST['withdrawal'])) {
             }
         });
     });
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelector("form").addEventListener("submit", function(event) {
+        var transaction_amt = parseFloat(document.getElementById("transaction_amt").value);
+        var acc_balance = <?php echo $acc_amount; ?>; // Get balance from PHP
+        var min_balance = <?php echo $min_balance; ?>; // Get min balance from PHP
+
+        if (isNaN(transaction_amt) || transaction_amt <= 0) {
+            alert("Please enter a valid positive number for withdrawal.");
+            event.preventDefault();
+        } else if (transaction_amt > acc_balance) {
+            alert("Insufficient Balance! Your Current Balance is Rs. " + acc_balance);
+            event.preventDefault();
+        } else if ((acc_balance - transaction_amt) < min_balance) {
+            alert("Minimum balance of Rs. " + min_balance + " is required in your account. Your balance cannot go below this limit.");
+            event.preventDefault();
+        }
+    });
+});
+
     </script>
 
 </body>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 28, 2025 at 06:09 PM
+-- Generation Time: Mar 01, 2025 at 01:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,20 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `internetbanking`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `client_feedback`
---
-
-CREATE TABLE `client_feedback` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `client_id` int(10) UNSIGNED NOT NULL,
-  `subject` varchar(255) NOT NULL,
-  `feedback_message` text NOT NULL,
-  `submission_date` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -112,11 +98,11 @@ CREATE TABLE `ib_bankaccounts` (
 --
 
 INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type`, `acc_rates`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
-(14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 70361.00, 5, '2025-02-25 07:56:15.621750', 1),
-(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 0.00, 8, '2025-02-27 13:37:40.759333', 1),
+(14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 70361.00, 5, '2025-03-01 12:11:07.067332', 1),
+(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 900000.00, 8, '2025-03-01 12:10:07.792640', 1),
 (16, 'Vraj Gujrati', '705239816', ' Retirement ', '10', 'Active', 10239.00, 6, '2025-02-25 08:52:27.969449', 1),
-(23, 'Yashpal Chavda', '573608192', 'Savings', '15', 'Active', 26486.00, 11, '2025-02-25 06:05:18.844339', 1),
-(24, 'Rohit Dhull', '529714806', 'Salary Account', '6.5', 'Active', 9312.00, 11, '2025-02-25 07:55:09.613763', 1);
+(23, 'Yashpal Chavda', '573608192', 'Savings', '15', 'Active', 0.00, 11, '2025-03-01 12:18:48.010090', 1),
+(24, 'Rohit Dhull', '529714806', 'Salary Account', '6.5', 'Active', 212.00, 11, '2025-03-01 12:15:40.217725', 1);
 
 -- --------------------------------------------------------
 
@@ -152,35 +138,6 @@ INSERT INTO `ib_clients` (`client_id`, `name`, `phone`, `address`, `email`, `aad
 (9, 'Aakash chopra', '8799050118', 'delhi', 'Achopra@mail.com', '978546321574', 'PDWEQ3467P', '55c3b5386c486feb662a0785f340938f518d547f', 'rahul.jpg', 'iBank-CLIENT-4716', 1, NULL, NULL),
 (11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXE23467P', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', '', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
 (13, 'darshan lakhani', '9714783225', 'DK NAGAR SOC VED ROAD KATARGAM 19', 'utkarsh.diam09@gmail.com', '773766750259', 'AETIL1036G', 'a40ed2eb4f420cecfc40eb2d3ee25af2c0366751', '', 'iBank-CLIENT-9847', 1, NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ib_nominees`
---
-
-CREATE TABLE `ib_nominees` (
-  `id` int(11) NOT NULL,
-  `client_id` int(11) NOT NULL,
-  `nominee_name` varchar(255) NOT NULL,
-  `relation` varchar(100) NOT NULL,
-  `nominee_email` varchar(255) DEFAULT NULL,
-  `nominee_phone` varchar(20) DEFAULT NULL,
-  `nominee_address` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `aadhar_number` varchar(12) NOT NULL,
-  `pan_number` varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `ib_nominees`
---
-
-INSERT INTO `ib_nominees` (`id`, `client_id`, `nominee_name`, `relation`, `nominee_email`, `nominee_phone`, `nominee_address`, `created_at`, `is_active`, `aadhar_number`, `pan_number`) VALUES
-(1, 11, 'Bhavnaben Dhola', 'Mother', 'jenildhola1811@gmail.com', '99025063124', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-20 06:29:08', 1, '785496325896', 'IHXOD1193P'),
-(4, 13, 'darshan', 'brother', 'darshanlakhani@gmail.com', '8326566665', 'DK NAGAR SOC VED ROAD KATARGAM 19', '2025-02-27 15:13:05', 1, '', ''),
-(6, 11, 'dineshbhai dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-28 17:00:36', 1, '978546321574', 'OPKFW7221Z');
 
 -- --------------------------------------------------------
 
@@ -251,7 +208,14 @@ INSERT INTO `ib_notifications` (`notification_id`, `notification_details`, `crea
 (94, 'Arin Gabani has withdrawn Rs. 1200 from Bank Account 287359614', '2025-02-25 07:51:10.546682', 1),
 (95, 'Harry Den has withdrawn Rs. 100 from Bank Account 357146928', '2025-02-25 07:52:08.535846', 1),
 (96, 'A deposit of Rs. 18000 has been made into Bank Account 357146928', '2025-02-25 07:56:06.177748', 1),
-(97, 'A deposit of Rs. 52000 has been made into Bank Account 357146928', '2025-02-25 07:56:15.624178', 1);
+(97, 'A deposit of Rs. 52000 has been made into Bank Account 357146928', '2025-02-25 07:56:15.624178', 1),
+(98, 'Jenil Dhola Has Withdrawn Rs. 25000 From Bank Account 573608192', '2025-03-01 11:55:50.296623', 1),
+(99, 'Harry Den Has Withdrawn Rs. 100 From Bank Account 357146928', '2025-03-01 12:08:44.103562', 1),
+(100, 'Jenil Dhola Has Withdrawn Rs. 9000 From Bank Account 529714806', '2025-03-01 12:09:19.146649', 1),
+(101, 'A deposit of Rs. 1000000 has been made into Bank Account 287359614', '2025-03-01 12:09:37.984075', 1),
+(102, 'Arin gabani Has Withdrawn Rs. 50000 From Bank Account 287359614', '2025-03-01 12:09:59.891171', 1),
+(103, 'Arin gabani Has Withdrawn Rs. 50000 From Bank Account 287359614', '2025-03-01 12:10:07.797564', 1),
+(104, 'Jenil Dhola has deposited Rs. 6000 into bank account 23', '2025-03-01 12:17:09.335715', 1);
 
 -- --------------------------------------------------------
 
@@ -374,7 +338,18 @@ INSERT INTO `ib_transactions` (`tr_id`, `tr_code`, `account_id`, `tr_type`, `tr_
 (152, 'hQR23ziWvyEAeUZmtMrN', 15, 'Transfer', 'Success', 8, '18000', '730459816', '2025-02-25 07:55:18.000000', 1),
 (153, 'jJKdkWTtnmchzbHQXg8Y', 14, 'Deposit', 'Success', 5, '18000', NULL, '2025-02-25 07:56:06.176874', 1),
 (154, 'OtXrJaKoAG6uvDR37BeM', 14, 'Deposit', 'Success', 5, '52000', NULL, '2025-02-25 07:56:15.623547', 1),
-(155, 'rHSMnDi7cXoEZhFIJwut', 16, 'Transfer', 'Success', 6, '100', '287359614', '2025-02-25 08:52:27.000000', 1);
+(155, 'rHSMnDi7cXoEZhFIJwut', 16, 'Transfer', 'Success', 6, '100', '287359614', '2025-02-25 08:52:27.000000', 1),
+(156, 'ZSnEfPBAlHI5hLo7vCX4', 23, 'Withdrawal', 'Success ', 11, '25000', NULL, '2025-03-01 11:55:50.293460', 1),
+(157, '8uxO7NrUqoGQYehiZmfK', 14, 'Withdrawal', 'Success ', 5, '100', NULL, '2025-03-01 12:08:44.101392', 1),
+(158, 'KoCm4FnO67Br8GjMuYzT', 24, 'Withdrawal', 'Success ', 11, '9000', NULL, '2025-03-01 12:09:19.144138', 1),
+(159, 'gtKpC6rMczAyUaYu5Slj', 15, 'Deposit', 'Success', 8, '1000000', NULL, '2025-03-01 12:09:37.983716', 1),
+(160, 'Xmaz801KbMOI3nu64xVi', 15, 'Withdrawal', 'Success ', 8, '50000', NULL, '2025-03-01 12:09:59.889484', 1),
+(161, 'QTgSnD7s2XZWI4h5Hxbu', 15, 'Withdrawal', 'Success ', 8, '50000', NULL, '2025-03-01 12:10:07.795601', 1),
+(162, 'WLmHJwBo14XyjF72r3u8', 23, 'Transfer', 'Success', 11, '100', '357146928', '2025-03-01 12:11:07.000000', 1),
+(163, '4BY8SlvcoPrQNjAsEJed', 24, 'Transfer', 'Success', 11, '100', '357146928', '2025-03-01 12:15:40.000000', 1),
+(164, 'wfZDU73aWXuTBsPKO5xY', 23, 'Transfer', 'Success', 11, '1386', '287359614', '2025-03-01 12:16:33.000000', 1),
+(165, '9FnwvaJcdq0B8yWko1pV', 23, 'Deposit', 'Success', 11, '6000', NULL, '2025-03-01 12:17:09.335452', 1),
+(166, 'FbQurL7NqXKdWEozBCji', 23, 'Transfer', 'Success', 11, '6000', '529714806', '2025-03-01 12:18:48.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -469,13 +444,6 @@ INSERT INTO `password_resets` (`id`, `admin_id`, `token`, `expiry`) VALUES
 --
 
 --
--- Indexes for table `client_feedback`
---
-ALTER TABLE `client_feedback`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `client_id` (`client_id`);
-
---
 -- Indexes for table `ib_acc_types`
 --
 ALTER TABLE `ib_acc_types`
@@ -499,12 +467,6 @@ ALTER TABLE `ib_bankaccounts`
 --
 ALTER TABLE `ib_clients`
   ADD PRIMARY KEY (`client_id`);
-
---
--- Indexes for table `ib_nominees`
---
-ALTER TABLE `ib_nominees`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `ib_notifications`
@@ -560,12 +522,6 @@ ALTER TABLE `password_resets`
 --
 
 --
--- AUTO_INCREMENT for table `client_feedback`
---
-ALTER TABLE `client_feedback`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
 -- AUTO_INCREMENT for table `ib_acc_types`
 --
 ALTER TABLE `ib_acc_types`
@@ -590,16 +546,10 @@ ALTER TABLE `ib_clients`
   MODIFY `client_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- AUTO_INCREMENT for table `ib_nominees`
---
-ALTER TABLE `ib_nominees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
 -- AUTO_INCREMENT for table `ib_notifications`
 --
 ALTER TABLE `ib_notifications`
-  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
 -- AUTO_INCREMENT for table `ib_staff`
@@ -617,7 +567,7 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=156;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`
@@ -640,12 +590,6 @@ ALTER TABLE `password_resets`
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `client_feedback`
---
-ALTER TABLE `client_feedback`
-  ADD CONSTRAINT `client_feedback_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `ib_clients` (`client_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ib_bankaccounts`

@@ -11,31 +11,37 @@ if (isset($_POST['withdrawal'])) {
     $acc_name = $_POST['acc_name'];
     $account_number = $_GET['account_number'];
     $acc_type = $_POST['acc_type'];
-    $tr_type  = $_POST['tr_type'];
+    $tr_type = $_POST['tr_type'];
     $tr_status = $_POST['tr_status'];
-    $client_id  = $_GET['client_id'];
-    $client_name  = $_POST['client_name'];
+    $client_id = $_GET['client_id'];
+    $client_name = $_POST['client_name'];
     $transaction_amt = $_POST['transaction_amt'];
     $client_phone = $_POST['client_phone'];
 
-    // Fetch account balance from ib_bankaccounts
-    $query = "SELECT acc_amount FROM ib_bankaccounts WHERE account_id = ?";
+    // Fetch account balance and account type's min balance
+    $query = "SELECT a.acc_amount, t.min_balance 
+FROM ib_bankaccounts a 
+JOIN ib_acc_types t ON a.acc_type = t.name 
+WHERE a.account_id = ?";
     $stmt = $mysqli->prepare($query);
     $stmt->bind_param('i', $account_id);
     $stmt->execute();
-    $stmt->bind_result($acc_amount);
+    $stmt->bind_result($acc_amount, $min_balance);
     $stmt->fetch();
     $stmt->close();
 
-    // Check if balance is sufficient
+    // Check if balance is sufficient and does not go below min_balance
+    $remaining_balance = $acc_amount - $transaction_amt;
+
     if ($transaction_amt > $acc_amount) {
         $err = "Insufficient Balance! Your Current Balance is Rs. $acc_amount";
+    } elseif ($remaining_balance < $min_balance) {
+        $err = "Minimum balance of Rs. $min_balance is required in your account. Your withdrawal exceeds this limit.";
     } else {
         // Deduct withdrawal amount from account balance
-        $new_balance = $acc_amount - $transaction_amt;
         $update_balance_query = "UPDATE ib_bankaccounts SET acc_amount = ? WHERE account_id = ?";
         $stmt = $mysqli->prepare($update_balance_query);
-        $stmt->bind_param('di', $new_balance, $account_id);
+        $stmt->bind_param('di', $remaining_balance, $account_id);
         $stmt->execute();
         $stmt->close();
 
@@ -57,15 +63,19 @@ if (isset($_POST['withdrawal'])) {
         // Success message
         $success = "Funds Withdrawn Successfully!";
     }
+
 }
+
 
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <?php include("dist/_partials/head.php"); ?>
 </head>
+
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
     <div class="wrapper">
         <!-- Navbar -->
@@ -85,7 +95,7 @@ if (isset($_POST['withdrawal'])) {
         $res = $stmt->get_result();
         $cnt = 1;
         while ($row = $res->fetch_object()) {
-        ?>
+            ?>
             <div class="content-wrapper">
                 <!-- Content Header (Page header) -->
                 <section class="content-header">
@@ -131,27 +141,37 @@ if (isset($_POST['withdrawal'])) {
                                             <div class="row">
                                                 <div class=" col-md-4 form-group">
                                                     <label for="exampleInputEmail1">Client Name</label>
-                                                    <input type="text" readonly name="client_name" value="<?php echo $row->client_name; ?>" required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" readonly name="client_name"
+                                                        value="<?php echo $row->client_name; ?>" required
+                                                        class="form-control" id="exampleInputEmail1">
                                                 </div>
-                                               
+
                                                 <div class=" col-md-8 form-group">
                                                     <label for="exampleInputEmail1">Client Phone Number</label>
-                                                    <input type="text" readonly name="client_phone" value="<?php echo $row->client_phone; ?>" required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" readonly name="client_phone"
+                                                        value="<?php echo $row->client_phone; ?>" required
+                                                        class="form-control" id="exampleInputEmail1">
                                                 </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class=" col-md-4 form-group">
                                                     <label for="exampleInputEmail1">Account Name</label>
-                                                    <input type="text" readonly name="acc_name" value="<?php echo $row->acc_name; ?>" required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" readonly name="acc_name"
+                                                        value="<?php echo $row->acc_name; ?>" required class="form-control"
+                                                        id="exampleInputEmail1">
                                                 </div>
                                                 <div class=" col-md-4 form-group">
                                                     <label for="exampleInputPassword1">Account Number</label>
-                                                    <input type="text" readonly value="<?php echo $row->account_number; ?>" name="account_number" required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" readonly value="<?php echo $row->account_number; ?>"
+                                                        name="account_number" required class="form-control"
+                                                        id="exampleInputEmail1">
                                                 </div>
                                                 <div class=" col-md-4 form-group">
                                                     <label for="exampleInputEmail1">Account Type | Category</label>
-                                                    <input type="text" readonly name="acc_type" value="<?php echo $row->acc_type; ?>" required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" readonly name="acc_type"
+                                                        value="<?php echo $row->acc_type; ?>" required class="form-control"
+                                                        id="exampleInputEmail1">
                                                 </div>
                                             </div>
 
@@ -161,22 +181,27 @@ if (isset($_POST['withdrawal'])) {
                                                     <?php
                                                     //PHP function to generate random account number
                                                     $length = 20;
-                                                    $_transcode =  substr(str_shuffle('0123456789QWERgfdsazxcvbnTYUIOqwertyuioplkjhmPASDFGHJKLMNBVCXZ'), 1, $length);
+                                                    $_transcode = substr(str_shuffle('0123456789QWERgfdsazxcvbnTYUIOqwertyuioplkjhmPASDFGHJKLMNBVCXZ'), 1, $length);
                                                     ?>
-                                                    <input type="text" name="tr_code" readonly value="<?php echo $_transcode; ?>" required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" name="tr_code" readonly
+                                                        value="<?php echo $_transcode; ?>" required class="form-control"
+                                                        id="exampleInputEmail1">
                                                 </div>
 
                                                 <div class=" col-md-6 form-group">
                                                     <label for="exampleInputPassword1">Amount Withdraw(Rs.) </label>
-                                                    <input type="text" name="transaction_amt" required class="form-control" id="transaction_amt">
+                                                    <input type="text" name="transaction_amt" required class="form-control"
+                                                        id="transaction_amt">
                                                 </div>
                                                 <div class=" col-md-4 form-group" style="display:none">
                                                     <label for="exampleInputPassword1">Transaction Type</label>
-                                                    <input type="text" name="tr_type" value="Withdrawal" required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" name="tr_type" value="Withdrawal" required
+                                                        class="form-control" id="exampleInputEmail1">
                                                 </div>
                                                 <div class=" col-md-4 form-group" style="display:none">
                                                     <label for="exampleInputPassword1">Transaction Status</label>
-                                                    <input type="text" name="tr_status" value="Success " required class="form-control" id="exampleInputEmail1">
+                                                    <input type="text" name="tr_status" value="Success " required
+                                                        class="form-control" id="exampleInputEmail1">
                                                 </div>
 
                                             </div>
@@ -184,7 +209,8 @@ if (isset($_POST['withdrawal'])) {
                                         </div>
                                         <!-- /.card-body -->
                                         <div class="card-footer">
-                                            <button type="submit" name="withdrawal" class="btn btn-success">Withdraw Funds</button>
+                                            <button type="submit" name="withdrawal" class="btn btn-success">Withdraw
+                                                Funds</button>
                                         </div>
                                     </form>
                                 </div>
@@ -216,22 +242,58 @@ if (isset($_POST['withdrawal'])) {
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
     <script type="text/javascript">
-      document.addEventListener("DOMContentLoaded", function() {
-        document.querySelector("form").addEventListener("submit", function(event) {
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector("form").addEventListener("submit", function (event) {
                 var transaction_amt = parseFloat(document.getElementById("transaction_amt").value);
                 var acc_amount = <?php echo $acc_amount; ?>; // Fetch current balance from PHP
 
                 if (isNaN(transaction_amt) || transaction_amt <= 0) {
                     alert("Please enter a valid positive number for withdrawal amount.");
                     event.preventDefault();
-                } else if (transaction_amt > acc_amount) {
-                    alert("Insufficient Balance! Your Current Balance is Rs. " + acc_amount);
+                }
+                // else if (transaction_amt > acc_amount) {
+                //     alert("Insufficient Balance! Your Current Balance is Rs. " + acc_amount);
+                //     event.preventDefault();
+                // }
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector("form").addEventListener("submit", function (event) {
+                var transaction_amt = parseFloat(document.getElementById("transaction_amt").value);
+                var acc_amount = <?php echo $acc_amount; ?>; // Current balance
+                var min_balance = <?php echo $min_balance; ?>; // Minimum balance required
+                var remaining_balance = acc_amount - transaction_amt;
+
+                if (isNaN(transaction_amt) || transaction_amt <= 0) {
                     event.preventDefault();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Invalid Amount!",
+                        text: "Please enter a valid positive number for withdrawal.",
+                        confirmButtonColor: "#d33"
+                    });
+                } else if (transaction_amt > acc_amount) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Insufficient Balance!",
+                        text: "Your Current Balance is Rs. " + acc_amount,
+                        confirmButtonColor: "#d33"
+                    });
+                } else if (remaining_balance < min_balance) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Minimum Balance Required!",
+                        text: "Minimum balance of Rs. " + min_balance + " is required in your account. Your withdrawal exceeds this limit.",
+                        confirmButtonColor: "#f39c12"
+                    });
                 }
             });
         });
 
     </script>
-    
+
 </body>
+
 </html>
