@@ -17,8 +17,9 @@ if (isset($_POST['create_acc_type'])) {
         $err = "All fields are required!";
     } elseif (!preg_match("/^[a-zA-Z ]+$/", $name)) {
         $err = "Category Name should contain only alphabets!";
-    } elseif (!is_numeric($rate) || $rate < 1 || $rate > 100) {
-        $err = "Rate must be a number between 1 and 100!";
+    } elseif (!is_numeric($rate) || $rate < 0.1 || $rate > 100) {
+        $err = "Rate must be a number between 0.1 and 100!";
+
     } else {
         // Insert into database
         $query = "INSERT INTO iB_Acc_types (name, description, rate, code) VALUES (?,?,?,?)";
@@ -37,6 +38,7 @@ if (isset($_POST['create_acc_type'])) {
 <!DOCTYPE html>
 <html>
 <?php include("dist/_partials/head.php"); ?>
+
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
     <div class="wrapper">
         <?php include("dist/_partials/nav.php"); ?>
@@ -73,11 +75,14 @@ if (isset($_POST['create_acc_type'])) {
                                         <div class="row">
                                             <div class="col-md-4 form-group">
                                                 <label>Account Category Name</label>
-                                                <input type="text" name="name" required class="form-control" id="categoryName">
+                                                <input type="text" name="name" required class="form-control"
+                                                    id="categoryName">
                                             </div>
                                             <div class="col-md-4 form-group">
                                                 <label>Account Category Rates % Per Year</label>
-                                                <input type="number" name="rate" required class="form-control" id="rate" min="1" max="100">
+                                                <input type="number" name="rate" required class="form-control" id="rate"
+                                                    step="0.01" min="0.1" max="100">
+
                                             </div>
                                             <div class="col-md-4 form-group">
                                                 <label>Account Category Code</label>
@@ -85,7 +90,8 @@ if (isset($_POST['create_acc_type'])) {
                                                 $length = 5;
                                                 $_Number = substr(str_shuffle('0123456789QWERTYUIOPLKJHGFDSAZXCVBNM'), 1, $length);
                                                 ?>
-                                                <input type="text" readonly name="code" value="ACC-CAT-<?php echo $_Number; ?>" class="form-control">
+                                                <input type="text" readonly name="code"
+                                                    value="ACC-CAT-<?php echo $_Number; ?>" class="form-control">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -97,7 +103,8 @@ if (isset($_POST['create_acc_type'])) {
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="create_acc_type" class="btn btn-success">Add Account Type</button>
+                                        <button type="submit" name="create_acc_type" class="btn btn-success">Add Account
+                                            Type</button>
                                     </div>
                                 </form>
                             </div>
@@ -117,7 +124,7 @@ if (isset($_POST['create_acc_type'])) {
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // SweetAlert notifications
             <?php if (isset($success)) { ?>
                 Swal.fire({
@@ -134,7 +141,7 @@ if (isset($_POST['create_acc_type'])) {
             <?php } ?>
 
             // Client-side validation: Allow only alphabets in Category Name
-            $("#categoryName").on("input", function() {
+            $("#categoryName").on("input", function () {
                 let value = $(this).val();
                 let regex = /^[a-zA-Z ]*$/;
                 if (!regex.test(value)) {
@@ -142,13 +149,26 @@ if (isset($_POST['create_acc_type'])) {
                 }
             });
 
-            // Client-side validation: Ensure Rate is between 1 and 100
-            $("#rate").on("input", function() {
-                let value = $(this).val();
-                if (value < 1) $(this).val(1);
-                if (value > 100) $(this).val(100);
+            // Client-side validation: Allow decimal values between 0.1 and 100
+            $("#rate").on("input", function () {
+                let value = $(this).val().replace(/[^0-9.]/g, ""); // Allow only numbers and decimal points
+
+                // Prevent multiple decimals
+                if ((value.match(/\./g) || []).length > 1) {
+                    value = value.substring(0, value.length - 1);
+                }
+
+                if (value !== "") {
+                    let numericValue = parseFloat(value);
+                    if (numericValue < 0.1) value = "0.1";
+                    if (numericValue > 100) value = "100";
+                }
+
+                $(this).val(value);
             });
+
         });
     </script>
 </body>
+
 </html>

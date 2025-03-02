@@ -38,10 +38,34 @@ if (isset($_POST['deposit'])) {
             $stmt->fetch();
             $stmt->close();
 
-            // Check if sender has sufficient balance
-            if ($transaction_amt > $sender_balance) {
+            // Fetch Sender's Account Type and Minimum Balance Requirement
+            $query = "SELECT acc_type, acc_amount FROM ib_bankaccounts WHERE account_id = ?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('i', $account_id);
+            $stmt->execute();
+            $stmt->bind_result($acc_type, $sender_balance);
+            $stmt->fetch();
+            $stmt->close();
+
+            // Fetch Minimum Balance for the Account Type
+            $query = "SELECT min_balance FROM ib_acc_types WHERE name = ?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('s', $acc_type);
+            $stmt->execute();
+            $stmt->bind_result($min_balance);
+            $stmt->fetch();
+            $stmt->close();
+
+            // Calculate the new sender balance after deduction
+            $new_sender_balance = $sender_balance - $transaction_amt;
+
+            // Validate if sender maintains the required minimum balance
+            if ($new_sender_balance < $min_balance) {
+                $err = "Transaction Failed! You must maintain a minimum balance of Rs. $min_balance in your $acc_type account.";
+            } elseif ($transaction_amt > $sender_balance) {
                 $err = "Insufficient Balance! Your Current Balance is Rs. $sender_balance";
             } else {
+
                 // Deduct amount from sender
                 $new_sender_balance = $sender_balance - $transaction_amt;
                 $update_sender_query = "UPDATE ib_bankaccounts SET acc_amount = ? WHERE account_id = ?";
@@ -298,6 +322,8 @@ if (isset($_POST['deposit'])) {
             });
         });
 
+    </script>
+    <script>
         $(document).ready(function () {
             $("#receiving_acc_no").change(function () {
                 var accountNumber = $(this).val();
@@ -306,7 +332,9 @@ if (isset($_POST['deposit'])) {
                     $.ajax({
                         type: "POST",
                         url: "get_account_name.php",
-                        data: { account_number: accountNumber },
+                        data: {
+                            account_number: accountNumber
+                        },
                         dataType: "json",
                         success: function (response) {
                             $("#receiving_acc_name").val(response.acc_name);

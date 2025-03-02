@@ -47,10 +47,12 @@ if (isset($_POST['open_account'])) {
     } elseif ($acc_type === "Joint Account" && $joint_acc_count >= 3) {
         $err = "You can only have a maximum of 3 Joint Accounts.";
     } else {
-        // Proceed with account creation
-        $query = "INSERT INTO iB_bankAccounts (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id, client_name, client_phone, client_number, client_email, client_adr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO iB_bankAccounts 
+        (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)";
+
         $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssssssssssss', $acc_name, $account_number, $acc_type, $acc_rates, $acc_status, $acc_amount, $client_id, $client_name, $client_phone, $client_number, $client_email, $client_adr);
+        $stmt->bind_param('ssssssd', $acc_name, $account_number, $acc_type, $acc_rates, $acc_status, $acc_amount, $client_id);
         $stmt->execute();
 
         if ($stmt) {
@@ -58,6 +60,7 @@ if (isset($_POST['open_account'])) {
         } else {
             $err = "Please Try Again Later";
         }
+
     }
 
 }
@@ -182,7 +185,8 @@ if (isset($_POST['open_account'])) {
 
                                                             ?>
                                                             <option value="<?php echo $row->name; ?> ">
-                                                                <?php echo $row->name; ?> </option>
+                                                                <?php echo $row->name; ?>
+                                                            </option>
                                                         <?php } ?>
                                                     </select>
 

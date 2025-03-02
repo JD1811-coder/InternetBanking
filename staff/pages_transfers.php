@@ -6,6 +6,12 @@ check_login();
 $client_id = $_SESSION['client_id'];
 
 ?>
+<?php
+if (isset($_SESSION['swal_message'])) {
+    echo $_SESSION['swal_message'];
+    unset($_SESSION['swal_message']); // Remove the session message after displaying
+}
+?>
 
 <!DOCTYPE html>
 <html>
