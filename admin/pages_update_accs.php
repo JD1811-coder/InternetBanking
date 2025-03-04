@@ -10,20 +10,23 @@ if (isset($_POST['update_acc_type'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $rate = trim($_POST['rate']);
+    $min_balance = trim($_POST['min_balance']);
     $code = $_GET['code'];
 
     // Validation
-    if (empty($name) || empty($description) || empty($rate)) {
+    if (empty($name) || empty($description) || empty($rate) || empty($min_balance)) {
         $err = "All fields are required!";
     } elseif (!preg_match("/^[a-zA-Z ]+$/", $name)) {
         $err = "Category Name should contain only alphabets!";
     } elseif (!is_numeric($rate) || $rate < 1 || $rate > 100) {
         $err = "Rate must be a number between 1 and 100!";
+    } elseif (!is_numeric($min_balance) || $min_balance < 1 || $min_balance > 100000) {
+        $err = "Minimum balance must be a number between 1 and 100000!";
     } else {
         // Update database
-        $query = "UPDATE iB_Acc_types SET name=?, description=?, rate=? WHERE code=?";
+        $query = "UPDATE iB_Acc_types SET name=?, description=?, rate=?, min_balance=? WHERE code=?";
         $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssss', $name, $description, $rate, $code);
+        $stmt->bind_param('sssss', $name, $description, $rate, $min_balance, $code);
         $stmt->execute();
 
         if ($stmt) {
@@ -33,6 +36,7 @@ if (isset($_POST['update_acc_type'])) {
         }
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -63,7 +67,7 @@ if (isset($_POST['update_acc_type'])) {
                                 <div class="card-header">
                                     <h3 class="card-title">Fill All Fields</h3>
                                 </div>
-                                
+
                                 <?php
                                 // Fetch account type data
                                 $code = $_GET['code'];
@@ -80,28 +84,39 @@ if (isset($_POST['update_acc_type'])) {
                                         <div class="row">
                                             <div class="col-md-4 form-group">
                                                 <label>Account Category Name</label>
-                                                <input type="text" name="name" value="<?php echo $row->name; ?>" required class="form-control" id="name">
+                                                <input type="text" name="name" value="<?php echo $row->name; ?>"
+                                                    required class="form-control" id="name">
                                             </div>
                                             <div class="col-md-4 form-group">
                                                 <label>Account Category Rates % Per Year</label>
-                                                <input type="text" name="rate" value="<?php echo $row->rate; ?>" required class="form-control" id="rate">
+                                                <input type="text" name="rate" value="<?php echo $row->rate; ?>"
+                                                    required class="form-control" id="rate">
+                                            </div>
+                                            <div class="col-md-4 form-group">
+                                                <label>Minimum Balance</label>
+                                                <input type="text" name="min_balance"
+                                                    value="<?php echo $row->min_balance; ?>" required
+                                                    class="form-control" id="min_balance">
                                             </div>
                                             <div class="col-md-4 form-group">
                                                 <label>Account Category Code</label>
-                                                <input type="text" readonly name="code" value="<?php echo $row->code; ?>" class="form-control">
+                                                <input type="text" readonly name="code"
+                                                    value="<?php echo $row->code; ?>" class="form-control">
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-md-12 form-group">
                                                 <label>Account Category Description</label>
-                                                <textarea name="description" required class="form-control" id="desc"><?php echo $row->description; ?></textarea>
+                                                <textarea name="description" required class="form-control"
+                                                    id="desc"><?php echo $row->description; ?></textarea>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="update_acc_type" class="btn btn-success">Update Account</button>
+                                        <button type="submit" name="update_acc_type" class="btn btn-success">Update
+                                            Account</button>
                                     </div>
                                 </form>
                             </div>
@@ -154,6 +169,37 @@ if (isset($_POST['update_acc_type'])) {
         <?php if (isset($err)) { ?>
             Swal.fire("Error!", "<?php echo $err; ?>", "error");
         <?php } ?>
+        function validateForm() {
+            let name = document.getElementById('name').value.trim();
+            let rate = document.getElementById('rate').value.trim();
+            let desc = document.getElementById('desc').value.trim();
+            let minBalance = document.getElementById('min_balance').value.trim();
+            let nameRegex = /^[a-zA-Z ]+$/;
+
+            if (name === '' || rate === '' || desc === '' || minBalance === '') {
+                Swal.fire("Error!", "All fields are required!", "error");
+                return false;
+            }
+
+            if (!nameRegex.test(name)) {
+                Swal.fire("Error!", "Category Name should contain only alphabets!", "error");
+                return false;
+            }
+
+            if (isNaN(rate) || rate < 1 || rate > 100) {
+                Swal.fire("Error!", "Rate must be a number between 1 and 100!", "error");
+                return false;
+            }
+
+            if (isNaN(minBalance) || minBalance < 1 || minBalance > 100000) {
+                Swal.fire("Error!", "Minimum balance must be a number between 1 and 100000!", "error");
+                return false;
+            }
+
+            return true;
+        }
+
     </script>
 </body>
+
 </html>

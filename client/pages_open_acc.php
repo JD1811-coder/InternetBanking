@@ -19,37 +19,39 @@ if (isset($_POST['open_account'])) {
     $client_number = $_POST['client_number'];
     $client_email = $_POST['client_email'];
     $client_adr = $_POST['client_adr'];
-
-    // Check if the client already has an account (except Joint Account)
+    // Check existing accounts for the client
     $check_query = "SELECT acc_type FROM iB_bankAccounts WHERE client_id = ?";
     $stmt_check = $mysqli->prepare($check_query);
     $stmt_check->bind_param('i', $client_id);
     $stmt_check->execute();
     $stmt_check->store_result();
-    $total_accounts = $stmt_check->num_rows;
     $stmt_check->bind_result($existing_acc_type);
-    $account_exists = false;
+
+    $has_non_joint = false;
     $joint_acc_count = 0;
 
-    // Fetch all accounts to count Joint Accounts
+    // Loop through existing accounts to check the types
     while ($stmt_check->fetch()) {
         if ($existing_acc_type === "Joint Account") {
-            $joint_acc_count++;
+            $joint_acc_count++; // Count joint accounts
         } else {
-            $account_exists = true;
+            $has_non_joint = true; // Client has a non-joint account
         }
     }
     $stmt_check->close();
 
-    // If the client already has an account (except Joint Account), prevent new accounts
-    if ($account_exists && $acc_type !== "Joint Account") {
-        $err = "You can only open one iBank account. Only Joint Accounts can have multiple.";
+    // Validation logic
+    if ($has_non_joint) {
+        // If a Non-Joint Account exists, prevent opening any new account (Joint or Non-Joint)
+        $err = "You already have a non-joint account. You cannot open another account.";
     } elseif ($acc_type === "Joint Account" && $joint_acc_count >= 3) {
+        // If the client already has 3 Joint Accounts, prevent opening more
         $err = "You can only have a maximum of 3 Joint Accounts.";
     } else {
+        // Allow account creation (either first account or valid Joint Account)
         $query = "INSERT INTO iB_bankAccounts 
-        (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id) 
-      VALUES (?, ?, ?, ?, ?, ?, ?)";
+              (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id) 
+              VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $mysqli->prepare($query);
         $stmt->bind_param('ssssssd', $acc_name, $account_number, $acc_type, $acc_rates, $acc_status, $acc_amount, $client_id);
@@ -60,11 +62,8 @@ if (isset($_POST['open_account'])) {
         } else {
             $err = "Please Try Again Later";
         }
-
     }
-
 }
-
 ?>
 <!DOCTYPE html>
 <html>

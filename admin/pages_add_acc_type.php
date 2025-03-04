@@ -10,27 +10,29 @@ if (isset($_POST['create_acc_type'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $rate = trim($_POST['rate']);
+    $min_balance = trim($_POST['min_balance']);
     $code = trim($_POST['code']);
 
     // Validation
-    if (empty($name) || empty($description) || empty($rate) || empty($code)) {
-        $err = "All fields are required!";
+    if (empty($name) || empty($description) || empty($rate) || empty($min_balance) || empty($code)) {
+        $_SESSION['error'] = "All fields are required!";
     } elseif (!preg_match("/^[a-zA-Z ]+$/", $name)) {
-        $err = "Category Name should contain only alphabets!";
+        $_SESSION['error'] = "Category Name should contain only alphabets!";
     } elseif (!is_numeric($rate) || $rate < 0.1 || $rate > 100) {
-        $err = "Rate must be a number between 0.1 and 100!";
-
+        $_SESSION['error'] = "Rate must be a number between 0.1 and 100!";
+    } elseif (!is_numeric($min_balance) || $min_balance < 1 || $min_balance > 100000) {
+        $_SESSION['error'] = "Minimum balance must be a number between 1 and 100000!";
     } else {
         // Insert into database
-        $query = "INSERT INTO iB_Acc_types (name, description, rate, code) VALUES (?,?,?,?)";
+        $query = "INSERT INTO iB_Acc_types (name, description, rate, min_balance, code) VALUES (?,?,?,?,?)";
         $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssss', $name, $description, $rate, $code);
+        $stmt->bind_param('sssss', $name, $description, $rate, $min_balance, $code);
         $stmt->execute();
 
         if ($stmt) {
-            $success = "Account Category Created Successfully!";
+            $_SESSION['success'] = "Account Category Created Successfully!";
         } else {
-            $err = "Error! Please try again.";
+            $_SESSION['error'] = "Error! Please try again.";
         }
     }
 }
@@ -73,25 +75,25 @@ if (isset($_POST['create_acc_type'])) {
                                 <form method="post" id="accForm">
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-md-4 form-group">
+                                            <div class="col-md-3 form-group">
                                                 <label>Account Category Name</label>
-                                                <input type="text" name="name" required class="form-control"
-                                                    id="categoryName">
+                                                <input type="text" name="name" required class="form-control" id="categoryName">
                                             </div>
-                                            <div class="col-md-4 form-group">
+                                            <div class="col-md-3 form-group">
                                                 <label>Account Category Rates % Per Year</label>
-                                                <input type="number" name="rate" required class="form-control" id="rate"
-                                                    step="0.01" min="0.1" max="100">
-
+                                                <input type="number" name="rate" required class="form-control" id="rate" step="0.01" min="0.1" max="100">
                                             </div>
-                                            <div class="col-md-4 form-group">
+                                            <div class="col-md-3 form-group">
+                                                <label>Minimum Balance</label>
+                                                <input type="number" name="min_balance" required class="form-control" id="min_balance" min="1" max="100000">
+                                            </div>
+                                            <div class="col-md-3 form-group">
                                                 <label>Account Category Code</label>
                                                 <?php
                                                 $length = 5;
                                                 $_Number = substr(str_shuffle('0123456789QWERTYUIOPLKJHGFDSAZXCVBNM'), 1, $length);
                                                 ?>
-                                                <input type="text" readonly name="code"
-                                                    value="ACC-CAT-<?php echo $_Number; ?>" class="form-control">
+                                                <input type="text" readonly name="code" value="ACC-CAT-<?php echo $_Number; ?>" class="form-control">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -103,8 +105,7 @@ if (isset($_POST['create_acc_type'])) {
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="create_acc_type" class="btn btn-success">Add Account
-                                            Type</button>
+                                        <button type="submit" name="create_acc_type" class="btn btn-success">Add Account Type</button>
                                     </div>
                                 </form>
                             </div>
@@ -119,56 +120,42 @@ if (isset($_POST['create_acc_type'])) {
 
     <!-- jQuery -->
     <script src="plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap -->
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="dist/js/adminlte.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function () {
-            // SweetAlert notifications
-            <?php if (isset($success)) { ?>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: '<?php echo $success; ?>'
-                });
-            <?php } elseif (isset($err)) { ?>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '<?php echo $err; ?>'
-                });
-            <?php } ?>
-
-            // Client-side validation: Allow only alphabets in Category Name
-            $("#categoryName").on("input", function () {
-                let value = $(this).val();
-                let regex = /^[a-zA-Z ]*$/;
-                if (!regex.test(value)) {
-                    $(this).val(value.replace(/[^a-zA-Z ]/g, ""));
-                }
-            });
-
-            // Client-side validation: Allow decimal values between 0.1 and 100
-            $("#rate").on("input", function () {
-                let value = $(this).val().replace(/[^0-9.]/g, ""); // Allow only numbers and decimal points
-
-                // Prevent multiple decimals
-                if ((value.match(/\./g) || []).length > 1) {
-                    value = value.substring(0, value.length - 1);
-                }
-
-                if (value !== "") {
-                    let numericValue = parseFloat(value);
-                    if (numericValue < 0.1) value = "0.1";
-                    if (numericValue > 100) value = "100";
-                }
-
+            $("#min_balance").on("input", function () {
+                let value = $(this).val().replace(/[^0-9]/g, "");
+                if (value < 1) value = "1";
+                if (value > 100000) value = "100000";
                 $(this).val(value);
             });
 
+            <?php if (isset($_SESSION['success'])) { ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '<?php echo $_SESSION["success"]; ?>',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                <?php unset($_SESSION['success']); ?>
+            <?php } ?>
+
+            <?php if (isset($_SESSION['error'])) { ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '<?php echo $_SESSION["error"]; ?>',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                <?php unset($_SESSION['error']); ?>
+            <?php } ?>
         });
     </script>
 </body>
-
 </html>

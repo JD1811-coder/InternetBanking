@@ -4,161 +4,173 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
-if (isset($_GET['deleteBankAccType'])) {
-  $id = intval($_GET['deleteBankAccType']);
-  $adn = "DELETE FROM  iB_Acc_types  WHERE acctype_id = ?";
-  $stmt = $mysqli->prepare($adn);
-  $stmt->bind_param('i', $id);
-  $stmt->execute();
-  $stmt->close();
 
-  if ($stmt) {
-    $info = "iBanking Account Type Removed";
-  } else {
-    $err = "Try Again Later";
-  }
+if (isset($_GET['deleteBankAccType'])) {
+    $id = intval($_GET['deleteBankAccType']);
+    $adn = "DELETE FROM iB_Acc_types WHERE acctype_id = ?";
+    $stmt = $mysqli->prepare($adn);
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $stmt->close();
+
+    if ($stmt) {
+        $_SESSION['success'] = "iBanking Account Type Removed Successfully!";
+    } else {
+        $_SESSION['error'] = "Failed to delete. Try Again Later!";
+    }
+    header("Location: pages_manage_accs.php");
+    exit();
 }
 ?>
-<!-- Log on to codeastro.com for more projects! -->
+
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
 <?php include("dist/_partials/head.php"); ?>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
-  <div class="wrapper">
-    <!-- Navbar -->
-    <?php include("dist/_partials/nav.php"); ?>
-    <!-- /.navbar -->
+    <div class="wrapper">
+        <!-- Navbar -->
+        <?php include("dist/_partials/nav.php"); ?>
 
-    <!-- Main Sidebar Container -->
-    <?php include("dist/_partials/sidebar.php"); ?>
+        <!-- Main Sidebar Container -->
+        <?php include("dist/_partials/sidebar.php"); ?>
 
-    <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
-      <!-- Content Header (Page header) -->
-      <section class="content-header">
-        <div class="container-fluid">
-          <div class="row mb-2">
-            <div class="col-sm-6">
-              <h1>iBanking Account Types</h1>
-            </div>
-            <div class="col-sm-6">
-              <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="pages_dashboard.php">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="pages_manage_accs.php">iBank Account Types</a></li>
-                <li class="breadcrumb-item active">Manage Clients</li>
-              </ol>
-            </div>
-          </div>
-        </div><!-- /.container-fluid -->
-      </section>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>iBanking Account Types</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="pages_dashboard.php">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="pages_manage_accs.php">iBank Account Types</a></li>
+                                <li class="breadcrumb-item active">Manage Clients</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-      <!-- Main content -->
-      <section class="content">
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Select on any action options to manage your account types</h3>
-              </div>
-              <div class="card-body">
-                <table id="example1" class="table table-hover table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Rate</th>
-                      <th>Code</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    //fetch all iB_Acc_types
-                    $ret = "SELECT * FROM  iB_Acc_types ORDER BY RAND() ";
-                    $stmt = $mysqli->prepare($ret);
-                    $stmt->execute(); //ok
-                    $res = $stmt->get_result();
-                    $cnt = 1;
-                    while ($row = $res->fetch_object()) {
-
-                    ?>
-
-                      <tr>
-                        <td><?php echo $cnt; ?></td>
-                        <td><?php echo $row->name; ?></td>
-                        <td><?php echo $row->rate; ?>%</td>
-                        <td><?php echo $row->code; ?></td>
-
-                        <td>
-                          <a class="btn btn-success btn-sm" href="pages_update_accs.php?code=<?php echo $row->code; ?>">
-                            <i class="fas fa-cogs"></i>
-                            <!-- <i class="fas fa-briefcase"></i> -->
-                            Manage
-                          </a>
-
-                          <a class="btn btn-danger btn-sm" href="pages_manage_accs.php?deleteBankAccType=<?php echo $row->acctype_id; ?>">
-                            <i class="fas fa-trash"></i>
-                            <!-- <i class="fas fa-briefcase"></i> -->
-                            Delete
-                          </a>
-
-
-                        </td>
-
-                      </tr>
-                    <?php $cnt = $cnt + 1;
-                    } ?>
-                    </tfoot>
-                </table>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </div>
-          <!-- /.col -->
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Manage Your Account Types</h3>
+                            </div>
+                            <div class="card-body">
+                                <table id="example1" class="table table-hover table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Rate</th>
+                                            <th>Min Balance</th> <!-- New Column -->
+                                            <th>Code</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $ret = "SELECT * FROM iB_Acc_types ORDER BY RAND()";
+                                        $stmt = $mysqli->prepare($ret);
+                                        $stmt->execute();
+                                        $res = $stmt->get_result();
+                                        $cnt = 1;
+                                        while ($row = $res->fetch_object()) {
+                                        ?>
+                                            <tr>
+                                                <td><?php echo $cnt; ?></td>
+                                                <td><?php echo $row->name; ?></td>
+                                                <td><?php echo $row->rate; ?>%</td>
+                                                <td><?php echo number_format($row->min_balance, 2); ?></td> <!-- Display Min Balance -->
+                                                <td><?php echo $row->code; ?></td>
+                                                <td>
+                                                    <a class="btn btn-success btn-sm" href="pages_update_accs.php?code=<?php echo $row->code; ?>">
+                                                        <i class="fas fa-cogs"></i> Manage
+                                                    </a>
+                                                    <a class="btn btn-danger btn-sm delete-confirm" href="pages_manage_accs.php?deleteBankAccType=<?php echo $row->acctype_id; ?>">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php $cnt++; } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-        <!-- /.row -->
-      </section>
-      <!-- /.content -->
+        
+        <?php include("dist/_partials/footer.php"); ?>
     </div>
-    <!-- /.content-wrapper -->
-    <?php include("dist/_partials/footer.php"); ?>
 
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
-  </div>
-  <!-- ./wrapper -->
+    <!-- jQuery -->
+    <script src="plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables -->
+    <script src="plugins/datatables/jquery.dataTables.js"></script>
+    <script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+    <!-- AdminLTE App -->
+    <script src="dist/js/adminlte.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- jQuery -->
-  <script src="plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
-  <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- DataTables -->
-  <script src="plugins/datatables/jquery.dataTables.js"></script>
-  <script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
-  <!-- AdminLTE App -->
-  <script src="dist/js/adminlte.min.js"></script>
-  <!-- AdminLTE for demo purposes -->
-  <script src="dist/js/demo.js"></script>
-  <!-- page script -->
-  <script>
-    $(function() {
-      $("#example1").DataTable();
-      $('#example2').DataTable({
-        "paging": true,
-        "lengthChange": false,
-        "searching": false,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-      });
-    });
-  </script>
+    <script>
+        $(function() {
+            $("#example1").DataTable();
+        });
+
+        <?php if (isset($_SESSION['success'])) { ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?php echo $_SESSION["success"]; ?>',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            <?php unset($_SESSION['success']); ?>
+        <?php } ?>
+
+        <?php if (isset($_SESSION['error'])) { ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '<?php echo $_SESSION["error"]; ?>',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            <?php unset($_SESSION['error']); ?>
+        <?php } ?>
+
+        // Confirmation before delete
+        $(document).on('click', '.delete-confirm', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href');
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    </script>
 </body>
-
 </html>

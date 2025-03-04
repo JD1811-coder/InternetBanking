@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 01, 2025 at 01:24 PM
+-- Generation Time: Mar 04, 2025 at 03:57 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- Database: `internetbanking`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_feedback`
+--
+
+CREATE TABLE `client_feedback` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `client_id` int(10) UNSIGNED NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `feedback_message` text NOT NULL,
+  `submission_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -46,8 +60,10 @@ INSERT INTO `ib_acc_types` (`acctype_id`, `name`, `description`, `rate`, `code`,
 (2, ' Retirement', '<p>Retirement accounts&nbsp;offer&nbsp;tax advantages. In very general terms, you get to&nbsp;avoid paying income tax on interest&nbsp;you earn from a savings account or CD each year. But you may have to pay taxes on those earnings at a later date. Still, keeping your money sheltered from taxes may help you over the long term. Most banks offer IRAs (both&nbsp;Traditional IRAs&nbsp;and&nbsp;Roth IRAs), and they may also provide&nbsp;retirement accounts for small businesses</p>', '10', 'ACC-CAT-1QYDV', 1, 0.00),
 (4, 'Recurring deposit', '<p><strong>Recurring deposit account or RD account</strong> is opened by those who want to save certain amount of money regularly for a certain period of time and earn a higher interest rate.&nbsp;In RD&nbsp;account a&nbsp;fixed amount is deposited&nbsp;every month for a specified period and the total amount is repaid with interest at the end of the particular fixed period.&nbsp;</p><p>The period of deposit is minimum six months and maximum ten years.&nbsp;The interest rates vary&nbsp;for different plans based on the amount one saves and the period of time and also on banks. No withdrawals are allowed from the RD account. However, the bank may allow to close the account before the maturity period.</p><p>These accounts can be opened in single or joint names. Banks are also providing the Nomination facility to the RD account holders.&nbsp;</p>', '15', 'ACC-CAT-VBQLE', 1, 2000.00),
 (5, 'Fixed Deposit Account', '<p>In <strong>Fixed Deposit Account</strong> (also known as <strong>FD Account</strong>), a particular sum of money is deposited in a bank for specific&nbsp;period of time. It&rsquo;s one time deposit and one time take away (withdraw) account.&nbsp;The money deposited in this account can not be withdrawn before the expiry of period.&nbsp;</p><p>However, in case of need,&nbsp; the depositor can ask for closing the fixed deposit prematurely by paying a penalty. The penalty amount varies with banks.</p><p>A high interest rate is paid on fixed deposits. The rate of interest paid for fixed deposit vary according to amount, period and also from bank to bank.</p>', '40', 'ACC-CAT-A86GO', 1, 10000.00),
-(7, 'Current account ', '<p><strong>Current account</strong> is mainly for business per<strong>s</strong>ons, firms, companies, public enterprises etc and are never used for the purpose of investment or savings.These deposits are the most liquid deposits and there are no limits for number of transactions or the amount of transactions in a day. While, there is no interest paid on amount held in the account, banks charges certain &nbsp;service charges, on such accounts. The current accounts do not have any fixed maturity as thegadegagagase are on continuous basis accounts.</p>', '19', 'ACC-CAT-4O8QW', 1, 5000.00),
-(8, 'Salary Account', '<p>A <strong>salary account</strong> is a bank account where an employer directly deposits an employee&rsquo;s salary. It usually has <strong>zero balance requirements</strong>, <strong>free debit card and chequebook</strong>, <strong>higher transaction limits</strong>, <strong>overdraft facility</strong>, and <strong>easy loan approvals</strong>. It also provides <strong>internet and mobile banking</strong> for seamless transactions.</p>', '6.5', 'ACC-CAT-27DQV', 1, 0.00);
+(7, 'Current account', '<p><strong>Current account</strong> is mainly for business per<strong>s</strong>ons, firms, companies, public enterprises etc and are never used for the purpose of investment or savings.These deposits are the most liquid deposits and there are no limits for number of transactions or the amount of transactions in a day. While, there is no interest paid on amount held in the account, banks charges certain &nbsp;service charges, on such accounts. The current accounts do not have any fixed maturity as thegadegagagase are on continuous basis accounts.</p>', '20', 'ACC-CAT-4O8QW', 1, 5000.00),
+(8, 'Salary Account', '<p>A <strong>salary account</strong> is a bank account where an employer directly deposits an employee&rsquo;s salary. It usually has <strong>zero balance requirements</strong>, <strong>free debit card and chequebook</strong>, <strong>higher transaction limits</strong>, <strong>overdraft facility</strong>, and <strong>easy loan approvals</strong>. It also provides <strong>internet and mobile banking</strong> for seamless transactions.</p>', '6.5', 'ACC-CAT-27DQV', 1, 0.00),
+(9, 'Minor Account', '<p>A Minor Account is a special type of bank account designed for individuals below the legal adult age, typically managed by a parent or guardian. These accounts help minors develop financial literacy and savings habits from an early age. While the account is in the minor&rsquo;s name, the guardian has control over transactions, withdrawals, and fund management until the minor reaches adulthood. Many banks offer minor accounts with benefits like zero minimum balance, higher interest rates, and restrictions on certain transactions to ensure financial safety. Upon reaching the legal age, the minor can convert the account into a regular savings account.</p>', '3.5', 'ACC-CAT-UBY52', 1, 500.00),
+(11, 'Joint Account', 'A Joint Account is a shared bank account owned by two or more individuals, allowing them to manage and access funds collectively. It is commonly used by spouses, business partners, family members, or anyone who wishes to share financial responsibilities. This type of account offers convenience for handling shared expenses such as household bills, savings, or business transactions. Depending on the account terms, withdrawals and transactions may require authorization from one or all account holders. A joint account promotes financial transparency and trust while providing an efficient way to manage funds together.', '10', 'ACC-CAT-8IQVP', 1, 0.00);
 
 -- --------------------------------------------------------
 
@@ -98,11 +114,12 @@ CREATE TABLE `ib_bankaccounts` (
 --
 
 INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type`, `acc_rates`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
-(14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 70361.00, 5, '2025-03-01 12:11:07.067332', 1),
-(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 900000.00, 8, '2025-03-01 12:10:07.792640', 1),
-(16, 'Vraj Gujrati', '705239816', ' Retirement ', '10', 'Active', 10239.00, 6, '2025-02-25 08:52:27.969449', 1),
-(23, 'Yashpal Chavda', '573608192', 'Savings', '15', 'Active', 0.00, 11, '2025-03-01 12:18:48.010090', 1),
-(24, 'Rohit Dhull', '529714806', 'Salary Account', '6.5', 'Active', 212.00, 11, '2025-03-01 12:15:40.217725', 1);
+(14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 31063.00, 5, '2025-03-02 15:26:59.154925', 1),
+(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 820836.00, 8, '2025-03-02 15:11:23.771478', 1),
+(16, 'Vraj Gujrati', '705239816', ' Retirement ', '10', 'Active', 61712.00, 6, '2025-03-02 14:51:59.220199', 1),
+(23, 'Yashpal Chavda', '573608192', 'Savings', '15', 'Active', 10603.00, 11, '2025-03-02 15:26:59.154046', 1),
+(24, 'Rohit Dhull', '529714806', 'Salary Account', '6.5', 'Active', 11012.00, 11, '2025-03-02 15:11:49.505011', 1),
+(35, 'Jenil Dhola', '964031285', 'Joint Account ', '10', 'Active', 0.00, 15, '2025-03-04 14:54:50.224069', 1);
 
 -- --------------------------------------------------------
 
@@ -137,7 +154,37 @@ INSERT INTO `ib_clients` (`client_id`, `name`, `phone`, `address`, `email`, `aad
 (8, 'Arin gabani', '7850000014', '92 Maple Street', 'arin123a@mail.com', '460140316244', 'OPKFW7221Z', '55c3b5386c486feb662a0785f340938f518d547f', 'beet.jpg', 'iBank-CLIENT-0423', 1, NULL, NULL),
 (9, 'Aakash chopra', '8799050118', 'delhi', 'Achopra@mail.com', '978546321574', 'PDWEQ3467P', '55c3b5386c486feb662a0785f340938f518d547f', 'rahul.jpg', 'iBank-CLIENT-4716', 1, NULL, NULL),
 (11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXE23467P', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', '', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
-(13, 'darshan lakhani', '9714783225', 'DK NAGAR SOC VED ROAD KATARGAM 19', 'utkarsh.diam09@gmail.com', '773766750259', 'AETIL1036G', 'a40ed2eb4f420cecfc40eb2d3ee25af2c0366751', '', 'iBank-CLIENT-9847', 1, NULL, NULL);
+(13, 'darshan lakhani', '9714783225', 'DK NAGAR SOC VED ROAD KATARGAM 19', 'utkarsh.diam09@gmail.com', '773766750259', 'AETIL1036G', 'a40ed2eb4f420cecfc40eb2d3ee25af2c0366751', '', 'iBank-CLIENT-9847', 1, NULL, NULL),
+(15, 'Sahil Gohil', '6352419685', 'A-103, Riivanta Riverview, Variyav, Surat', 'cleints2023@gmail.com', '741852963159', 'OPKFW7221Z', '$2y$10$tnXEHcPfGDA/hDMbeQd/Z.CFd5AlFASauXVLC7BN7ImCIbogDP/BS', '', 'iBank-CLIENT-0458', 1, '625736', '2025-03-02 22:08:23');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ib_nominees`
+--
+
+CREATE TABLE `ib_nominees` (
+  `id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `nominee_name` varchar(255) NOT NULL,
+  `relation` varchar(100) NOT NULL,
+  `nominee_email` varchar(255) DEFAULT NULL,
+  `nominee_phone` varchar(20) DEFAULT NULL,
+  `nominee_address` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `aadhar_number` varchar(12) NOT NULL,
+  `pan_number` varchar(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ib_nominees`
+--
+
+INSERT INTO `ib_nominees` (`id`, `client_id`, `nominee_name`, `relation`, `nominee_email`, `nominee_phone`, `nominee_address`, `created_at`, `is_active`, `aadhar_number`, `pan_number`) VALUES
+(1, 11, 'Bhavnaben Dhola', 'Mother', 'jenildhola1811@gmail.com', '99025063124', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-20 06:29:08', 1, '785496325896', 'IHXOD1193P'),
+(4, 13, 'darshan', 'brother', 'darshanlakhani@gmail.com', '8326566665', 'DK NAGAR SOC VED ROAD KATARGAM 19', '2025-02-27 15:13:05', 1, '', ''),
+(6, 11, 'dineshbhai dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-28 17:00:36', 1, '978546321574', 'OPKFW7221Z');
 
 -- --------------------------------------------------------
 
@@ -215,7 +262,9 @@ INSERT INTO `ib_notifications` (`notification_id`, `notification_details`, `crea
 (101, 'A deposit of Rs. 1000000 has been made into Bank Account 287359614', '2025-03-01 12:09:37.984075', 1),
 (102, 'Arin gabani Has Withdrawn Rs. 50000 From Bank Account 287359614', '2025-03-01 12:09:59.891171', 1),
 (103, 'Arin gabani Has Withdrawn Rs. 50000 From Bank Account 287359614', '2025-03-01 12:10:07.797564', 1),
-(104, 'Jenil Dhola has deposited Rs. 6000 into bank account 23', '2025-03-01 12:17:09.335715', 1);
+(104, 'Jenil Dhola has deposited Rs. 6000 into bank account 23', '2025-03-01 12:17:09.335715', 1),
+(105, 'Jenil Dhola has deposited Rs. 5000 into bank account 23', '2025-03-02 11:36:14.289504', 1),
+(106, 'Harry Den Has Withdrawn Rs. 50000 From Bank Account 357146928', '2025-03-02 11:41:27.165799', 1);
 
 -- --------------------------------------------------------
 
@@ -346,10 +395,12 @@ INSERT INTO `ib_transactions` (`tr_id`, `tr_code`, `account_id`, `tr_type`, `tr_
 (160, 'Xmaz801KbMOI3nu64xVi', 15, 'Withdrawal', 'Success ', 8, '50000', NULL, '2025-03-01 12:09:59.889484', 1),
 (161, 'QTgSnD7s2XZWI4h5Hxbu', 15, 'Withdrawal', 'Success ', 8, '50000', NULL, '2025-03-01 12:10:07.795601', 1),
 (162, 'WLmHJwBo14XyjF72r3u8', 23, 'Transfer', 'Success', 11, '100', '357146928', '2025-03-01 12:11:07.000000', 1),
-(163, '4BY8SlvcoPrQNjAsEJed', 24, 'Transfer', 'Success', 11, '100', '357146928', '2025-03-01 12:15:40.000000', 1),
-(164, 'wfZDU73aWXuTBsPKO5xY', 23, 'Transfer', 'Success', 11, '1386', '287359614', '2025-03-01 12:16:33.000000', 1),
 (165, '9FnwvaJcdq0B8yWko1pV', 23, 'Deposit', 'Success', 11, '6000', NULL, '2025-03-01 12:17:09.335452', 1),
-(166, 'FbQurL7NqXKdWEozBCji', 23, 'Transfer', 'Success', 11, '6000', '529714806', '2025-03-01 12:18:48.000000', 1);
+(166, 'FbQurL7NqXKdWEozBCji', 23, 'Transfer', 'Success', 11, '6000', '529714806', '2025-03-01 12:18:48.000000', 1),
+(167, 'mfjgDwEaTxvrCR8cI6uq', 23, 'Deposit', 'Success', 11, '5000', NULL, '2025-03-02 11:36:14.286271', 1),
+(168, '8pWHm4oSnVQx5fzrPh2Z', 15, 'Transfer', 'Success', 8, '10000', '573608192', '2025-03-02 11:40:54.000000', 1),
+(169, 'gN6TabdDErCO2yXKRQhe', 14, 'Withdrawal', 'Success ', 5, '50000', NULL, '2025-03-02 11:41:27.164055', 1),
+(184, 'q3VHEGI1U0NOle47L96D', 23, 'Transfer', 'Success', 11, '487', '705239816', '2025-03-02 13:01:59.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -444,6 +495,13 @@ INSERT INTO `password_resets` (`id`, `admin_id`, `token`, `expiry`) VALUES
 --
 
 --
+-- Indexes for table `client_feedback`
+--
+ALTER TABLE `client_feedback`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `client_id` (`client_id`);
+
+--
 -- Indexes for table `ib_acc_types`
 --
 ALTER TABLE `ib_acc_types`
@@ -467,6 +525,12 @@ ALTER TABLE `ib_bankaccounts`
 --
 ALTER TABLE `ib_clients`
   ADD PRIMARY KEY (`client_id`);
+
+--
+-- Indexes for table `ib_nominees`
+--
+ALTER TABLE `ib_nominees`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `ib_notifications`
@@ -522,10 +586,16 @@ ALTER TABLE `password_resets`
 --
 
 --
+-- AUTO_INCREMENT for table `client_feedback`
+--
+ALTER TABLE `client_feedback`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `ib_acc_types`
 --
 ALTER TABLE `ib_acc_types`
-  MODIFY `acctype_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `acctype_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `ib_admin`
@@ -537,19 +607,25 @@ ALTER TABLE `ib_admin`
 -- AUTO_INCREMENT for table `ib_bankaccounts`
 --
 ALTER TABLE `ib_bankaccounts`
-  MODIFY `account_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `account_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `ib_clients`
 --
 ALTER TABLE `ib_clients`
-  MODIFY `client_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `client_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `ib_nominees`
+--
+ALTER TABLE `ib_nominees`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `ib_notifications`
 --
 ALTER TABLE `ib_notifications`
-  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
+  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT for table `ib_staff`
@@ -567,7 +643,7 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=202;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`
@@ -590,6 +666,12 @@ ALTER TABLE `password_resets`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `client_feedback`
+--
+ALTER TABLE `client_feedback`
+  ADD CONSTRAINT `client_feedback_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `ib_clients` (`client_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ib_bankaccounts`

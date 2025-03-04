@@ -4,7 +4,6 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
-
 // Fire staff
 if (isset($_GET['deleteBankAcc'])) {
     $id = intval($_GET['deleteBankAcc']);
@@ -15,11 +14,15 @@ if (isset($_GET['deleteBankAcc'])) {
     $stmt->close();
 
     if ($stmt) {
-        $info = "iBanking Account Closed";
+        $_SESSION['success'] = "iBanking Account Closed Successfully!";
     } else {
-        $err = "Try Again Later";
+        $_SESSION['error'] = "Error! Try Again Later.";
     }
+
+    header("Location: pages_manage_acc_openings.php"); // Redirect to avoid resubmission
+    exit();
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -153,6 +156,33 @@ if (isset($_GET['deleteBankAcc'])) {
             $("#example1").DataTable();
         });
     </script>
+    <!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function() {
+        <?php if (isset($_SESSION['success'])) { ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?php echo $_SESSION['success']; ?>',
+                confirmButtonColor: '#3085d6'
+            });
+            <?php unset($_SESSION['success']); // Clear session message ?>
+        <?php } ?>
+
+        <?php if (isset($_SESSION['error'])) { ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops!',
+                text: '<?php echo $_SESSION['error']; ?>',
+                confirmButtonColor: '#d33'
+            });
+            <?php unset($_SESSION['error']); ?>
+        <?php } ?>
+    });
+</script>
+
 </body>
 
 </html>
