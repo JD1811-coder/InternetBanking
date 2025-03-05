@@ -11,11 +11,14 @@ if (!isset($mysqli) || $mysqli->connect_error) {
 }
 
 // Prepare the SQL query to fetch loan applications, excluding those with a status of 'pending'
-$query = "SELECT la.*, lt.type_name, la.income_salary, COALESCE(ibs.name, 'N/A') AS reviewer_name
+$query = "SELECT la.*, lt.type_name, la.income_salary, 
+                 COALESCE(ibs.name, 'N/A') AS reviewer_name, 
+                 la.loan_duration_years, la.loan_duration_months
           FROM loan_applications la
           LEFT JOIN loan_types lt ON la.loan_type_id = lt.id
           LEFT JOIN ib_staff ibs ON la.reviewed_by = ibs.staff_id
           WHERE la.status <> 'pending'";
+
 
 // Execute the query and assign to a uniquely named variable to avoid conflicts
 $loanResult = $mysqli->query($query);
@@ -77,6 +80,8 @@ if (!$loanResult) {
                                             <th>Loan Amount</th>
                                             <th>Income/Salary</th>
                                             <th>Application Date</th>
+                                            <th>Loan Duration</th>
+
                                             <th>Status</th>
                                             <th>Reviewed By</th>
                                             <th>Staff Remarks</th>
@@ -85,45 +90,48 @@ if (!$loanResult) {
                                     </thead>
                                     <tbody>
                                         <?php
-    $cnt = 1;
-    if ($loanResult->num_rows > 0) {
-        while ($row = $loanResult->fetch_object()) {
-            echo "<tr>";
-            echo "<td>" . $cnt . "</td>";
-            echo "<td>" . htmlspecialchars($row->applicant_name ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row->type_name ?? '') . "</td>";
-            echo "<td>Rs. " . number_format($row->loan_amount, 2) . "</td>";
-            echo "<td>Rs. " . number_format($row->income_salary, 2) . "</td>"; // New Column
-            echo "<td>" . date('d/m/Y H:i', strtotime($row->application_date)) . "</td>";
+                                        $cnt = 1;
+                                        if ($loanResult->num_rows > 0) {
+                                            while ($row = $loanResult->fetch_object()) {
+                                                echo "<tr>";
+                                                echo "<td>" . $cnt . "</td>";
+                                                echo "<td>" . htmlspecialchars($row->applicant_name ?? '') . "</td>";
+                                                echo "<td>" . htmlspecialchars($row->type_name ?? '') . "</td>";
+                                                echo "<td>Rs. " . number_format($row->loan_amount, 2) . "</td>";
+                                                echo "<td>Rs. " . number_format($row->income_salary, 2) . "</td>"; // New Column
+                                                echo "<td>" . date('d/m/Y H:i', strtotime($row->application_date)) . "</td>";
+                                                echo "<td>" . htmlspecialchars($row->loan_duration_years ?? 0) . " Years " .
+                                                    htmlspecialchars($row->loan_duration_months ?? 0) . " Months</td>";
 
-            // Determine badge class based on status
-            $badgeClass = 'danger'; // default class
-            if ($row->status == 'approved') {
-                $badgeClass = 'success';
-            }
-            if ($row->status == 'recommended') {
-                $badgeClass = 'warning';
-            } elseif ($row->status == 'pending_admin') {
-                $badgeClass = 'warning';
-            } elseif ($row->status == 'pending') {
-                $badgeClass = 'secondary';
-            }
-            echo "<td><span class=\"badge badge-$badgeClass\">" . ucfirst($row->status) . "</span></td>";
 
-            echo "<td>" . htmlspecialchars($row->reviewer_name ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row->staff_remark ?? '') . "</td>";
-            echo "<td>
+                                                // Determine badge class based on status
+                                                $badgeClass = 'danger'; // default class
+                                                if ($row->status == 'approved') {
+                                                    $badgeClass = 'success';
+                                                }
+                                                if ($row->status == 'recommended') {
+                                                    $badgeClass = 'warning';
+                                                } elseif ($row->status == 'pending_admin') {
+                                                    $badgeClass = 'warning';
+                                                } elseif ($row->status == 'pending') {
+                                                    $badgeClass = 'secondary';
+                                                }
+                                                echo "<td><span class=\"badge badge-$badgeClass\">" . ucfirst($row->status) . "</span></td>";
+
+                                                echo "<td>" . htmlspecialchars($row->reviewer_name ?? '') . "</td>";
+                                                echo "<td>" . htmlspecialchars($row->staff_remark ?? '') . "</td>";
+                                                echo "<td>
                     <a href=\"pages_review_loan.php?id=" . $row->id . "\" class=\"btn btn-primary btn-sm\">
                         <i class=\"fas fa-search\"></i> Review
                     </a>
                   </td>";
-            echo "</tr>";
-            $cnt++;
-        }
-    } else {
-        echo "<tr><td colspan=\"10\">No loan applications found.</td></tr>";
-    }
-    ?>
+                                                echo "</tr>";
+                                                $cnt++;
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan=\"10\">No loan applications found.</td></tr>";
+                                        }
+                                        ?>
                                     </tbody>
 
                                 </table>
@@ -148,16 +156,16 @@ if (!$loanResult) {
     <script src="dist/js/adminlte.min.js"></script>
     <!-- Page script -->
     <script>
-    $(function() {
-        $("#example1").DataTable({
-            "paging": true,
-            "lengthChange": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
+        $(function () {
+            $("#example1").DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+            });
         });
-    });
     </script>
 </body>
 

@@ -16,21 +16,18 @@ if (!isset($_SESSION['client_id'])) {
 
 $client_id = $_SESSION['client_id']; // Logged-in client's ID
 
-// Fetch loan applications
+// Fetch only approved loan applications
 $query = "SELECT la.id,
                  la.loan_type_id,
                  lt.type_name AS loan_type,
+                 lt.interest_rate,
                  la.loan_amount,
-                 la.income_salary,
-                 la.staff_remark,
-                 la.application_date,
-                 la.status,
                  la.loan_duration_years,
-                 la.loan_duration_months
+                 la.loan_duration_months,
+                 la.status
           FROM loan_applications la
           INNER JOIN loan_types lt ON la.loan_type_id = lt.id
-          WHERE la.client_id = ?";
-
+          WHERE la.client_id = ? AND la.status = 'approved'";
 
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
@@ -47,7 +44,7 @@ $result = $stmt->get_result();
 
 <head>
     <meta charset="UTF-8">
-    <title>My Loan Applications</title>
+    <title>Loan EMI Management</title>
     <?php include("dist/_partials/head.php"); ?>
 </head>
 
@@ -60,17 +57,16 @@ $result = $stmt->get_result();
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-            <!-- Content Header -->
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>My Loan Applications</h1>
+                            <h1>Loan EMI Management</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="pages_dashboard.php">Dashboard</a></li>
-                                <li class="breadcrumb-item active">Loan Applications</li>
+                                <li class="breadcrumb-item active">EMI Management</li>
                             </ol>
                         </div>
                     </div>
@@ -84,32 +80,25 @@ $result = $stmt->get_result();
                         <div class="col-md-12">
                             <div class="card card-purple">
                                 <div class="card-header">
-                                    <h3 class="card-title">Loan Applications</h3>
+                                    <h3 class="card-title">Approved Loan Applications</h3>
                                 </div>
                                 <div class="card-body">
                                     <table class="table table-bordered table-striped">
                                         <thead>
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Loan Type</th>
-                                                    <th>Loan Amount (Rs.)</th>
-                                                    <th>Income/Salary (Rs.)</th>
-                                                    <th>Loan Duration</th> 
-                                                    <th>Staff Remark</th>
-                                                    <th>Application Date</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Loan Type</th>
+                                                <th>Loan Amount (Rs.)</th>
+                                                <th>Interest Rate (%)</th>
+                                                <th>Loan Duration</th>
+                                                <th>Action</th>
+                                            </tr>
                                         </thead>
-
                                         <tbody>
                                             <?php
                                             $count = 1;
                                             if ($result && $result->num_rows > 0) {
                                                 while ($row = $result->fetch_object()) {
-                                                    // Format loan duration
                                                     $loanDuration = "";
                                                     if (!empty($row->loan_duration_years) && $row->loan_duration_years > 0) {
                                                         $loanDuration .= $row->loan_duration_years . " Year" . ($row->loan_duration_years > 1 ? "s" : "");
@@ -126,17 +115,14 @@ $result = $stmt->get_result();
                                                     echo "<td>" . $count . "</td>";
                                                     echo "<td>" . htmlspecialchars($row->loan_type) . "</td>";
                                                     echo "<td>" . number_format($row->loan_amount, 2) . "</td>";
-                                                    echo "<td>" . number_format($row->income_salary, 2) . "</td>";
-                                                    echo "<td>" . $loanDuration . "</td>"; // Loan Duration Column
-                                                    echo "<td>" . htmlspecialchars($row->staff_remark) . "</td>";
-                                                    echo "<td>" . date('d M Y', strtotime($row->application_date)) . "</td>";
-                                                    echo "<td>" . htmlspecialchars($row->status) . "</td>";
+                                                    echo "<td>" . number_format($row->interest_rate, 2) . "</td>";
+                                                    echo "<td>" . $loanDuration . "</td>";
+                                                    echo "<td><a href='installment_details.php?loan_id=" . $row->id . "' class='btn btn-primary btn-sm'>Installment</a></td>";
                                                     echo "</tr>";
                                                     $count++;
-
                                                 }
                                             } else {
-                                                echo "<tr><td colspan='7' class='text-center'>No loan applications found.</td></tr>";
+                                                echo "<tr><td colspan='6' class='text-center'>No approved loan applications found.</td></tr>";
                                             }
                                             ?>
                                         </tbody>
@@ -152,9 +138,6 @@ $result = $stmt->get_result();
         <!-- Footer -->
         <?php include("dist/_partials/footer.php"); ?>
 
-        <!-- Control Sidebar -->
-        <aside class="control-sidebar control-sidebar-dark">
-        </aside>
     </div>
 
     <!-- Scripts -->

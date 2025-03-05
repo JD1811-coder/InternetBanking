@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 04, 2025 at 03:57 PM
+-- Generation Time: Mar 05, 2025 at 11:19 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -184,7 +184,9 @@ CREATE TABLE `ib_nominees` (
 INSERT INTO `ib_nominees` (`id`, `client_id`, `nominee_name`, `relation`, `nominee_email`, `nominee_phone`, `nominee_address`, `created_at`, `is_active`, `aadhar_number`, `pan_number`) VALUES
 (1, 11, 'Bhavnaben Dhola', 'Mother', 'jenildhola1811@gmail.com', '99025063124', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-20 06:29:08', 1, '785496325896', 'IHXOD1193P'),
 (4, 13, 'darshan', 'brother', 'darshanlakhani@gmail.com', '8326566665', 'DK NAGAR SOC VED ROAD KATARGAM 19', '2025-02-27 15:13:05', 1, '', ''),
-(6, 11, 'dineshbhai dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-28 17:00:36', 1, '978546321574', 'OPKFW7221Z');
+(6, 11, 'dineshbhai dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-28 17:00:36', 1, '978546321574', 'OPKFW7221Z'),
+(7, 15, 'dineshbhai dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A/2 -203,devi complex,dabholi char rasta,ved road,surat', '2025-03-05 05:24:49', 1, '460140316244', 'OPKFW7221Z'),
+(8, 15, 'Bhavnaben Dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-03-05 05:25:15', 1, '879905011845', 'PDWEQ3467P');
 
 -- --------------------------------------------------------
 
@@ -422,18 +424,18 @@ CREATE TABLE `loan_applications` (
   `client_id` int(10) UNSIGNED NOT NULL,
   `loan_type_id` int(11) DEFAULT NULL,
   `is_approved_by_staff` tinyint(1) DEFAULT 0,
-  `income_salary` decimal(10,2) NOT NULL
+  `income_salary` decimal(10,2) NOT NULL,
+  `loan_duration_years` int(11) NOT NULL DEFAULT 0,
+  `loan_duration_months` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `loan_applications`
 --
 
-INSERT INTO `loan_applications` (`id`, `applicant_name`, `loan_amount`, `application_date`, `status`, `reviewed_by`, `admin_review_id`, `review_date`, `staff_remark`, `admin_remark`, `client_id`, `loan_type_id`, `is_approved_by_staff`, `income_salary`) VALUES
-(8, 'Darshan', 300000.00, '2025-02-04 12:59:46', 'rejected', 3, 2, '2025-02-17 13:18:49', 'yoo', 'sadssdsdsdf', 11, 10, 0, 60000.00),
-(17, '2222', 100000.00, '2025-02-26 18:22:34', 'pending', NULL, NULL, NULL, 'adf', 'Pending Review', 11, 6, 0, 1000.00),
-(18, '2222555', 50000.00, '2025-02-26 18:24:31', 'pending', NULL, NULL, NULL, 'WAESDFHG ', 'Pending Review', 11, 7, 0, 12000.00),
-(19, 'fdff', 50000.00, '2025-02-26 18:26:10', 'pending', NULL, NULL, NULL, 'qwsdfvc', 'Pending Review', 11, 7, 0, 1000.00);
+INSERT INTO `loan_applications` (`id`, `applicant_name`, `loan_amount`, `application_date`, `status`, `reviewed_by`, `admin_review_id`, `review_date`, `staff_remark`, `admin_remark`, `client_id`, `loan_type_id`, `is_approved_by_staff`, `income_salary`, `loan_duration_years`, `loan_duration_months`) VALUES
+(27, 'utsav cheta', 800000.00, '2025-03-05 11:38:24', 'approved', 3, 2, '2025-03-05 11:52:42', 'good', 'all good', 11, 2, 0, 80000.00, 10, 6),
+(28, 'darshan lakhani', 120000.00, '2025-03-05 13:49:35', 'approved', 3, 2, '2025-03-05 13:50:23', 'good', 'ok', 15, 11, 0, 25000.00, 1, 6);
 
 -- --------------------------------------------------------
 
@@ -619,7 +621,7 @@ ALTER TABLE `ib_clients`
 -- AUTO_INCREMENT for table `ib_nominees`
 --
 ALTER TABLE `ib_nominees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `ib_notifications`
@@ -649,7 +651,7 @@ ALTER TABLE `ib_transactions`
 -- AUTO_INCREMENT for table `loan_applications`
 --
 ALTER TABLE `loan_applications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `loan_types`

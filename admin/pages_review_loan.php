@@ -13,10 +13,12 @@ if (isset($_GET['id']) || isset($_POST['id'])) {
 }
 
 // Fetch loan details
-$query = "SELECT la.*, lt.type_name, lt.max_amount, lt.interest_rate 
+$query = "SELECT la.*, lt.type_name, lt.max_amount, lt.interest_rate, 
+                 la.loan_duration_years, la.loan_duration_months
           FROM loan_applications la
           LEFT JOIN loan_types lt ON la.loan_type_id = lt.id
           WHERE la.id = ?";
+
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     error_log("Query Preparation Failed: " . $mysqli->error);
@@ -88,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <dt class="col-sm-3">Loan Type:</dt>
                                 <dd class="col-sm-9">
                                     <?php echo htmlspecialchars($loan->type_name); ?>
-                                    (Max: Rs. <?php echo number_format($loan->max_amount); ?>)
+                                    <!-- (Max: Rs. <?php echo number_format($loan->max_amount); ?>) -->
                                 </dd>
 
                                 <dt class="col-sm-3">Requested Amount:</dt>
@@ -98,6 +100,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <dd class="col-sm-9">
                                     <?php echo date('d/m/Y H:i', strtotime($loan->application_date)); ?>
                                 </dd>
+                                <dt class="col-sm-3">Loan Duration:</dt>
+                                <dd class="col-sm-9">
+                                    <?php
+                                    $loanDuration = "";
+                                    if (!empty($loan->loan_duration_years) && $loan->loan_duration_years > 0) {
+                                        $loanDuration .= $loan->loan_duration_years . " Year" . ($loan->loan_duration_years > 1 ? "s" : "");
+                                    }
+                                    if (!empty($loan->loan_duration_months) && $loan->loan_duration_months > 0) {
+                                        if (!empty($loanDuration)) {
+                                            $loanDuration .= " ";
+                                        }
+                                        $loanDuration .= $loan->loan_duration_months . " Month" . ($loan->loan_duration_months > 1 ? "s" : "");
+                                    }
+                                    echo !empty($loanDuration) ? htmlspecialchars($loanDuration) : "N/A";
+                                    ?>
+                                </dd>
+
 
                                 <dt class="col-sm-3">Staff Remarks:</dt>
                                 <dd class="col-sm-9">

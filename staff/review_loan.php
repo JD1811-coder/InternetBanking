@@ -23,10 +23,12 @@ if(isset($_GET['id']) || isset($_POST['id'])) {
 }
 
 // Fetch loan details
-$query = "SELECT la.*, lt.type_name, lt.max_amount, lt.interest_rate, la.income_salary
+$query = "SELECT la.*, lt.type_name, lt.max_amount, lt.interest_rate, la.income_salary, 
+                 la.loan_duration_years, la.loan_duration_months 
           FROM loan_applications la
           LEFT JOIN loan_types lt ON la.loan_type_id = lt.id
           WHERE la.id = ?";
+
 
 $stmt = $mysqli->prepare($query);
 if(!$stmt){
@@ -112,6 +114,12 @@ if($_SESSION['admin_level'] == 'admin') {
                                 </dd>
                                 <dt class="col-sm-3">Income/Salary:</dt>
                                 <dd class="col-sm-9">Rs. <?php echo number_format($loan->income_salary, 2); ?></dd>
+                                <dt class="col-sm-3">Loan Duration:</dt>
+<dd class="col-sm-9">
+    <?php echo htmlspecialchars($loan->loan_duration_years ?? 0); ?> Years
+    <?php echo htmlspecialchars($loan->loan_duration_months ?? 0); ?> Months
+</dd>
+
                             </dl>
 
 
