@@ -10,7 +10,6 @@ if (!isset($_SESSION['client_id'])) {
 
 $client_id = $_SESSION['client_id'];
 
-// Fetch client's bank account balance
 $account_query = "SELECT acc_amount FROM ib_bankaccounts WHERE client_id = ? AND is_active = 1";
 $stmt = $mysqli->prepare($account_query);
 $stmt->bind_param('i', $client_id);
@@ -18,6 +17,7 @@ $stmt->execute();
 $account_result = $stmt->get_result();
 $account_row = $account_result->fetch_assoc();
 $client_balance = $account_row ? $account_row['acc_amount'] : 0;
+
 
 // Fetch approved loans
 $query = "SELECT la.id, la.loan_type_id, lt.interest_rate, la.loan_amount, 
@@ -32,7 +32,8 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Generate EMI due dates function
-function generate_due_dates($start_date, $months) {
+function generate_due_dates($start_date, $months)
+{
     $due_dates = [];
     $current_date = new DateTime($start_date);
     $current_date->modify('+1 month');
@@ -44,48 +45,74 @@ function generate_due_dates($start_date, $months) {
     }
     return $due_dates;
 }
-
-// Handle payment processing
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
-    $loan_id = $_POST['loan_id'];
-    $emi_date = $_POST['emi_date'];
-    $emi_amount = $_POST['emi_amount'];
+    header('Content-Type: application/json'); // Set JSON response type
 
-    // Ensure the client has enough balance
+    // Debugging
+    echo json_encode([
+        'debug' => true,
+        'client_id' => $client_id,
+        'emi_amount' => $_POST['emi_amount'],
+        'emi_date' => $_POST['emi_date'],
+        'loan_id' => $_POST['loan_id'],
+        'client_balance' => $client_balance
+    ]);
+    exit;
+
+
+
     if ($client_balance >= $emi_amount) {
-        // Deduct the amount from the client's bank account
+        // Deduct balance
         $update_balance_query = "UPDATE ib_bankaccounts SET acc_amount = acc_amount - ? WHERE client_id = ? AND is_active = 1";
         $stmt = $mysqli->prepare($update_balance_query);
         $stmt->bind_param('di', $emi_amount, $client_id);
-        $stmt->execute();
 
-        // Insert the payment record
+        if (!$stmt->execute()) {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to update balance!']);
+            exit;
+        }
+
+        // Insert payment record
         $payment_query = "INSERT INTO loan_payments (client_id, loan_id, emi_date, amount, status) VALUES (?, ?, ?, ?, 'paid')";
         $stmt = $mysqli->prepare($payment_query);
         $stmt->bind_param('iisd', $client_id, $loan_id, $emi_date, $emi_amount);
-        $stmt->execute();
 
-        echo "<script>
-            alert('Payment successful! ₹$emi_amount has been deducted from your account.');
-            window.location.href = 'emi_schedule.php';
-        </script>";
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'message' => "Payment successful! ₹$emi_amount has been deducted."]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Payment processing failed!',
+                'sql_error' => $stmt->error
+            ]);
+        }
+        exit;
+
+
     } else {
-        echo "<script>
-            alert('Insufficient balance! Please deposit money into your account.');
-            window.location.href = 'emi_schedule.php';
-        </script>";
+        echo json_encode(['status' => 'error', 'message' => 'Insufficient balance! Please deposit money.']);
     }
+    exit;
+
+
 }
+
+var_dump($client_id);
+var_dump($client_balance);
+
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>EMI Schedule</title>
     <?php include("dist/_partials/head.php"); ?>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Swal Alert -->
 </head>
+
 <body>
     <div class="wrapper">
         <?php include("dist/_partials/nav.php"); ?>
@@ -129,7 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
                                                 $months = ($years * 12) + $row->loan_duration_months;
                                                 $rate = $row->interest_rate;
                                                 $total_interest = ($principal * $rate * $years) / 100;
-                                                $emi = ($principal + $total_interest) / $months;
+                                                $emi = round(($principal + $total_interest) / $months);
+
                                                 $due_dates = generate_due_dates($row->application_date, $months);
 
                                                 for ($i = 0; $i < $months; $i++) {
@@ -156,13 +184,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
                                                         echo "<button class='btn btn-success btn-sm' disabled>Done</button>";
                                                     } else {
                                                         if ($due_date->format("Y-m") == $current_date->format("Y-m")) {
-                                                            echo "<button class='btn btn-primary btn-sm' onclick='confirmPayment(" . $row->id . ", \"" . $due_date_str . "\", " . $emi . ")'>Pay Now</button>";
+                                                            echo "<form id='paymentForm-" . $row->id . "-" . $i . "' method='POST' action=''>
+                                                                    <input type='hidden' name='loan_id' value='" . $row->id . "'>
+                                                                    <input type='hidden' name='emi_date' value='" . $due_date_str . "'>
+                                                                    <input type='hidden' name='emi_amount' value='" . $emi . "'>
+                                                                  </form>";
+
+                                                            echo "<button class='btn btn-primary btn-sm' onclick='confirmPayment(" . $row->id . ", " . $i . ", " . $emi . ", \"" . $due_date_str . "\")'>Pay Now</button>";
+
+
+
                                                         } else {
                                                             echo "<button class='btn btn-secondary btn-sm' disabled>Upcoming</button>";
                                                         }
                                                     }
 
                                                     echo "</td>";
+
                                                     echo "</tr>";
                                                     $count++;
                                                 }
@@ -180,8 +218,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
         <?php include("dist/_partials/footer.php"); ?>
     </div>
 
+    <!-- Load jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Your script -->
     <script>
-        function confirmPayment(loanId, emiDate, emiAmount) {
+        function confirmPayment(loanId, emiIndex, emiAmount, emiDate) {
             Swal.fire({
                 title: "Confirm Payment",
                 text: "Are you sure you want to pay ₹" + emiAmount + "?",
@@ -192,11 +234,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
                 confirmButtonText: "Yes, Pay Now"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('paymentForm-' + loanId).submit();
+                    console.log("Sending AJAX Request...");
+                    console.log("Loan ID:", loanId);
+                    console.log("EMI Amount:", emiAmount);
+                    console.log("EMI Date:", emiDate);
+
+                    $.ajax({
+                        url: "emi_schedule.php",  // Make sure this file exists
+                        type: "POST",
+                        data: {
+                            pay_emi: true,
+                            loan_id: loanId,
+                            emi_date: emiDate,
+                            emi_amount: emiAmount
+                        },
+                        dataType: "json",
+                        success: function (response) {
+                            console.log("Server Response:", response);
+                            if (response.status === "success") {
+                                Swal.fire("Success!", response.message, "success").then(() => {
+                                    location.reload(); // Reload page on success
+                                });
+                            } else {
+                                Swal.fire("Error!", response.message, "error");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("AJAX Error:", xhr.responseText);
+                            Swal.fire("Error!", "Something went wrong! Try again.", "error");
+                        }
+                    });
+
                 }
             });
         }
     </script>
+
+
+
 </body>
+
 </html>
-        

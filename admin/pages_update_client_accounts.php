@@ -34,7 +34,7 @@ if (isset($_POST['update_account'])) {
                         icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(() => {
-                        window.location.href = 'pages_open_acc.php';
+                        window.location.href = 'pages_manage_acc_openings.php';
                     });
                 }, 500);
             </script>";

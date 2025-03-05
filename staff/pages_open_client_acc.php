@@ -4,39 +4,72 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $astaff_id = $_SESSION['staff_id'];
-//register new account
+
 if (isset($_POST['open_account'])) {
-    //Client open account
     $acc_name = $_POST['acc_name'];
     $account_number = $_POST['account_number'];
-    $acc_type = $_POST['acc_type'];
+    $acc_type = trim($_POST['acc_type']);
     $acc_rates = $_POST['acc_rates'];
     $acc_status = $_POST['acc_status'];
     $acc_amount = $_POST['acc_amount'];
     $client_id  = $_GET['client_id'];
-    // $client_national_id = $_POST['client_national_id'];
     $client_name = $_POST['client_name'];
     $client_phone = $_POST['client_phone'];
     $client_number = $_POST['client_number'];
     $client_email  = $_POST['client_email'];
     $client_adr  = $_POST['client_adr'];
 
-    //Insert Captured information to a database table
-    $query = "INSERT INTO iB_bankAccounts (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id, client_name, client_phone, client_number, client_email, client_adr) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
-    $stmt = $mysqli->prepare($query);
-    //bind paramaters
-    $rc = $stmt->bind_param('ssssssssssss', $acc_name, $account_number, $acc_type, $acc_rates, $acc_status, $acc_amount, $client_id, $client_name, $client_phone, $client_number, $client_email, $client_adr);
-    $stmt->execute();
+    // Check existing accounts for the client
+    $check_query = "SELECT acc_type FROM iB_bankAccounts WHERE client_id = ?";
+    $stmt_check = $mysqli->prepare($check_query);
+    $stmt_check->bind_param('i', $client_id);
+    $stmt_check->execute();
+    $stmt_check->store_result();
+    $stmt_check->bind_result($existing_acc_type);
 
-    //declare a varible which will be passed to alert function
-    if ($stmt) {
-        $success = "iBank Account Opened";
-    } else {
-        $err = "Please Try Again Or Try Later";
+    $existing_accounts = [];
+    $joint_acc_count = 0;
+
+    while ($stmt_check->fetch()) {
+        $existing_accounts[] = trim($existing_acc_type);
+        if (trim($existing_acc_type) === "Joint Account") {
+            $joint_acc_count++;
+        }
+    }
+    $stmt_check->close();
+
+    $total_accounts = count($existing_accounts);
+    $allow_account = false;
+
+    if ($total_accounts == 0) {
+        $allow_account = true;
+    } elseif ($total_accounts == 1 && $existing_accounts[0] !== "Joint Account") {
+        $err = "You can only open one non-joint account. Additional accounts must be Joint Accounts.";
+    } elseif ($total_accounts >= 1 && in_array("Joint Account", $existing_accounts)) {
+        if ($acc_type !== "Joint Account") {
+            $err = "You are only allowed to open Joint Accounts now.";
+        } elseif ($joint_acc_count >= 3) {
+            $err = "You can only have a maximum of 3 Joint Accounts.";
+        } else {
+            $allow_account = true;
+        }
+    }
+
+    if ($allow_account) {
+        $query = "INSERT INTO iB_bankAccounts (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id, client_name, client_phone, client_number, client_email, client_adr) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('ssssssssssss', $acc_name, $account_number, $acc_type, $acc_rates, $acc_status, $acc_amount, $client_id, $client_name, $client_phone, $client_number, $client_email, $client_adr);
+        $stmt->execute();
+
+        if ($stmt) {
+            $success = "iBank Account Opened";
+        } else {
+            $err = "Please Try Again Or Try Later";
+        }
     }
 }
-
 ?>
+
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
