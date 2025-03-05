@@ -22,10 +22,12 @@ if (!isset($mysqli) || $mysqli->connect_error) {
 }
 
 // Fetch loan applications including income/salary
-$query = "SELECT la.*, lt.type_name, la.income_salary, COALESCE(ibs.name, 'N/A') AS reviewer_name
+$query = "SELECT la.*, lt.type_name, la.income_salary, la.loan_duration_years, la.loan_duration_months, 
+                 COALESCE(ibs.name, 'N/A') AS reviewer_name
           FROM loan_applications la
           LEFT JOIN loan_types lt ON la.loan_type_id = lt.id
           LEFT JOIN ib_staff ibs ON la.reviewed_by = ibs.staff_id";
+
 
 $loanResult = $mysqli->query($query);
 
@@ -74,55 +76,73 @@ if (!$loanResult) {
                             </div>
                             <div class="card-body">
                                 <table id="example1" class="table table-bordered table-hover table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Applicant Name</th>
-                                            <th>Loan Type</th>
-                                            <th>Loan Amount</th>
-                                            <th>Income/Salary</th> <!-- Added column -->
-                                            <th>Application Date</th>
-                                            <th>Status</th>
-                                            <th>Reviewed By</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                      $cnt = 1;
-                      if ($loanResult->num_rows > 0) {
-                        while ($row = $loanResult->fetch_object()) {
-                          echo "<tr>";
-                          echo "<td>" . $cnt . "</td>";
-                          echo "<td>" . htmlspecialchars($row->applicant_name ?? '') . "</td>";
-                          echo "<td>" . htmlspecialchars($row->type_name ?? '') . "</td>";
-                          echo "<td>Rs. " . number_format($row->loan_amount, 2) . "</td>";
-                          echo "<td>Rs. " . number_format($row->income_salary, 2) . "</td>"; // Display income
-                          echo "<td>" . date('d/m/Y H:i', strtotime($row->application_date)) . "</td>";
+                                <thead>
+    <tr>
+        <th>#</th>
+        <th>Applicant Name</th>
+        <th>Loan Type</th>
+        <th>Loan Amount</th>
+        <th>Income/Salary</th>
+        <th>Loan Duration</th>
 
-                          $badgeClass = match ($row->status) {
-                              'approved' => 'success',
-                              'recommended' => 'warning',
-                              'pending' => 'secondary',
-                              'pending_admin' => 'warning',
-                              default => 'danger',
-                          };
+        <th>Application Date</th>
+        <th>Status</th>
+        <th>Reviewed By</th>
+        <th>Action</th>
+    </tr>
+</thead>
+<tbody>
+    <?php
+    $cnt = 1;
+    if ($loanResult->num_rows > 0) {
+        while ($row = $loanResult->fetch_object()) {
+            $loanDuration = "";
+            if (!empty($row->loan_duration_years) && $row->loan_duration_years > 0) {
+                $loanDuration .= $row->loan_duration_years . " Year" . ($row->loan_duration_years > 1 ? "s" : "");
+            }
+            if (!empty($row->loan_duration_months) && $row->loan_duration_months > 0) {
+                if (!empty($loanDuration)) {
+                    $loanDuration .= " ";
+                }
+                $loanDuration .= $row->loan_duration_months . " Month" . ($row->loan_duration_months > 1 ? "s" : "");
+            }
+            if (empty($loanDuration)) {
+                $loanDuration = "N/A"; // If no duration is set
+            }
 
-                          echo "<td><span class=\"badge badge-$badgeClass\">" . ucfirst($row->status) . "</span></td>";
-                          echo "<td>" . htmlspecialchars($row->reviewer_name ?? '') . "</td>";
-                          echo "<td>
-                                  <a href=\"review_loan.php?id=" . $row->id . "\" class=\"btn btn-primary btn-sm\">
-                                    <i class=\"fas fa-search\"></i> Review
-                                  </a>
-                                </td>";
-                          echo "</tr>";
-                          $cnt++;
-                        }
-                      } else {
-                        echo "<tr><td colspan=\"9\" class=\"text-center\">No loan applications found.</td></tr>";
-                      }
-                      ?>
-                                    </tbody>
+            echo "<tr>";
+            echo "<td>" . $cnt . "</td>";
+            echo "<td>" . htmlspecialchars($row->applicant_name ?? '') . "</td>";
+            echo "<td>" . htmlspecialchars($row->type_name ?? '') . "</td>";
+            echo "<td>Rs. " . number_format($row->loan_amount, 2) . "</td>";
+            echo "<td>Rs. " . number_format($row->income_salary, 2) . "</td>";
+            echo "<td>" . htmlspecialchars($loanDuration) . "</td>"; // Single column for loan duration
+            echo "<td>" . date('d/m/Y H:i', strtotime($row->application_date)) . "</td>";
+
+            $badgeClass = match ($row->status) {
+                'approved' => 'success',
+                'recommended' => 'warning',
+                'pending' => 'secondary',
+                'pending_admin' => 'warning',
+                default => 'danger',
+            };
+
+            echo "<td><span class=\"badge badge-$badgeClass\">" . ucfirst($row->status) . "</span></td>";
+            echo "<td>" . htmlspecialchars($row->reviewer_name ?? '') . "</td>";
+            echo "<td>
+                    <a href=\"review_loan.php?id=" . $row->id . "\" class=\"btn btn-primary btn-sm\">
+                        <i class=\"fas fa-search\"></i> Review
+                    </a>
+                  </td>";
+            echo "</tr>";
+            $cnt++;
+        }
+    } else {
+        echo "<tr><td colspan=\"10\" class=\"text-center\">No loan applications found.</td></tr>";
+    }
+    ?>
+</tbody>
+
                                 </table>
                             </div>
                         </div>

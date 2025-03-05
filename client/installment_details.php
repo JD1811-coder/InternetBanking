@@ -1,0 +1,202 @@
+<?php
+session_start();
+include('conf/config.php');
+include('conf/checklogin.php');
+check_login();
+
+if (!isset($_SESSION['client_id'])) {
+    die("Error: Client ID is missing. Please log in again.");
+}
+
+$client_id = $_SESSION['client_id'];
+
+// Fetch client's bank account balance
+$account_query = "SELECT acc_amount FROM ib_bankaccounts WHERE client_id = ? AND is_active = 1";
+$stmt = $mysqli->prepare($account_query);
+$stmt->bind_param('i', $client_id);
+$stmt->execute();
+$account_result = $stmt->get_result();
+$account_row = $account_result->fetch_assoc();
+$client_balance = $account_row ? $account_row['acc_amount'] : 0;
+
+// Fetch approved loans
+$query = "SELECT la.id, la.loan_type_id, lt.interest_rate, la.loan_amount, 
+                 la.loan_duration_years, la.loan_duration_months, la.application_date 
+          FROM loan_applications la
+          INNER JOIN loan_types lt ON la.loan_type_id = lt.id 
+          WHERE la.status = 'approved' AND la.client_id = ?";
+
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param('i', $client_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Generate EMI due dates function
+function generate_due_dates($start_date, $months) {
+    $due_dates = [];
+    $current_date = new DateTime($start_date);
+    $current_date->modify('+1 month');
+    for ($i = 0; $i < $months; $i++) {
+        $random_day = rand(1, 28);
+        $due_date = $current_date->format("Y-m-") . str_pad($random_day, 2, '0', STR_PAD_LEFT);
+        $due_dates[] = $due_date;
+        $current_date->modify('+1 month');
+    }
+    return $due_dates;
+}
+
+// Handle payment processing
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
+    $loan_id = $_POST['loan_id'];
+    $emi_date = $_POST['emi_date'];
+    $emi_amount = $_POST['emi_amount'];
+
+    // Ensure the client has enough balance
+    if ($client_balance >= $emi_amount) {
+        // Deduct the amount from the client's bank account
+        $update_balance_query = "UPDATE ib_bankaccounts SET acc_amount = acc_amount - ? WHERE client_id = ? AND is_active = 1";
+        $stmt = $mysqli->prepare($update_balance_query);
+        $stmt->bind_param('di', $emi_amount, $client_id);
+        $stmt->execute();
+
+        // Insert the payment record
+        $payment_query = "INSERT INTO loan_payments (client_id, loan_id, emi_date, amount, status) VALUES (?, ?, ?, ?, 'paid')";
+        $stmt = $mysqli->prepare($payment_query);
+        $stmt->bind_param('iisd', $client_id, $loan_id, $emi_date, $emi_amount);
+        $stmt->execute();
+
+        echo "<script>
+            alert('Payment successful! ₹$emi_amount has been deducted from your account.');
+            window.location.href = 'emi_schedule.php';
+        </script>";
+    } else {
+        echo "<script>
+            alert('Insufficient balance! Please deposit money into your account.');
+            window.location.href = 'emi_schedule.php';
+        </script>";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EMI Schedule</title>
+    <?php include("dist/_partials/head.php"); ?>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Swal Alert -->
+</head>
+<body>
+    <div class="wrapper">
+        <?php include("dist/_partials/nav.php"); ?>
+        <?php include("dist/_partials/sidebar.php"); ?>
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>EMI Schedule</h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card card-purple">
+                                <div class="card-header">
+                                    <h3 class="card-title">EMI Breakdown (Month-wise)</h3>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Month</th>
+                                                <th>Due Date</th>
+                                                <th>EMI Amount (Rs.)</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $count = 1;
+                                            $current_date = new DateTime();
+                                            while ($row = $result->fetch_object()) {
+                                                $principal = $row->loan_amount;
+                                                $years = $row->loan_duration_years;
+                                                $months = ($years * 12) + $row->loan_duration_months;
+                                                $rate = $row->interest_rate;
+                                                $total_interest = ($principal * $rate * $years) / 100;
+                                                $emi = ($principal + $total_interest) / $months;
+                                                $due_dates = generate_due_dates($row->application_date, $months);
+
+                                                for ($i = 0; $i < $months; $i++) {
+                                                    $due_date = new DateTime($due_dates[$i]);
+                                                    $due_date_str = $due_date->format("Y-m-d");
+
+                                                    // Check if payment is already made
+                                                    $payment_check_query = "SELECT COUNT(*) AS paid FROM loan_payments WHERE client_id = ? AND loan_id = ? AND emi_date = ?";
+                                                    $stmt = $mysqli->prepare($payment_check_query);
+                                                    $stmt->bind_param('iis', $client_id, $row->id, $due_date_str);
+                                                    $stmt->execute();
+                                                    $payment_result = $stmt->get_result();
+                                                    $payment_row = $payment_result->fetch_assoc();
+                                                    $is_paid = $payment_row['paid'] > 0;
+
+                                                    echo "<tr>";
+                                                    echo "<td>" . $count . "</td>";
+                                                    echo "<td>Month " . ($i + 1) . "</td>";
+                                                    echo "<td>" . $due_date_str . "</td>";
+                                                    echo "<td>" . number_format($emi, 2) . "</td>";
+                                                    echo "<td>";
+
+                                                    if ($is_paid) {
+                                                        echo "<button class='btn btn-success btn-sm' disabled>Done</button>";
+                                                    } else {
+                                                        if ($due_date->format("Y-m") == $current_date->format("Y-m")) {
+                                                            echo "<button class='btn btn-primary btn-sm' onclick='confirmPayment(" . $row->id . ", \"" . $due_date_str . "\", " . $emi . ")'>Pay Now</button>";
+                                                        } else {
+                                                            echo "<button class='btn btn-secondary btn-sm' disabled>Upcoming</button>";
+                                                        }
+                                                    }
+
+                                                    echo "</td>";
+                                                    echo "</tr>";
+                                                    $count++;
+                                                }
+                                            }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <?php include("dist/_partials/footer.php"); ?>
+    </div>
+
+    <script>
+        function confirmPayment(loanId, emiDate, emiAmount) {
+            Swal.fire({
+                title: "Confirm Payment",
+                text: "Are you sure you want to pay ₹" + emiAmount + "?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, Pay Now"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('paymentForm-' + loanId).submit();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+        

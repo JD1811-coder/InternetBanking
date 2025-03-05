@@ -23,34 +23,40 @@ if (isset($_POST['apply_for_loan'])) {
     $loan_amount = $_POST['loan_amount'];
     $loan_type_id = $_POST['loan_type_id'];
     $staff_remark = $_POST['staff_remark'];
-    $income_salary = $_POST['income_salary']; 
+    $income_salary = $_POST['income_salary'];
     $client_id = $_SESSION['client_id'];
 
     // Check if loan amount exceeds maximum allowed
-    foreach ($loan_types as $type) {
-        if ($type['id'] == $loan_type_id && $loan_amount > $type['max_amount']) {
-            $err = "Loan amount exceeds maximum allowed for the selected loan type.";
-            break;
+    // foreach ($loan_types as $type) {
+    //     if ($type['id'] == $loan_type_id && $loan_amount > $type['max_amount']) {
+    //         $err = "Loan amount exceeds maximum allowed for the selected loan type.";
+    //         break;
+    //     }
+    // }
+
+    if (!isset($err)) {
+        // Ensure admin_remark has a default value if not provided
+        $admin_remark = "Pending Review"; // Default value instead of NULL
+
+        $loan_duration_years = $_POST['loan_duration_years'];
+        $loan_duration_months = $_POST['loan_duration_months'];
+        
+        $query = "INSERT INTO loan_applications (applicant_name, loan_amount, staff_remark, loan_type_id, client_id, 
+                  income_salary, admin_remark, loan_duration_years, loan_duration_months) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('sdsiidsii', $applicant_name, $loan_amount, $staff_remark, $loan_type_id, $client_id, 
+                          $income_salary, $admin_remark, $loan_duration_years, $loan_duration_months);
+        $stmt->execute();
+                
+
+        if ($stmt->affected_rows > 0) {
+            $success = "Loan application submitted successfully!";
+        } else {
+            $err = "Error applying for the loan. Try again.";
         }
     }
-
-   if (!isset($err)) {
-    // Ensure admin_remark has a default value if not provided
-    $admin_remark = "Pending Review"; // Default value instead of NULL
-
-    $query = "INSERT INTO loan_applications (applicant_name, loan_amount, staff_remark, loan_type_id, client_id, income_salary, admin_remark) 
-              VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-    $stmt = $mysqli->prepare($query);
-    $stmt->bind_param('sdsiids', $applicant_name, $loan_amount, $staff_remark, $loan_type_id, $client_id, $income_salary, $admin_remark);
-    $stmt->execute();
-
-    if ($stmt->affected_rows > 0) {
-        $success = "Loan application submitted successfully!";
-    } else {
-        $err = "Error applying for the loan. Try again.";
-    }
-}
 
 }
 
@@ -107,19 +113,19 @@ if (isset($_POST['apply_for_loan'])) {
                                 <form method="post" enctype="multipart/form-data" role="form">
                                     <div class="card-body">
                                         <?php if (isset($success)) { ?>
-                                        <div class="alert alert-success"><?php echo $success; ?></div>
+                                            <div class="alert alert-success"><?php echo $success; ?></div>
                                         <?php } ?>
                                         <?php if (isset($err)) { ?>
-                                        <div class="alert alert-danger"><?php echo $err; ?></div>
+                                            <div class="alert alert-danger"><?php echo $err; ?></div>
                                         <?php } ?>
 
                                         <div class="row">
-                                        <div class="col-md-6 form-group">
-    <label for="applicant_name">Applicant Name</label>
-    <input type="text" name="applicant_name" id="applicant_name" class="form-control" 
-           required pattern="^[a-zA-Z\s]{2,50}$" 
-           title="Applicant name should only contain letters and spaces, and be 2 to 50 characters long.">
-</div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="applicant_name">Applicant Name</label>
+                                                <input type="text" name="applicant_name" id="applicant_name"
+                                                    class="form-control" required pattern="^[a-zA-Z\s]{2,50}$"
+                                                    title="Applicant name should only contain letters and spaces, and be 2 to 50 characters long.">
+                                            </div>
 
 
                                             <div class="col-md-6 form-group">
@@ -128,9 +134,9 @@ if (isset($_POST['apply_for_loan'])) {
                                                     required onchange="updateLoanDetails()">
                                                     <option value="">Select Loan Type</option>
                                                     <?php foreach ($loan_types as $type) { ?>
-                                                    <option value="<?php echo $type['id']; ?>">
-                                                        <?php echo htmlspecialchars($type['type_name']); ?>
-                                                    </option>
+                                                        <option value="<?php echo $type['id']; ?>">
+                                                            <?php echo htmlspecialchars($type['type_name']); ?>
+                                                        </option>
                                                     <?php } ?>
                                                 </select>
 
@@ -151,6 +157,21 @@ if (isset($_POST['apply_for_loan'])) {
                                                 <!-- <small id="max_amount_label" class="form-text text-muted">Max Amount:
                                                 </small> -->
                                             </div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="loan_duration_years">Loan Duration (Years)</label>
+                                                <input type="number" name="loan_duration_years" id="loan_duration_years"
+                                                    class="form-control" min="0" max="10" required>
+                                            </div>
+
+                                            <div class="col-md-6 form-group">
+                                                <label for="loan_duration_months">Loan Duration (Months)</label>
+                                                <input type="number" name="loan_duration_months"
+                                                    id="loan_duration_months" class="form-control" min="0" max="120"
+                                                    required>
+                                            </div>
+
+                                            <small class="form-text text-danger" id="duration_error"></small>
+
                                             <div class="col-md-6 form-group">
                                                 <label for="income_salary">Monthly Income/Salary</label>
                                                 <input type="number" name="income_salary" id="income_salary"
@@ -205,37 +226,62 @@ if (isset($_POST['apply_for_loan'])) {
 
 
     <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        const loanTypes = <?php echo json_encode($loan_types); ?>;
+        document.addEventListener('DOMContentLoaded', function () {
+            const loanTypes = <?php echo json_encode($loan_types); ?>;
 
-        function updateLoanDetails() {
-            const selectedTypeId = document.getElementById('loan_type_id').value;
-            console.log('Selected Type ID:', selectedTypeId);
+            function updateLoanDetails() {
+                const selectedTypeId = document.getElementById('loan_type_id').value;
+                console.log('Selected Type ID:', selectedTypeId);
 
-            const loanType = loanTypes.find(type => type.id == selectedTypeId);
-            console.log('Found Loan Type:', loanType);
+                const loanType = loanTypes.find(type => type.id == selectedTypeId);
+                console.log('Found Loan Type:', loanType);
 
-            if (loanType) {
-                document.getElementById('interest_rate').value = loanType.interest_rate + "%";
-                document.getElementById('loan_amount').max = loanType.max_amount;
-                document.getElementById('loan_amount').placeholder = "Enter up to " + loanType.max_amount;
-            } else {
-                document.getElementById('interest_rate').value = '';
-                document.getElementById('loan_amount').placeholder = "Amount";
+                if (loanType) {
+                    document.getElementById('interest_rate').value = loanType.interest_rate + "%";
+                    // document.getElementById('loan_amount').max = loanType.max_amount;
+                    // document.getElementById('loan_amount').placeholder = "Enter up to " + loanType.max_amount;
+                } else {
+                    document.getElementById('interest_rate').value = '';
+                    document.getElementById('loan_amount').placeholder = "Amount";
+                }
             }
-        }
 
-        document.getElementById('loan_type_id').addEventListener('change', updateLoanDetails);
-    });
+            document.getElementById('loan_type_id').addEventListener('change', updateLoanDetails);
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const yearInput = document.getElementById("loan_duration_years");
+            const monthInput = document.getElementById("loan_duration_months");
+            const errorMessage = document.getElementById("duration_error");
+
+            function validateDuration() {
+                const years = parseInt(yearInput.value) || 0;
+                const months = parseInt(monthInput.value) || 0;
+                const totalMonths = years * 12 + months;
+
+                if (totalMonths > 240) {
+                    errorMessage.textContent = "Total loan duration cannot exceed 20 years (240 months).";
+                    yearInput.setCustomValidity("Invalid");
+                    monthInput.setCustomValidity("Invalid");
+                } else {
+                    errorMessage.textContent = "";
+                    yearInput.setCustomValidity("");
+                    monthInput.setCustomValidity("");
+                }
+            }
+
+            yearInput.addEventListener("input", validateDuration);
+            monthInput.addEventListener("input", validateDuration);
+        });
+
     </script>
 
 
 
 
     <script type="text/javascript">
-    $(document).ready(function() {
-        bsCustomFileInput.init();
-    });
+        $(document).ready(function () {
+            bsCustomFileInput.init();
+        });
     </script>
 </body>
 
