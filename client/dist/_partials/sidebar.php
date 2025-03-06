@@ -18,6 +18,7 @@
     $res = $stmt->get_result();
     while ($sys = $res->fetch_object()) {
   ?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <a href="pages_dashboard.php" class="brand-link">
     <img src="../admin/dist/img/<?php echo $sys->sys_logo; ?>" alt="iBanking Logo"
@@ -124,7 +125,27 @@
             </li>
           </ul>
         </li>
-
+   <!-- EMI Section -->
+   <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+          <i class="fa-solid fa-id-card"></i>
+            <p>Nominee <i class="fas fa-angle-left right"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="client_add_nominee.php" class="nav-link">
+              <i class="fa-solid fa-user-plus"></i>
+                <p>Add Nominee</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="client_nominees.php" class="nav-link">
+              <i class="fa-solid fa-users"></i>
+                <p>Show Nominee</p>
+              </a>
+            </li>
+          </ul>
+        </li>
         <!-- EMI Section -->
         <li class="nav-item has-treeview">
           <a href="#" class="nav-link">

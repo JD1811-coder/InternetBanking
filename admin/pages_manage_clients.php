@@ -96,11 +96,14 @@ if (isset($_GET['deleteClient'])) {
                     </thead>
                     <tbody>
                       <?php
-                      $ret = "SELECT c.client_id, c.name, c.client_number, c.phone, c.email, c.address, c.aadhar_number, c.pan_number, c.is_active, 
-    n.nominee_name 
-FROM iB_clients c
-LEFT JOIN iB_nominees n ON c.client_id = n.client_id
-ORDER BY c.name ASC";
+              $ret = "SELECT c.client_id, c.name, c.client_number, c.phone, c.email, c.address, 
+              c.aadhar_number, c.pan_number, c.is_active, 
+              GROUP_CONCAT(n.nominee_name SEPARATOR ', ') AS nominee_names 
+       FROM iB_clients c
+       LEFT JOIN iB_nominees n ON c.client_id = n.client_id
+       GROUP BY c.client_id
+       ORDER BY c.name ASC";
+
 
                       $stmt = $mysqli->prepare($ret);
                       $stmt->execute();
@@ -117,8 +120,8 @@ ORDER BY c.name ASC";
                           <td><?php echo htmlspecialchars($row->address); ?></td>
                           <td><?php echo htmlspecialchars($row->aadhar_number ?? 'N/A'); ?></td>
                           <td><?php echo htmlspecialchars($row->pan_number ?? 'N/A'); ?></td>
+                          <td><?php echo htmlspecialchars($row->nominee_names ?? 'N/A'); ?></td>
 
-                          <td><?php echo htmlspecialchars($row->nominee_name ?? 'N/A'); ?></td>
                           <td>
                             <div class="btn-group" role="group">
                               <a class="btn btn-success btn-sm"

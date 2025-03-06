@@ -75,7 +75,8 @@ if (isset($_GET['deleteBankAcc'])) {
                                             <th>Acc Number</th>
                                             <th>Rate</th>
                                             <th>Acc Type</th>
-                                            <th>Acc Owner</th>
+                                            <!-- <th>Acc Owner</th> -->
+                                            <th>Balance</th>
                                             <th>Date Opened</th>
                                             <th>Action</th>
                                         </tr>
@@ -84,11 +85,13 @@ if (isset($_GET['deleteBankAcc'])) {
                                         <?php
                                         // Fetch all iB_Accs
                                         $ret = "SELECT 
-                                                    b.*, 
-                                                    c.name AS client_name 
-                                                FROM iB_bankAccounts b
-                                                LEFT JOIN ib_clients c ON b.client_id = c.client_id 
-                                                ORDER BY RAND()";
+                                        b.*, 
+                                        c.name AS client_name 
+                                    FROM iB_bankAccounts b
+                                    LEFT JOIN ib_clients c ON b.client_id = c.client_id 
+                                    ORDER BY RAND()";
+                            
+
                                         $stmt = $mysqli->prepare($ret);
                                         $stmt->execute();
                                         $res = $stmt->get_result();
@@ -103,7 +106,9 @@ if (isset($_GET['deleteBankAcc'])) {
                                                 <td><?php echo htmlspecialchars($row->account_number ?? 'N/A'); ?></td>
                                                 <td><?php echo htmlspecialchars($row->acc_rates ?? '0.00'); ?>%</td>
                                                 <td><?php echo htmlspecialchars($row->acc_type ?? 'N/A'); ?></td>
-                                                <td><?php echo isset($row->client_name) ? htmlspecialchars($row->client_name) : 'N/A'; ?></td>
+                                                <td>₹<?php echo htmlspecialchars(  number_format($row->acc_amount ?? 0, 2)); ?></td>
+
+                                                <!-- <td><?php echo isset($row->client_name) ? htmlspecialchars($row->client_name) : 'N/A'; ?></td> -->
                                                 <td><?php echo $dateOpened !== 'N/A' ? date("d-M-Y", strtotime($dateOpened)) : 'N/A'; ?></td>
                                                 <td>
                                                     <a class="btn btn-success btn-sm" href="pages_update_client_accounts.php?account_id=<?php echo $row->account_id; ?>">
