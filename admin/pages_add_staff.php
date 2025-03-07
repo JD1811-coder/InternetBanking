@@ -5,6 +5,9 @@ include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
 
+$errors = [];
+$success = false;
+
 if (isset($_POST['create_staff_account'])) {
     $name = trim($_POST['name']);
     $staff_number = $_POST['staff_number'];
@@ -18,14 +21,23 @@ if (isset($_POST['create_staff_account'])) {
 
     // Validate profile picture format
     if (!in_array($file_extension, $allowed_extensions)) {
-        $swal_type = "error";
-        $swal_message = "Only JPG, JPEG, and PNG files are allowed for the profile picture.";
-    } 
+        $errors['profile_pic'] = "Only JPG, JPEG, and PNG files are allowed.";
+    }
+
     // Validate strong password
-    elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
-        $swal_type = "error";
-        $swal_message = "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.";
-    } else {
+    if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
+        $errors['password'] = "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.";
+    }
+    if (!preg_match('/^[6789]\d{9}$/', $phone)) {
+        $errors['phone'] = "Phone number must start with 6, 7, 8, or 9 and be exactly 10 digits.";
+    }
+    // Validate email format strictly
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = "Invalid email format. Please enter a valid email address.";
+    }
+
+
+    if (empty($errors)) {
         // Encrypt password
         $hashed_password = sha1(md5($password));
 
@@ -41,15 +53,29 @@ if (isset($_POST['create_staff_account'])) {
             $check_stmt->fetch();
 
             if ($existing_name == $name) {
-                $swal_type = "error";
-                $swal_message = "Staff name already exists! Please use a different name.";
-            } elseif ($existing_phone == $phone) {
-                $swal_type = "error";
-                $swal_message = "Phone number already exists! Please use a different number.";
-            } elseif ($existing_email == $email) {
-                $swal_type = "error";
-                $swal_message = "Email already exists! Please use a different email.";
+                $errors['name'] = "Staff name already exists!";
             }
+            if ($existing_phone == $phone) {
+                $errors['phone'] = "Phone number already exists!";
+            }
+            if ($existing_email == $email) {
+                $errors['email'] = "Email already exists!";
+            }
+            if (empty(trim($name))) {
+                $errors['name'] = "Staff name cannot be empty or contain only spaces.";
+            }
+            if (empty(trim($phone))) {
+                $errors['phone'] = "Phone number cannot be empty or contain only spaces.";
+            }
+            if (empty(trim($email))) {
+                $errors['email'] = "Email cannot be empty or contain only spaces.";
+            }
+            if (empty(trim($password))) {
+                $errors['password'] = "Password cannot be empty or contain only spaces.";
+            }
+
+
+
         } else {
             // Upload profile picture
             $target_dir = "dist/img/";
@@ -63,11 +89,9 @@ if (isset($_POST['create_staff_account'])) {
             $stmt->bind_param('sssssss', $name, $staff_number, $phone, $email, $hashed_password, $sex, $profile_pic);
 
             if ($stmt->execute()) {
-                $swal_type = "success";
-                $swal_message = "Staff Account Created Successfully!";
+                $success = true;
             } else {
-                $swal_type = "error";
-                $swal_message = "Error! Please Try Again Later.";
+                $errors['general'] = "Error! Please try again later.";
             }
 
             $stmt->close();
@@ -114,10 +138,16 @@ if (isset($_POST['create_staff_account'])) {
 
                                 <form method="post" enctype="multipart/form-data" role="form" id="staffForm">
                                     <div class="card-body">
+                                        <?php if (isset($errors['general'])): ?>
+                                            <div class="alert alert-danger"><?php echo $errors['general']; ?></div>
+                                        <?php endif; ?>
+
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Staff Name</label>
-                                                <input type="text" name="name" required class="form-control">
+                                                <input type="text" name="name" class="form-control"
+                                                    value="<?php echo htmlspecialchars($name ?? ''); ?>">
+                                                <small class="text-danger"><?php echo $errors['name'] ?? ''; ?></small>
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Staff Number</label>
@@ -130,15 +160,16 @@ if (isset($_POST['create_staff_account'])) {
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Phone Number</label>
-                                                <input type="text" name="phone" required pattern="[0-9]{10}"
-                                                    class="form-control">
+                                                <input type="text" name="phone" class="form-control"
+                                                    value="<?php echo htmlspecialchars($phone ?? ''); ?>">
+                                                <small class="text-danger"><?php echo $errors['phone'] ?? ''; ?></small>
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Gender</label>
                                                 <select class="form-control" name="sex">
                                                     <option value="">Select Gender</option>
-                                                    <option>Female</option>
-                                                    <option>Male</option>
+                                                    <option value="Female" <?php echo isset($sex) && $sex === 'Female' ? 'selected' : ''; ?>>Female</option>
+                                                    <option value="Male" <?php echo isset($sex) && $sex === 'Male' ? 'selected' : ''; ?>>Male</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -146,20 +177,22 @@ if (isset($_POST['create_staff_account'])) {
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Email</label>
-                                                <input type="email" name="email" required class="form-control">
+                                                <input type="email" name="email" class="form-control">
+                                                <small class="text-danger"><?php echo $errors['email'] ?? ''; ?></small>
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Password</label>
-                                                <input type="password" name="password" required class="form-control"
-                                                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&]).{8,}"
-                                                    title="Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.">
+                                                <input type="password" name="password" class="form-control">
+                                                <small
+                                                    class="text-danger"><?php echo $errors['password'] ?? ''; ?></small>
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label>Profile Picture (JPG, JPEG, PNG)</label>
-                                            <input type="file" name="profile_pic" required class="form-control-file"
-                                                accept=".jpg,.jpeg,.png">
+                                            <input type="file" name="profile_pic" class="form-control-file">
+                                            <small
+                                                class="text-danger"><?php echo $errors['profile_pic'] ?? ''; ?></small>
                                         </div>
                                     </div>
 
@@ -181,18 +214,18 @@ if (isset($_POST['create_staff_account'])) {
     <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Show SweetAlert -->
-    <?php if (isset($swal_type) && isset($swal_message)) : ?>
-    <script>
-        Swal.fire({
-            icon: '<?php echo $swal_type; ?>',
-            title: 'Message',
-            text: '<?php echo $swal_message; ?>',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK'
-        });
-    </script>
+    <?php if ($success): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Staff Account Created Successfully!',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+        </script>
     <?php endif; ?>
 
 </body>
+
 </html>
