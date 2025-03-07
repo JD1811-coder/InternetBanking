@@ -5,48 +5,75 @@ include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
 
-$success = $err = "";
-
-// Register new staff
 if (isset($_POST['create_staff_account'])) {
     $name = trim($_POST['name']);
     $staff_number = $_POST['staff_number'];
     $phone = trim($_POST['phone']);
     $email = trim($_POST['email']);
-    $password = sha1(md5(trim($_POST['password'])));
+    $password = trim($_POST['password']);
     $sex = $_POST['sex'];
-
-    // Handle profile picture upload
     $profile_pic = $_FILES["profile_pic"]["name"];
-    $target_dir = "dist/img/";
-    $target_file = $target_dir . basename($_FILES["profile_pic"]["name"]);
-    move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file);
+    $allowed_extensions = ['jpg', 'jpeg', 'png'];
+    $file_extension = strtolower(pathinfo($profile_pic, PATHINFO_EXTENSION));
 
-    // Check if the staff name already exists
-    $check_query = "SELECT name FROM iB_staff WHERE name = ?";
-    $check_stmt = $mysqli->prepare($check_query);
-    $check_stmt->bind_param('s', $name);
-    $check_stmt->execute();
-    $check_stmt->store_result();
-
-    if ($check_stmt->num_rows > 0) {
-        $err = "Staff name already exists! Please use a different name.";
+    // Validate profile picture format
+    if (!in_array($file_extension, $allowed_extensions)) {
+        $swal_type = "error";
+        $swal_message = "Only JPG, JPEG, and PNG files are allowed for the profile picture.";
+    } 
+    // Validate strong password
+    elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
+        $swal_type = "error";
+        $swal_message = "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.";
     } else {
-        // Proceed with insertion
-        $query = "INSERT INTO iB_staff (name, staff_number, phone, email, password, sex, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('sssssss', $name, $staff_number, $phone, $email, $password, $sex, $profile_pic);
-        $stmt->execute();
+        // Encrypt password
+        $hashed_password = sha1(md5($password));
 
-        if ($stmt) {
-            $success = "Staff Account Created Successfully!";
+        // Check for duplicate name, phone, or email
+        $check_query = "SELECT name, phone, email FROM iB_staff WHERE name = ? OR phone = ? OR email = ?";
+        $check_stmt = $mysqli->prepare($check_query);
+        $check_stmt->bind_param('sss', $name, $phone, $email);
+        $check_stmt->execute();
+        $check_stmt->store_result();
+
+        if ($check_stmt->num_rows > 0) {
+            $check_stmt->bind_result($existing_name, $existing_phone, $existing_email);
+            $check_stmt->fetch();
+
+            if ($existing_name == $name) {
+                $swal_type = "error";
+                $swal_message = "Staff name already exists! Please use a different name.";
+            } elseif ($existing_phone == $phone) {
+                $swal_type = "error";
+                $swal_message = "Phone number already exists! Please use a different number.";
+            } elseif ($existing_email == $email) {
+                $swal_type = "error";
+                $swal_message = "Email already exists! Please use a different email.";
+            }
         } else {
-            $err = "Error! Please Try Again Later.";
-        }
-        $stmt->close();
-    }
-    $check_stmt->close();
+            // Upload profile picture
+            $target_dir = "dist/img/";
+            $target_file = $target_dir . basename($_FILES["profile_pic"]["name"]);
+            move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file);
 
+            // Insert into database
+            $query = "INSERT INTO iB_staff (name, staff_number, phone, email, password, sex, profile_pic) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('sssssss', $name, $staff_number, $phone, $email, $hashed_password, $sex, $profile_pic);
+
+            if ($stmt->execute()) {
+                $swal_type = "success";
+                $swal_message = "Staff Account Created Successfully!";
+            } else {
+                $swal_type = "error";
+                $swal_message = "Error! Please Try Again Later.";
+            }
+
+            $stmt->close();
+        }
+        $check_stmt->close();
+    }
 }
 ?>
 
@@ -90,7 +117,7 @@ if (isset($_POST['create_staff_account'])) {
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Staff Name</label>
-                                                <input type="text" name="name" required class="form-control" id="name">
+                                                <input type="text" name="name" required class="form-control">
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Staff Number</label>
@@ -104,11 +131,11 @@ if (isset($_POST['create_staff_account'])) {
                                             <div class="col-md-6 form-group">
                                                 <label>Phone Number</label>
                                                 <input type="text" name="phone" required pattern="[0-9]{10}"
-                                                    class="form-control" id="phone">
+                                                    class="form-control">
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Gender</label>
-                                                <select class="form-control" name="sex" id="gender">
+                                                <select class="form-control" name="sex">
                                                     <option value="">Select Gender</option>
                                                     <option>Female</option>
                                                     <option>Male</option>
@@ -119,26 +146,26 @@ if (isset($_POST['create_staff_account'])) {
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Email</label>
-                                                <input type="email" name="email" required class="form-control"
-                                                    id="email">
+                                                <input type="email" name="email" required class="form-control">
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Password</label>
                                                 <input type="password" name="password" required class="form-control"
-                                                    id="password">
+                                                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&]).{8,}"
+                                                    title="Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.">
                                             </div>
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Profile Picture</label>
-                                            <input type="file" name="profile_pic" class="form-control-file"
-                                                id="profile_pic">
+                                            <label>Profile Picture (JPG, JPEG, PNG)</label>
+                                            <input type="file" name="profile_pic" required class="form-control-file"
+                                                accept=".jpg,.jpeg,.png">
                                         </div>
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="create_staff_account" class="btn btn-success"
-                                            onclick="return validateForm()">Add Staff</button>
+                                        <button type="submit" name="create_staff_account" class="btn btn-success">Add
+                                            Staff</button>
                                     </div>
                                 </form>
                             </div>
@@ -151,83 +178,21 @@ if (isset($_POST['create_staff_account'])) {
         <?php include("dist/_partials/footer.php"); ?>
     </div>
 
-    <!-- SweetAlert Library -->
+    <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- jQuery -->
-    <script src="plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap -->
-    <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Show SweetAlert -->
+    <?php if (isset($swal_type) && isset($swal_message)) : ?>
     <script>
-        function validateForm() {
-            var name = document.getElementById("name").value.trim();
-            var phone = document.getElementById("phone").value.trim();
-            var email = document.getElementById("email").value.trim();
-            var password = document.getElementById("password").value.trim();
-            var gender = document.getElementById("gender").value;
-            var profilePic = document.getElementById("profile_pic").value;
-
-            var namePattern = /^[A-Za-z ]+$/;
-            var phonePattern = /^[0-9]{10}$/;
-            var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-            if (!name.match(namePattern)) {
-                Swal.fire("Error", "Name must contain only alphabets!", "error");
-                return false;
-            }
-            if (!phone.match(phonePattern)) {
-                Swal.fire("Error", "Phone number must be 10 digits!", "error");
-                return false;
-            }
-            if (!email.match(emailPattern)) {
-                Swal.fire("Error", "Enter a valid email!", "error");
-                return false;
-            }
-            if (password.length < 6) {
-                Swal.fire("Error", "Password must be at least 6 characters long!", "error");
-                return false;
-            }
-            if (gender == "") {
-                Swal.fire("Error", "Please select a gender!", "error");
-                return false;
-            }
-            if (profilePic == "") {
-                Swal.fire("Error", "Please upload a profile picture!", "error");
-                return false;
-            }
-            return true;
-        }
-
-        <?php if (!empty($success)) { ?>
-            Swal.fire("Success", "<?php echo $success; ?>", "success").then(() => {
-                window.location.href = 'pages_manage_staff.php';
-            });
-        <?php } elseif (!empty($err)) { ?>
-            Swal.fire("Error", "<?php echo $err; ?>", "error");
-        <?php } ?>
-        $(document).ready(function () {
-            $("#name").keyup(function () {
-                var name = $(this).val().trim();
-                if (name.length > 0) {
-                    $.ajax({
-                        url: "check_staff_name.php",
-                        method: "POST",
-                        data: { name: name },
-                        success: function (response) {
-                            if (response.trim() === "exists") {
-                                Swal.fire("Error", "Staff name already exists!", "error");
-                                $("#name").addClass("is-invalid");
-                            } else {
-                                $("#name").removeClass("is-invalid");
-                            }
-                        }
-                    });
-                }
-            });
+        Swal.fire({
+            icon: '<?php echo $swal_type; ?>',
+            title: 'Message',
+            text: '<?php echo $swal_message; ?>',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
         });
-
     </script>
+    <?php endif; ?>
 
 </body>
-
 </html>

@@ -24,7 +24,7 @@ if (isset($_GET['toggleStaff'])) {
     }
 }
 
-// 🛑 DELETE STAFF FUNCTIONALITY
+
 if (isset($_GET['deleteStaff'])) {
     $id = intval($_GET['deleteStaff']);
 
@@ -224,6 +224,7 @@ if (isset($_GET['deleteStaff'])) {
             });
         });
     </script>
+    
 </body>
 
 </html>

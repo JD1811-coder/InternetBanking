@@ -57,7 +57,7 @@ $client_id = $_SESSION['client_id'];
                       <th>Account No.</th>
                       <th>Rate</th>
                       <th>Acc. Type</th>
-                      <th>Acc. Owner</th>
+                      <th>Acc. Balance</th> <!-- Updated Header -->
                       <th>Date Opened</th>
                     </tr>
                   </thead>
@@ -65,10 +65,12 @@ $client_id = $_SESSION['client_id'];
                     <?php
                     //fetch all iB_Accs
                     $client_id = $_SESSION['client_id'];
-                    $ret = "SELECT a.*, c.name AS client_name 
-                            FROM iB_bankAccounts a 
-                            JOIN iB_clients c ON a.client_id = c.client_id 
-                            WHERE a.client_id = ? ";
+                    $ret = "SELECT a.*, acc_amount, c.name AS client_name 
+                    FROM iB_bankAccounts a 
+                    JOIN iB_clients c ON a.client_id = c.client_id 
+                    WHERE a.client_id = ?";
+
+                    ;
                     $stmt = $mysqli->prepare($ret);
                     $stmt->bind_param('i', $client_id);
                     $stmt->execute(); //ok
@@ -78,7 +80,7 @@ $client_id = $_SESSION['client_id'];
                       //Trim Timestamp to DD-MM-YYYY : H-M-S
                       $dateOpened = $row->created_at;
 
-                    ?>
+                      ?>
 
                       <tr>
                         <td><?php echo $cnt; ?></td>
@@ -86,10 +88,10 @@ $client_id = $_SESSION['client_id'];
                         <td><?php echo $row->account_number; ?></td>
                         <td><?php echo $row->acc_rates; ?>%</td>
                         <td><?php echo $row->acc_type; ?></td>
-                        <td><?php echo $row->client_name; ?></td>
+                        <td><?php echo number_format($row->acc_amount, 2); ?> </td> <!-- Updated -->
                         <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
                       </tr>
-                    <?php $cnt = $cnt + 1;
+                      <?php $cnt = $cnt + 1;
                     } ?>
                     </tfoot>
                 </table>
@@ -128,7 +130,7 @@ $client_id = $_SESSION['client_id'];
   <script src="dist/js/demo.js"></script>
   <!-- page script -->
   <script>
-    $(function() {
+    $(function () {
       $("#example1").DataTable();
       $('#example2').DataTable({
         "paging": true,
