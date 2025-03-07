@@ -5,9 +5,9 @@ include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
 
-// Initialize variables
 $loanType = null;
 $message = '';
+$errors = ['type_name' => '', 'description' => '', 'interest_rate' => '', 'max_amount' => ''];
 
 // Fetch loan type details for editing
 if (isset($_GET['id'])) {
@@ -28,35 +28,74 @@ if (isset($_GET['id'])) {
     }
 }
 
-// Handle form submission for updating loan type
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_loan_type'])) {
     $type_name = trim($_POST['type_name']);
     $description = trim($_POST['description']);
     $interest_rate = floatval($_POST['interest_rate']);
     $max_amount = floatval($_POST['max_amount']);
+    
+    $hasError = false;
 
-    // Update loan type details
-    $updateQuery = "UPDATE loan_types SET type_name = ?, description = ?, interest_rate = ?, max_amount = ? WHERE id = ?";
-    $updateStmt = $mysqli->prepare($updateQuery);
+    // Check for duplicate Loan Type Name (excluding current ID)
+    $checkQuery = "SELECT id FROM loan_types WHERE type_name = ? AND id != ?";
+    $checkStmt = $mysqli->prepare($checkQuery);
+    $checkStmt->bind_param('si', $type_name, $id);
+    $checkStmt->execute();
+    $checkStmt->store_result();
+    
+    if ($checkStmt->num_rows > 0) {
+        $errors['type_name'] = "Loan Type Name already exists!";
+        $hasError = true;
+    }
+    $checkStmt->close();
 
-    if ($updateStmt) {
-        $updateStmt->bind_param('ssdii', $type_name, $description, $interest_rate, $max_amount, $id);
-        $updateStmt->execute();
+    // Validation checks
+    if ($type_name === "" || ctype_space($type_name)) {
+        $errors['type_name'] = "Loan Type Name is required!";
+        $hasError = true;
+    } elseif (!preg_match('/^[a-zA-Z\s_]+$/', $type_name)) {
+        $errors['type_name'] = "Only letters, spaces, and underscores allowed!";
+        $hasError = true;
+    }
 
-        if ($updateStmt->affected_rows > 0) {
-            $_SESSION['message'] = "Loan Type Updated Successfully";
-            $updateStmt->close();
-            header("Location: pages_manage_loan_types.php");
-            exit();
+    if ($description === "" || ctype_space($description)) {
+        $errors['description'] = "Description is required!";
+        $hasError = true;
+    }
+
+    if (!is_numeric($interest_rate) || $interest_rate < 0) {
+        $errors['interest_rate'] = "Interest Rate must be a valid non-negative number!";
+        $hasError = true;
+    }
+
+    if (!is_numeric($max_amount) || $max_amount < 0) {
+        $errors['max_amount'] = "Max Amount must be a valid non-negative number!";
+        $hasError = true;
+    }
+
+    if (!$hasError) {
+        $updateQuery = "UPDATE loan_types SET type_name = ?, description = ?, interest_rate = ?, max_amount = ? WHERE id = ?";
+        $updateStmt = $mysqli->prepare($updateQuery);
+
+        if ($updateStmt) {
+            $updateStmt->bind_param('ssdii', $type_name, $description, $interest_rate, $max_amount, $id);
+            $updateStmt->execute();
+
+            if ($updateStmt->affected_rows > 0) {
+                $_SESSION['message'] = "Loan Type Updated Successfully";
+                header("Location: pages_manage_loan_types.php");
+                exit();
+            } else {
+                $_SESSION['message'] = "No changes made. Please check the details and try again.";
+                header("Location: pages_edit_loan_type.php?id=$id");
+                exit();
+            }
         } else {
-            $_SESSION['message'] = "No changes made. Please check the details and try again.";
+            $_SESSION['message'] = "Failed to update loan type.";
             header("Location: pages_edit_loan_type.php?id=$id");
             exit();
         }
-    } else {
-        $_SESSION['message'] = "Failed to update loan type.";
-        header("Location: pages_edit_loan_type.php?id=$id");
-        exit();
     }
 }
 ?>
@@ -89,7 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_loan_type'])) 
                                 <h3 class="card-title">Edit Loan Type Details</h3>
                             </div>
                             <div class="card-body">
-                                <!-- Success/Error Message Modal -->
                                 <?php if (isset($_SESSION['message'])) : ?>
                                 <script>
                                 document.addEventListener("DOMContentLoaded", function() {
@@ -109,23 +147,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_loan_type'])) 
                                         <label for="type_name">Type Name</label>
                                         <input type="text" class="form-control" id="type_name" name="type_name"
                                             value="<?php echo htmlspecialchars($loanType->type_name); ?>" required>
+                                        <span class="error text-danger"><?php echo $errors['type_name']; ?></span>
                                     </div>
                                     <div class="form-group">
                                         <label for="description">Description</label>
                                         <textarea class="form-control" id="description" name="description" rows="3"
                                             required><?php echo htmlspecialchars($loanType->description); ?></textarea>
+                                        <span class="error text-danger"><?php echo $errors['description']; ?></span>
                                     </div>
                                     <div class="form-group">
                                         <label for="interest_rate">Interest Rate (%)</label>
                                         <input type="number" class="form-control" id="interest_rate"
                                             name="interest_rate"
                                             value="<?php echo htmlspecialchars($loanType->interest_rate); ?>"
-                                            step="0.01" required>
+                                            step="0.01" required min="0">
+                                        <span class="error text-danger"><?php echo $errors['interest_rate']; ?></span>
                                     </div>
                                     <div class="form-group">
                                         <label for="max_amount">Max Amount</label>
                                         <input type="number" class="form-control" id="max_amount" name="max_amount"
-                                            value="<?php echo htmlspecialchars($loanType->max_amount); ?>" required>
+                                            value="<?php echo htmlspecialchars($loanType->max_amount); ?>" required min="0">
+                                        <span class="error text-danger"><?php echo $errors['max_amount']; ?></span>
                                     </div>
                                     <button type="submit" name="update_loan_type" class="btn btn-primary">Update Loan
                                         Type</button>
@@ -144,7 +186,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_loan_type'])) 
         <?php include("dist/_partials/footer.php"); ?>
     </div>
 
-    <!-- Required JS Files -->
     <script src="plugins/jquery/jquery.min.js"></script>
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="dist/js/adminlte.min.js"></script>

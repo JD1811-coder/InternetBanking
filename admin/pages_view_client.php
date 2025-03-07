@@ -1,3 +1,8 @@
+
+
+
+
+
 <?php
 session_start();
 include('conf/config.php');
@@ -28,8 +33,9 @@ if (isset($_POST['update_client_account'])) {
         $_SESSION['swal_message'] = ['error', 'Only JPG, JPEG, and PNG files are allowed!'];
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['swal_message'] = ['error', 'Invalid email format!'];
-    } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
-        $_SESSION['swal_message'] = ['error', 'Phone number must be 10 digits!'];
+    } elseif (!preg_match('/^[987][0-9]{9}$/', $phone)) {
+        $_SESSION['swal_message'] = ['error', 'Phone number must be 10 digits and start with 9, 8, or 7!'];
+    
     } elseif (!preg_match('/^[0-9]{12}$/', $aadhar_number)) {
         $_SESSION['swal_message'] = ['error', 'Aadhaar number must be exactly 12 digits!'];
     } elseif (!preg_match('/^[[A-Z]{5}[0-9]{4}[A-Z]{1}$/', $pan_number)) {

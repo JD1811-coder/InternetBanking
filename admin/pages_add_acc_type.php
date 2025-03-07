@@ -5,38 +5,77 @@ include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
 
-if (isset($_POST['create_acc_type'])) {
-    // Sanitize and validate inputs
+$errors = ['name' => '', 'description' => '', 'rate' => '', 'min_balance' => ''];
+$success_message = '';
+$error_message = '';
+
+$name = $description = $rate = $min_balance = '';
+$code = "ACC-CAT-" . substr(str_shuffle('0123456789QWERTYUIOPLKJHGFDSAZXCVBNM'), 1, 5);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_acc_type'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $rate = trim($_POST['rate']);
     $min_balance = trim($_POST['min_balance']);
-    $code = trim($_POST['code']);
 
-    // Validation
-    if (empty($name) || empty($description) || empty($rate) || empty($min_balance) || empty($code)) {
-        $_SESSION['error'] = "All fields are required!";
-    } elseif (!preg_match("/^[a-zA-Z ]+$/", $name)) {
-        $_SESSION['error'] = "Category Name should contain only alphabets!";
-    } elseif (!is_numeric($rate) || $rate < 0.1 || $rate > 100) {
-        $_SESSION['error'] = "Rate must be a number between 0.1 and 100!";
-    } elseif (!is_numeric($min_balance) || $min_balance < 1 || $min_balance > 100000) {
-        $_SESSION['error'] = "Minimum balance must be a number between 1 and 100000!";
-    } else {
-        // Insert into database
+    $hasError = false;
+
+    // **Check if Name already exists**
+    $checkQuery = "SELECT acctype_id FROM iB_Acc_types WHERE name = ?";
+$checkStmt = $mysqli->prepare($checkQuery);
+$checkStmt->bind_param('s', $name);
+$checkStmt->execute();
+$checkStmt->store_result();
+
+if ($checkStmt->num_rows > 0) {
+    $errors['name'] = "Account Category Name already exists!";
+    $hasError = true;
+}
+$checkStmt->close();
+
+
+    // **Validation checks**
+    if ($name === "" || ctype_space($name)) {
+        $errors['name'] = "Category Name is required!";
+        $hasError = true;
+    } elseif (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
+        $errors['name'] = "Only letters and spaces allowed!";
+        $hasError = true;
+    }
+
+    if ($description === "" || ctype_space($description)) {
+        $errors['description'] = "Description is required!";
+        $hasError = true;
+    }
+
+    if (!is_numeric($rate) || $rate < 0.1 || $rate > 100) {
+        $errors['rate'] = "Rate must be between 0.1 and 100!";
+        $hasError = true;
+    }
+
+    if (!is_numeric($min_balance) || $min_balance < 1 || $min_balance > 100000) {
+        $errors['min_balance'] = "Min balance must be between 1 and 100000!";
+        $hasError = true;
+    }
+
+    // **Insert into database if no errors**
+    if (!$hasError) {
         $query = "INSERT INTO iB_Acc_types (name, description, rate, min_balance, code) VALUES (?,?,?,?,?)";
         $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('sssss', $name, $description, $rate, $min_balance, $code);
+        $stmt->bind_param('ssdss', $name, $description, $rate, $min_balance, $code);
         $stmt->execute();
 
         if ($stmt) {
             $_SESSION['success'] = "Account Category Created Successfully!";
+            header("Location: pages_add_account_category.php");
+            exit();
         } else {
             $_SESSION['error'] = "Error! Please try again.";
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <?php include("dist/_partials/head.php"); ?>
@@ -72,40 +111,49 @@ if (isset($_POST['create_acc_type'])) {
                                     <h3 class="card-title">Fill All Fields</h3>
                                 </div>
 
-                                <form method="post" id="accForm">
+                                <form method="post">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-3 form-group">
                                                 <label>Account Category Name</label>
-                                                <input type="text" name="name" required class="form-control" id="categoryName">
+                                                <input type="text" name="name" class="form-control"
+                                                    value="<?php echo htmlspecialchars($name); ?>" required>
+                                                <span class="text-danger"><?php echo $errors['name']; ?></span>
                                             </div>
                                             <div class="col-md-3 form-group">
                                                 <label>Account Category Rates % Per Year</label>
-                                                <input type="number" name="rate" required class="form-control" id="rate" step="0.01" min="0.1" max="100">
+                                                <input type="number" name="rate" class="form-control" step="0.01"
+                                                    min="0.1" max="100" value="<?php echo htmlspecialchars($rate); ?>"
+                                                    required>
+                                                <span class="text-danger"><?php echo $errors['rate']; ?></span>
                                             </div>
                                             <div class="col-md-3 form-group">
                                                 <label>Minimum Balance</label>
-                                                <input type="number" name="min_balance" required class="form-control" id="min_balance" min="1" max="100000">
+                                                <input type="number" name="min_balance" class="form-control" min="1"
+                                                    max="100000"
+                                                    value="<?php echo htmlspecialchars($min_balance); ?>" required>
+                                                <span class="text-danger"><?php echo $errors['min_balance']; ?></span>
                                             </div>
                                             <div class="col-md-3 form-group">
                                                 <label>Account Category Code</label>
-                                                <?php
-                                                $length = 5;
-                                                $_Number = substr(str_shuffle('0123456789QWERTYUIOPLKJHGFDSAZXCVBNM'), 1, $length);
-                                                ?>
-                                                <input type="text" readonly name="code" value="ACC-CAT-<?php echo $_Number; ?>" class="form-control">
+                                                <input type="text" readonly name="code" value="<?php echo $code; ?>"
+                                                    class="form-control">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12 form-group">
                                                 <label>Account Category Description</label>
-                                                <textarea name="description" required class="form-control"></textarea>
+                                                <textarea name="description" class="form-control"
+                                                    required><?php echo htmlspecialchars($description); ?></textarea>
+                                                <span class="text-danger"><?php echo $errors['description']; ?></span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="create_acc_type" class="btn btn-success">Add Account Type</button>
+                                        <button type="submit" name="create_acc_type" class="btn btn-success">
+                                            Add Account Type
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -118,11 +166,8 @@ if (isset($_POST['create_acc_type'])) {
         <?php include("dist/_partials/footer.php"); ?>
     </div>
 
-    <!-- jQuery -->
     <script src="plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap -->
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -158,4 +203,5 @@ if (isset($_POST['create_acc_type'])) {
         });
     </script>
 </body>
+
 </html>

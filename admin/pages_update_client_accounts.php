@@ -6,45 +6,56 @@ check_login();
 $admin_id = $_SESSION['admin_id'];
 
 if (isset($_POST['update_account'])) {
-    // Client open account
-    $acc_name = $_POST['acc_name'];
-    $account_number = $_POST['account_number'];
+    $acc_name = trim($_POST['acc_name']); // Trim to prevent only spaces
+    $account_id = $_GET['account_id'];
     $acc_type = $_POST['acc_type'];
     $acc_rates = $_POST['acc_rates'];
     $acc_status = $_POST['acc_status'];
     $acc_amount = $_POST['acc_amount'];
-    $account_id  = $_GET['account_id'];
 
-    // Validate that acc_name contains only letters
-    if (!preg_match("/^[a-zA-Z ]*$/", $acc_name)) {
-        $err = "Account Name should contain only alphabets!";
+    // Validate Account Name
+    if (empty($acc_name) || strlen(trim($acc_name)) == 0) {
+        $err = "❌ Account Name cannot be empty or only spaces!";
+    } elseif (!preg_match("/^[a-zA-Z ]+$/", $acc_name)) {
+        $err = "❌ Account Name should contain only alphabets and spaces!";
     } else {
-        // Update only fields that exist in iB_bankAccounts
-        $query = "UPDATE iB_bankAccounts SET acc_name=?, acc_type=?, acc_rates=?, acc_status=?, acc_amount=? WHERE account_id=?";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('sssssi', $acc_name, $acc_type, $acc_rates, $acc_status, $acc_amount, $account_id);
-        $stmt->execute();
+        // Check if Account Name already exists (excluding current account)
+        $check_query = "SELECT acc_name FROM iB_bankAccounts WHERE acc_name = ? AND account_id != ?";
+        $stmt_check = $mysqli->prepare($check_query);
+        $stmt_check->bind_param('si', $acc_name, $account_id);
+        $stmt_check->execute();
+        $stmt_check->store_result();
 
-        if ($stmt) {
-            echo "<script>
-                setTimeout(() => {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'iBank Account Updated Successfully!',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        window.location.href = 'pages_manage_acc_openings.php';
-                    });
-                }, 500);
-            </script>";
+        if ($stmt_check->num_rows > 0) {
+            $err = "❌ This Account Name is already in use! Please choose a different name.";
         } else {
-            $err = "Please Try Again Or Try Later";
+            // Update Account if validation passes
+            $query = "UPDATE iB_bankAccounts SET acc_name=?, acc_type=?, acc_rates=?, acc_status=?, acc_amount=? WHERE account_id=?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('sssssi', $acc_name, $acc_type, $acc_rates, $acc_status, $acc_amount, $account_id);
+
+            if ($stmt->execute()) {
+                echo "<script>
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: '✅ iBank Account Updated Successfully!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = 'pages_manage_acc_openings.php';
+                        });
+                    }, 500);
+                </script>";
+            } else {
+                $err = "❌ Please Try Again Or Try Later.";
+            }
         }
     }
 }
-
 ?>
+
+
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
@@ -153,10 +164,11 @@ if (isset($_POST['update_account'])) {
 
                                             <!-- Bank Account Details -->
                                             <div class="row">
-                                                <div class="col-md-6 form-group">
-                                                    <label for="accName">Account Name</label>
-                                                    <input type="text" name="acc_name" value="<?php echo htmlspecialchars($row->acc_name); ?>" required class="form-control" id="accName">
-                                                </div>
+                                            <div class="col-md-6 form-group">
+    <label for="accName">Account Name</label>
+    <input type="text" name="acc_name" value="<?php echo htmlspecialchars($row->acc_name); ?>" required class="form-control" id="accName">
+    <small id="accNameError"></small> <!-- Error message appears here -->
+</div>
 
                                                 <div class="col-md-6 form-group">
                                                     <label for="accountNumber">Account Number</label>
@@ -225,24 +237,49 @@ if (isset($_POST['update_account'])) {
     <!-- AdminLTE App -->
     <script src="dist/js/adminlte.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
+    <script>
 document.querySelector("form").addEventListener("submit", function (event) {
-    let accNameInput = document.getElementById("accName").value;
-    
-    // Regular expression to check for alphabets and spaces only
+    let accNameInput = document.getElementById("accName").value.trim();
+    let errorDiv = document.getElementById("accNameError");
+
+    // Regular expression to allow only alphabets and spaces
     let nameRegex = /^[a-zA-Z ]+$/;
+
+    // Clear previous error message
+    errorDiv.innerHTML = "";
+    errorDiv.style.color = "red";
     
-    if (!nameRegex.test(accNameInput)) {
-        Swal.fire({
-            title: "Error!",
-            text: "Account Name should contain only alphabets!",
-            icon: "error",
-            confirmButtonText: "OK"
-        });
+    if (accNameInput === "") {
+        errorDiv.innerHTML = "❌ Account Name cannot be empty!";
         event.preventDefault(); // Stop form submission
+        return;
     }
+
+    if (!nameRegex.test(accNameInput)) {
+        errorDiv.innerHTML = "❌ Account Name should contain only alphabets and spaces!";
+        event.preventDefault();
+        return;
+    }
+
+    if (accNameInput.replace(/\s/g, '') === "") {
+        errorDiv.innerHTML = "❌ Account Name cannot be only spaces!";
+        event.preventDefault();
+        return;
+    }
+
+    // Check for duplicate name using AJAX
+    fetch(`check_duplicate.php?acc_name=${encodeURIComponent(accNameInput)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                errorDiv.innerHTML = "❌ This Account Name is already in use!";
+                event.preventDefault();
+            }
+        })
+        .catch(error => console.error("Error checking duplicate:", error));
 });
 </script>
+
 
     
 </body>
