@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 06, 2025 at 11:23 AM
+-- Generation Time: Apr 15, 2025 at 12:11 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -56,9 +56,9 @@ CREATE TABLE `ib_acc_types` (
 --
 
 INSERT INTO `ib_acc_types` (`acctype_id`, `name`, `description`, `rate`, `code`, `is_active`, `min_balance`) VALUES
-(1, 'Savings', '<p>Savings accounts&nbsp;are typically the first official bank account anybody opens. Children may open an account with a parent to begin a pattern of saving. Teenagers open accounts to stash cash earned&nbsp;from a first job&nbsp;or household chores.</p><p>Savings accounts are an excellent place to park&nbsp;emergency cash. Opening a savings account also marks the beginning of your relationship with a financial institution. For example, when joining a credit union, your &ldquo;share&rdquo; or savings account establishes your membership.</p>', '20', 'ACC-CAT-4EZFO', 1, 1000.00),
-(2, ' Retirement', '<p>Retirement accounts&nbsp;offer&nbsp;tax advantages. In very general terms, you get to&nbsp;avoid paying income tax on interest&nbsp;you earn from a savings account or CD each year. But you may have to pay taxes on those earnings at a later date. Still, keeping your money sheltered from taxes may help you over the long term. Most banks offer IRAs (both&nbsp;Traditional IRAs&nbsp;and&nbsp;Roth IRAs), and they may also provide&nbsp;retirement accounts for small businesses</p>', '10', 'ACC-CAT-1QYDV', 1, 0.00),
-(4, 'Recurring deposit', '<p><strong>Recurring deposit account or RD account</strong> is opened by those who want to save certain amount of money regularly for a certain period of time and earn a higher interest rate.&nbsp;In RD&nbsp;account a&nbsp;fixed amount is deposited&nbsp;every month for a specified period and the total amount is repaid with interest at the end of the particular fixed period.&nbsp;</p><p>The period of deposit is minimum six months and maximum ten years.&nbsp;The interest rates vary&nbsp;for different plans based on the amount one saves and the period of time and also on banks. No withdrawals are allowed from the RD account. However, the bank may allow to close the account before the maturity period.</p><p>These accounts can be opened in single or joint names. Banks are also providing the Nomination facility to the RD account holders.&nbsp;</p>', '15', 'ACC-CAT-VBQLE', 1, 2000.00),
+(1, 'Savings Account', '<p>Savings accounts&nbsp;are typically the first official bank account anybody opens. Children may open an account with a parent to begin a pattern of saving. Teenagers open accounts to stash cash earned&nbsp;from a first job&nbsp;or household chores.</p><p>Savings accounts are an excellent place to park&nbsp;emergency cash. Opening a savings account also marks the beginning of your relationship with a financial institution. For example, when joining a credit union, your &ldquo;share&rdquo; or savings account establishes your membership.</p>', '20', 'ACC-CAT-4EZFO', 1, 1000.00),
+(2, ' Retirement Account', '<p>Retirement accounts&nbsp;offer&nbsp;tax advantages. In very general terms, you get to&nbsp;avoid paying income tax on interest&nbsp;you earn from a savings account or CD each year. But you may have to pay taxes on those earnings at a later date. Still, keeping your money sheltered from taxes may help you over the long term. Most banks offer IRAs (both&nbsp;Traditional IRAs&nbsp;and&nbsp;Roth IRAs), and they may also provide&nbsp;retirement accounts for small businesses</p>', '10', 'ACC-CAT-1QYDV', 1, 0.00),
+(4, 'Recurring deposit Account', '<p><strong>Recurring deposit account or RD account</strong> is opened by those who want to save certain amount of money regularly for a certain period of time and earn a higher interest rate.&nbsp;In RD&nbsp;account a&nbsp;fixed amount is deposited&nbsp;every month for a specified period and the total amount is repaid with interest at the end of the particular fixed period.&nbsp;</p><p>The period of deposit is minimum six months and maximum ten years.&nbsp;The interest rates vary&nbsp;for different plans based on the amount one saves and the period of time and also on banks. No withdrawals are allowed from the RD account. However, the bank may allow to close the account before the maturity period.</p><p>These accounts can be opened in single or joint names. Banks are also providing the Nomination facility to the RD account holders.&nbsp;</p>', '15', 'ACC-CAT-VBQLE', 1, 2000.00),
 (5, 'Fixed Deposit Account', '<p>In <strong>Fixed Deposit Account</strong> (also known as <strong>FD Account</strong>), a particular sum of money is deposited in a bank for specific&nbsp;period of time. It&rsquo;s one time deposit and one time take away (withdraw) account.&nbsp;The money deposited in this account can not be withdrawn before the expiry of period.&nbsp;</p><p>However, in case of need,&nbsp; the depositor can ask for closing the fixed deposit prematurely by paying a penalty. The penalty amount varies with banks.</p><p>A high interest rate is paid on fixed deposits. The rate of interest paid for fixed deposit vary according to amount, period and also from bank to bank.</p>', '40', 'ACC-CAT-A86GO', 1, 10000.00),
 (7, 'Current account', '<p><strong>Current account</strong> is mainly for business per<strong>s</strong>ons, firms, companies, public enterprises etc and are never used for the purpose of investment or savings.These deposits are the most liquid deposits and there are no limits for number of transactions or the amount of transactions in a day. While, there is no interest paid on amount held in the account, banks charges certain &nbsp;service charges, on such accounts. The current accounts do not have any fixed maturity as thegadegagagase are on continuous basis accounts.</p>', '20', 'ACC-CAT-4O8QW', 1, 5000.00),
 (8, 'Salary Account', '<p>A <strong>salary account</strong> is a bank account where an employer directly deposits an employee&rsquo;s salary. It usually has <strong>zero balance requirements</strong>, <strong>free debit card and chequebook</strong>, <strong>higher transaction limits</strong>, <strong>overdraft facility</strong>, and <strong>easy loan approvals</strong>. It also provides <strong>internet and mobile banking</strong> for seamless transactions.</p>', '6.5', 'ACC-CAT-27DQV', 1, 0.00),
@@ -88,7 +88,7 @@ CREATE TABLE `ib_admin` (
 --
 
 INSERT INTO `ib_admin` (`admin_id`, `name`, `email`, `number`, `password`, `profile_pic`, `is_active`, `otp`, `otp_expiry`) VALUES
-(2, 'system administrater ', 'dholajenil2024.katargam@gmail.com', 'iBank-ADM-0516', '$2y$10$RE2rcBl/BwzXLr7C7PQN2uDyoOSnI8QTcpGlpU215q9.YEi8SrYJq', 'admin-icn.png', 1, NULL, NULL);
+(2, 'system administrator', 'dholajenil2024.katargam@gmail.com', 'iBank-ADM-0516', '$2y$10$RE2rcBl/BwzXLr7C7PQN2uDyoOSnI8QTcpGlpU215q9.YEi8SrYJq', 'admin-icn.png', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -117,7 +117,7 @@ INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_
 (14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 31063.00, 5, '2025-03-02 15:26:59.154925', 1),
 (15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 820836.00, 8, '2025-03-02 15:11:23.771478', 1),
 (16, 'Harshit Rana', '705239816', ' Retirement ', '10', 'Active', 61712.00, 6, '2025-03-06 10:07:10.847487', 1),
-(23, 'Jenil Dhola', '573608192', 'Savings', '15', 'Active', 21503.00, 11, '2025-03-06 10:07:31.418188', 1),
+(23, 'Jenil Dhola', '573608192', 'Savings', '15', 'Active', 5633.00, 11, '2025-04-15 09:31:31.620167', 1),
 (35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 0.00, 15, '2025-03-06 10:07:41.268040', 1);
 
 -- --------------------------------------------------------
@@ -149,8 +149,8 @@ CREATE TABLE `ib_clients` (
 INSERT INTO `ib_clients` (`client_id`, `name`, `phone`, `address`, `email`, `aadhar_number`, `pan_number`, `password`, `profile_pic`, `client_number`, `is_active`, `otp`, `otp_expiry`) VALUES
 (5, 'Hari Pandya', '7412560000', '114 Allace Avenue', 'harryden@mail.com', '996544392776', 'FXYYY8710N', '55c3b5386c486feb662a0785f340938f518d547f', '', 'iBank-CLIENT-7014', 1, NULL, NULL),
 (6, 'Harshit Rana', '7412545454', '23 Hinkle Deegan Lake Road', 'reyes@mail.com', '489954692767', 'YFGOZ3386S', '55c3b5386c486feb662a0785f340938f518d547f', 'user-profile-min.png', 'iBank-CLIENT-1698', 1, NULL, NULL),
-(8, 'Arin gabani', '7850000014', '92 Maple Street', 'arin123a@mail.com', '460140316244', 'OPKFW7221Z', '55c3b5386c486feb662a0785f340938f518d547f', 'beet.jpg', 'iBank-CLIENT-0423', 1, NULL, NULL),
-(11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXE23467P', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', '', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
+(8, 'arin gabani', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'jenildhola1811@gmail.com', '234567890354', 'IHXPD1193P', '55c3b5386c486feb662a0785f340938f518d547f', 'v2.jpg', 'iBank-CLIENT-0423', 1, NULL, NULL),
+(11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXEQ23467', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', '', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
 (15, 'Sahil Gohil', '6352419685', 'A-103, Riivanta Riverview, Variyav, Surat', 'cleints2023@gmail.com', '741852963159', 'OPKFW7221Z', '$2y$10$tnXEHcPfGDA/hDMbeQd/Z.CFd5AlFASauXVLC7BN7ImCIbogDP/BS', '', 'iBank-CLIENT-0458', 1, '625736', '2025-03-02 22:08:23');
 
 -- --------------------------------------------------------
@@ -260,7 +260,8 @@ INSERT INTO `ib_notifications` (`notification_id`, `notification_details`, `crea
 (104, 'Jenil Dhola has deposited Rs. 6000 into bank account 23', '2025-03-01 12:17:09.335715', 1),
 (105, 'Jenil Dhola has deposited Rs. 5000 into bank account 23', '2025-03-02 11:36:14.289504', 1),
 (106, 'Harry Den Has Withdrawn Rs. 50000 From Bank Account 357146928', '2025-03-02 11:41:27.165799', 1),
-(107, 'Jenil Dhola Has Withdrawn Rs. 100 From Bank Account 573608192', '2025-05-08 09:26:34.840175', 1);
+(107, 'Jenil Dhola Has Withdrawn Rs. 100 From Bank Account 573608192', '2025-05-08 09:26:34.840175', 1),
+(108, 'Jenil Dhola has deposited Rs. 100000 into bank account 23', '2025-03-07 16:54:24.102925', 1);
 
 -- --------------------------------------------------------
 
@@ -279,17 +280,18 @@ CREATE TABLE `ib_staff` (
   `profile_pic` varchar(200) NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `otp` varchar(6) DEFAULT NULL,
-  `otp_expiry` datetime DEFAULT NULL
+  `otp_expiry` datetime DEFAULT NULL,
+  `aadhaar_number` varchar(12) NOT NULL,
+  `pan` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `ib_staff`
 --
 
-INSERT INTO `ib_staff` (`staff_id`, `name`, `staff_number`, `phone`, `email`, `password`, `sex`, `profile_pic`, `is_active`, `otp`, `otp_expiry`) VALUES
-(3, 'Jay Shah', 'iBank-STAFF-6785', '7049757429', 'dharmika192@gmail.com', '$2y$10$Kh5mefahn9r3uUbthwxXi.XuCSOV9Y5Nsk8SrhT82uFR15pufqYz6', 'Male', 'jay.jpg', 1, '719130', '2025-02-20 10:48:33'),
-(4, 'Rahul Dravid', 'iBank-STAFF-6724', '9265460571', 'wall@gmail.com', 'd95d3bbedb4dcba5a8e891968853002354b028e9', 'Male', 'rahul.jpg', 1, NULL, NULL),
-(6, 'jeff besos', 'iBank-STAFF-0974', '7049757429', 'jenildhola1811@gmail.com', '2b76cc7ede474c4bdd63b8b26929625b6e6441d7', 'Male', 'aadu.jpg', 1, NULL, NULL);
+INSERT INTO `ib_staff` (`staff_id`, `name`, `staff_number`, `phone`, `email`, `password`, `sex`, `profile_pic`, `is_active`, `otp`, `otp_expiry`, `aadhaar_number`, `pan`) VALUES
+(3, 'Jay Shah', 'iBank-STAFF-6785', '7049757429', 'dharmika192@gmail.com', '$2y$10$Kh5mefahn9r3uUbthwxXi.XuCSOV9Y5Nsk8SrhT82uFR15pufqYz6', 'Male', 'jay.jpg', 1, '719130', '2025-02-20 10:48:33', '', ''),
+(4, 'Rahul Dravid', 'iBank-STAFF-6724', '7656789876', 'wall@gmail.com', 'd95d3bbedb4dcba5a8e891968853002354b028e9', 'Male', 'v2.jpg', 1, NULL, NULL, '', '');
 
 -- --------------------------------------------------------
 
@@ -393,7 +395,8 @@ INSERT INTO `ib_transactions` (`tr_id`, `tr_code`, `account_id`, `tr_type`, `tr_
 (168, '8pWHm4oSnVQx5fzrPh2Z', 15, 'Transfer', 'Success', 8, '10000', '573608192', '2025-03-02 11:40:54.000000', 1),
 (169, 'gN6TabdDErCO2yXKRQhe', 14, 'Withdrawal', 'Success ', 5, '50000', NULL, '2025-03-02 11:41:27.164055', 1),
 (184, 'q3VHEGI1U0NOle47L96D', 23, 'Transfer', 'Success', 11, '487', '705239816', '2025-03-02 13:01:59.000000', 1),
-(202, 'epkXFV51faQcD06mEPCT', 23, 'Withdrawal', 'Success ', 11, '100', NULL, '2025-05-08 09:26:34.837289', 1);
+(202, 'epkXFV51faQcD06mEPCT', 23, 'Withdrawal', 'Success ', 11, '100', NULL, '2025-05-08 09:26:34.837289', 1),
+(204, 'GFcYuTbBtK8xVCjhlDo9', 23, 'Deposit', 'Success', 11, '100000', NULL, '2025-03-07 16:54:24.102416', 1);
 
 -- --------------------------------------------------------
 
@@ -427,6 +430,34 @@ CREATE TABLE `loan_applications` (
 INSERT INTO `loan_applications` (`id`, `applicant_name`, `loan_amount`, `application_date`, `status`, `reviewed_by`, `admin_review_id`, `review_date`, `staff_remark`, `admin_remark`, `client_id`, `loan_type_id`, `is_approved_by_staff`, `income_salary`, `loan_duration_years`, `loan_duration_months`) VALUES
 (27, 'utsav cheta', 800000.00, '2025-03-05 11:38:24', 'approved', 3, 2, '2025-03-05 11:52:42', 'good', 'all good', 11, 2, 0, 80000.00, 10, 6),
 (28, 'darshan lakhani', 120000.00, '2025-03-05 13:49:35', 'approved', 3, 2, '2025-03-05 13:50:23', 'good', 'ok', 15, 11, 0, 25000.00, 1, 6);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `loan_payments`
+--
+
+CREATE TABLE `loan_payments` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `client_id` int(10) UNSIGNED NOT NULL,
+  `loan_id` int(10) UNSIGNED NOT NULL,
+  `emi_date` date NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('paid','pending') NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `loan_payments`
+--
+
+INSERT INTO `loan_payments` (`id`, `client_id`, `loan_id`, `emi_date`, `amount`, `status`, `created_at`) VALUES
+(1, 11, 27, '2025-04-08', 11587.00, 'paid', '2025-04-13 17:55:10'),
+(4, 11, 27, '2025-04-01', 11587.00, 'paid', '2025-04-15 18:01:18'),
+(7, 11, 27, '2025-04-21', 11587.00, 'paid', '2025-04-18 18:11:22'),
+(8, 11, 27, '2025-04-28', 11587.00, 'paid', '2025-04-18 18:16:10'),
+(9, 11, 27, '2025-04-16', 11587.00, 'paid', '2025-04-15 08:58:28'),
+(10, 11, 27, '2025-04-11', 11587.00, 'paid', '2025-04-15 09:31:31');
 
 -- --------------------------------------------------------
 
@@ -562,6 +593,14 @@ ALTER TABLE `loan_applications`
   ADD KEY `fk_admin_review` (`admin_review_id`);
 
 --
+-- Indexes for table `loan_payments`
+--
+ALTER TABLE `loan_payments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_payment` (`client_id`,`loan_id`,`emi_date`),
+  ADD KEY `loan_id` (`loan_id`);
+
+--
 -- Indexes for table `loan_types`
 --
 ALTER TABLE `loan_types`
@@ -618,13 +657,13 @@ ALTER TABLE `ib_nominees`
 -- AUTO_INCREMENT for table `ib_notifications`
 --
 ALTER TABLE `ib_notifications`
-  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
+  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
 
 --
 -- AUTO_INCREMENT for table `ib_staff`
 --
 ALTER TABLE `ib_staff`
-  MODIFY `staff_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `staff_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `ib_systemsettings`
@@ -636,7 +675,7 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=204;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`
@@ -645,10 +684,16 @@ ALTER TABLE `loan_applications`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
+-- AUTO_INCREMENT for table `loan_payments`
+--
+ALTER TABLE `loan_payments`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
 -- AUTO_INCREMENT for table `loan_types`
 --
 ALTER TABLE `loan_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
@@ -687,6 +732,13 @@ ALTER TABLE `loan_applications`
   ADD CONSTRAINT `fk_client_id` FOREIGN KEY (`client_id`) REFERENCES `ib_clients` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `loan_applications_ibfk_1` FOREIGN KEY (`reviewed_by`) REFERENCES `ib_staff` (`staff_id`),
   ADD CONSTRAINT `loan_applications_ibfk_2` FOREIGN KEY (`loan_type_id`) REFERENCES `loan_types` (`id`);
+
+--
+-- Constraints for table `loan_payments`
+--
+ALTER TABLE `loan_payments`
+  ADD CONSTRAINT `loan_payments_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `ib_clients` (`client_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `loan_payments_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `loan_applications` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `password_resets`

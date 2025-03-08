@@ -15,21 +15,28 @@ if (isset($_POST['create_staff_account'])) {
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
     $sex = $_POST['sex'];
-    $aadhaar_number = trim($_POST['aadhaar_number']);
-    $pan = trim($_POST['pan']);
+    $aadhaar_number = trim($_POST['aadhaar_number'] ?? '');
+    $pan = trim($_POST['pan'] ?? '');
     $profile_pic = $_FILES["profile_pic"]["name"];
     $allowed_extensions = ['jpg', 'jpeg', 'png'];
     $file_extension = strtolower(pathinfo($profile_pic, PATHINFO_EXTENSION));
 
-    // Aadhaar validation (12 digits, should not start with 0 or 1)
-    if (!preg_match('/^[2-9][0-9]{11}$/', $aadhaar_number)) {
-        $errors['aa aadhaar_numberdhaar'] = "Invalid Aadhaar number. Must be 12 digits and cannot start with 0 or 1.";
+    // ✅ Staff Name Validation
+    if (empty($name) || !preg_match('/^[a-zA-Z\s]+$/', $name)) {
+        $errors['name'] = "Invalid Staff Name. Only alphabets are allowed.";
     }
 
-    // PAN validation (5 uppercase letters, 4 digits, 1 uppercase letter)
+    // Aadhaar validation (12 digits, should not start with 0 or 1)
+    if (!preg_match('/^[2-9][0-9]{11}$/', $aadhaar_number)) {
+        $errors['aadhaar_number'] = "Invalid Aadhaar number. Must be 12 digits and cannot start with 0 or 1.";
+    }
+
+    // PAN validation
     if (!preg_match('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/', $pan)) {
         $errors['pan'] = "Invalid PAN format. Must be in format: ABCDE1234F.";
     }
+
+    // Continue with remaining validations and logic...
 
     // Validate profile picture format
     if (!in_array($file_extension, $allowed_extensions)) {
@@ -37,7 +44,8 @@ if (isset($_POST['create_staff_account'])) {
     }
 
     // Validate strong password
-    if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
+    if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/', $password)) {
+        
         $errors['password'] = "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.";
     }
 
@@ -59,7 +67,7 @@ if (isset($_POST['create_staff_account'])) {
         $check_stmt->store_result();
 
         if ($check_stmt->num_rows > 0) {
-            $errors['general'] = "Phone, Email,  aadhaar_number, or PAN already exists!";
+            $errors['general'] = "name,Phone, Email,  aadhaar_number, or PAN already exists!";
         } else {
             $target_dir = "dist/img/";
             $target_file = $target_dir . basename($_FILES["profile_pic"]["name"]);
@@ -131,6 +139,7 @@ if (isset($_POST['create_staff_account'])) {
                                                 <input type="text" name="name" class="form-control"
                                                     value="<?php echo htmlspecialchars($name ?? ''); ?>">
                                                 <small class="text-danger"><?php echo $errors['name'] ?? ''; ?></small>
+
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Staff Number</label>
@@ -157,45 +166,51 @@ if (isset($_POST['create_staff_account'])) {
                                             </div>
                                         </div>
                                         <div class="row">
+
                                             <div class="col-md-6 form-group">
                                                 <label>Aadhaar Number</label>
-                                                <input type="text" name="aadhaar_number" class="form-control">
+                                                <input type="text" name="aadhaar_number" class="form-control"
+                                                    value="<?php echo htmlspecialchars($aadhaar_number ?? ''); ?>">
                                                 <small
                                                     class="text-danger"><?php echo $errors['aadhaar_number'] ?? ''; ?></small>
                                             </div>
-
-                                            <div class="col-md-6 form-group">
-                                                <label>PAN Number</label>
-                                                <input type="text" name="pan" class="form-control">
-                                                <small class="text-danger"><?php echo $errors['pan'] ?? ''; ?></small>
+                                            
+                                                <div class="col-md-6 form-group">
+                                                    <label>PAN Number</label>
+                                                    <input type="text" name="pan" class="form-control"
+                                                        value="<?php echo htmlspecialchars($pan ?? ''); ?>">
+                                                    <small
+                                                        class="text-danger"><?php echo $errors['pan'] ?? ''; ?></small>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 form-group">
-                                                <label>Email</label>
-                                                <input type="email" name="email" class="form-control">
-                                                <small class="text-danger"><?php echo $errors['email'] ?? ''; ?></small>
+                                            <div class="row">
+                                                <div class="col-md-6 form-group">
+                                                    <label>Email</label>
+                                                    <input type="email" name="email" class="form-control">
+                                                    <small
+                                                        class="text-danger"><?php echo $errors['email'] ?? ''; ?></small>
+                                                </div>
+                                                <div class="col-md-6 form-group">
+                                                    <label>Password</label>
+                                                    <input type="password" name="password" class="form-control">
+                                                    <small
+                                                        class="text-danger"><?php echo $errors['password'] ?? ''; ?></small>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6 form-group">
-                                                <label>Password</label>
-                                                <input type="password" name="password" class="form-control">
+                                            <div class="row">
+                                            <div class="form-group">
+                                                <label>Profile Picture (JPG, JPEG, PNG)</label>
+                                                <input type="file" name="profile_pic" class="form-control-file">
                                                 <small
-                                                    class="text-danger"><?php echo $errors['password'] ?? ''; ?></small>
+                                                    class="text-danger"><?php echo $errors['profile_pic'] ?? ''; ?></small>
                                             </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>Profile Picture (JPG, JPEG, PNG)</label>
-                                            <input type="file" name="profile_pic" class="form-control-file">
-                                            <small
-                                                class="text-danger"><?php echo $errors['profile_pic'] ?? ''; ?></small>
+                                        <div class="card-footer">
+                                            <button type="submit" name="create_staff_account"
+                                                class="btn btn-success">Add
+                                                Staff</button>
                                         </div>
-                                    </div>
-
-                                    <div class="card-footer">
-                                        <button type="submit" name="create_staff_account" class="btn btn-success">Add
-                                            Staff</button>
-                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -220,43 +235,43 @@ if (isset($_POST['create_staff_account'])) {
                 confirmButtonText: 'OK'
             });
             // JavaScript to handle form submission using AJAX
-$(document).ready(function () {
-    $("#staffForm").submit(function (e) {
-        e.preventDefault();
-        let formData = new FormData(this);
-        
-        $.ajax({
-            url: "process_staff.php", // Backend script to handle form processing
-            type: "POST",
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (response) {
-                let res = JSON.parse(response);
-                
-                // Clear previous error messages
-                $(".text-danger").text("");
-                
-                if (res.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: 'Staff Account Created Successfully!',
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        location.reload(); // Reload to reset form
+            $(document).ready(function () {
+                $("#staffForm").submit(function (e) {
+                    e.preventDefault();
+                    let formData = new FormData(this);
+
+                    $.ajax({
+                        url: "process_staff.php", // Backend script to handle form processing
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            let res = JSON.parse(response);
+
+                            // Clear previous error messages
+                            $(".text-danger").text("");
+
+                            if (res.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: 'Staff Account Created Successfully!',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    location.reload(); // Reload to reset form
+                                });
+                            } else {
+                                // Display validation errors
+                                $.each(res.errors, function (key, value) {
+                                    $("[name='" + key + "']").next(".text-danger").text(value);
+                                });
+                            }
+                        }
                     });
-                } else {
-                    // Display validation errors
-                    $.each(res.errors, function (key, value) {
-                        $("[name='" + key + "']").next(".text-danger").text(value);
-                    });
-                }
-            }
-        });
-    });
-});
+                });
+            });
 
         </script>
     <?php endif; ?>

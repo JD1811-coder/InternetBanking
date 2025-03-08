@@ -325,6 +325,7 @@ if (isset($_POST['change_client_password'])) {
         </aside><!-- /.control-sidebar -->
     </div><!-- ./wrapper -->
     <!-- jQuery -->
+     
     <script src="plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>

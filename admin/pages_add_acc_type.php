@@ -67,7 +67,7 @@ $checkStmt->close();
 
         if ($stmt) {
             $_SESSION['success'] = "Account Category Created Successfully!";
-            header("Location: pages_add_account_category.php");
+            header("Location: pages_manage_accs.php");
             exit();
         } else {
             $_SESSION['error'] = "Error! Please try again.";
