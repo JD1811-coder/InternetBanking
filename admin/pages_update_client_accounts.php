@@ -166,7 +166,7 @@ if (isset($_POST['update_account'])) {
                                             <div class="row">
                                             <div class="col-md-6 form-group">
     <label for="accName">Account Name</label>
-    <input type="text" name="acc_name" value="<?php echo htmlspecialchars($row->acc_name); ?>" required class="form-control" id="accName">
+    <input type="text" name="acc_name" readonly value="<?php echo htmlspecialchars($row->acc_name); ?>" required class="form-control" id="accName">
     <small id="accNameError"></small> <!-- Error message appears here -->
 </div>
 

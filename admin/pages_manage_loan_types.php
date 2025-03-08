@@ -110,7 +110,7 @@ $loanTypesResult = $mysqli->query($loanTypesQuery);
                                             <th>Type Name</th>
                                             <th>Description</th>
                                             <th>Interest Rate</th>
-                                            <th>Max Amount</th>
+                                            <!-- <th>Max Amount</th> -->
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -124,7 +124,7 @@ $loanTypesResult = $mysqli->query($loanTypesQuery);
                                             <td><?php echo htmlspecialchars($row->type_name); ?></td>
                                             <td><?php echo htmlspecialchars($row->description); ?></td>
                                             <td><?php echo htmlspecialchars($row->interest_rate); ?>%</td>
-                                            <td><?php echo number_format($row->max_amount, 2); ?></td>
+                                            <!-- <td><?php echo number_format($row->max_amount, 2); ?></td> -->
                                             <td>
                                                 <a class="btn btn-success btn-sm"
                                                     href="pages_edit_loan_type.php?id=<?php echo $row->id; ?>">

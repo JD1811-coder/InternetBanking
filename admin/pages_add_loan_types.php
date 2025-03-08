@@ -6,22 +6,39 @@ check_login();
 $admin_id = $_SESSION['admin_id'];
 
 if (isset($_POST['add_loan_type'])) {
-    $type_name = $_POST['type_name'];
-    $description = $_POST['description'];
-    $interest_rate = $_POST['interest_rate'];
-    $max_amount = $_POST['max_amount'];
+    $type_name = trim($_POST['type_name']);
+    $description = trim($_POST['description']);
+    $interest_rate = floatval($_POST['interest_rate']);
+    $max_amount = floatval($_POST['max_amount']);
 
-    $query = "INSERT INTO loan_types (type_name, description, interest_rate, max_amount, created_at) VALUES (?, ?, ?, ?, NOW())";
-    $stmt = $mysqli->prepare($query);
-    $stmt->bind_param('ssdd', $type_name, $description, $interest_rate, $max_amount);
+    // Check for duplicate Loan Type Name
+    $stmt = $mysqli->prepare("SELECT type_name FROM loan_types WHERE type_name = ?");
+    $stmt->bind_param('s', $type_name);
     $stmt->execute();
+    $stmt->store_result();
 
-    if ($stmt) {
-        $success = "Loan Type Added Successfully";
+    if ($stmt->num_rows > 0) {
+        $err = "Loan Type Name already exists!";
+    } elseif (empty($type_name) || empty($description)) {
+        $err = "All fields are required!";
+    } elseif ($interest_rate < 1 || $interest_rate > 100) {
+        $err = "Interest Rate must be between 1 and 100!";
+    } elseif ($max_amount <= 0) {
+        $err = "Maximum Loan Amount must be greater than zero!";
     } else {
-        $err = "Please Try Again Later";
+        $query = "INSERT INTO loan_types (type_name, description, interest_rate, max_amount, created_at) 
+                  VALUES (?, ?, ?, ?, NOW())";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('ssdd', $type_name, $description, $interest_rate, $max_amount);
+
+        if ($stmt->execute()) {
+            $success = "Loan Type Added Successfully";
+        } else {
+            $err = "Please Try Again Later";
+        }
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -111,12 +128,12 @@ document.addEventListener("DOMContentLoaded", function () {
         let maxAmount = document.getElementById("max_amount").value.trim();
 
         // Validation regex
-        let nameRegex = /^[a-zA-Z\s_]+$/; // Only letters, spaces, and underscores allowed
+        let nameRegex = /^[a-zA-Z\s_]+$/; 
 
         // Clear previous errors
         document.querySelectorAll(".error").forEach(el => el.innerText = "");
 
-        let hasError = false; // Flag to check errors
+        let hasError = false; 
 
         // Loan Type Name validation
         if (typeName === "") {
@@ -137,57 +154,37 @@ document.addEventListener("DOMContentLoaded", function () {
         if (interestRate === "" || isNaN(interestRate)) {
             document.getElementById("error_interest_rate").innerText = "Valid Interest Rate is required!";
             hasError = true;
-        } else if (parseFloat(interestRate) < 0) {
-            document.getElementById("error_interest_rate").innerText = "Interest Rate cannot be negative!";
+        } else if (parseFloat(interestRate) < 1 || parseFloat(interestRate) > 100) {
+            document.getElementById("error_interest_rate").innerText = "Interest Rate must be between 1 and 100!";
             hasError = true;
         }
 
         // Maximum Loan Amount validation
-        if (maxAmount === "" || isNaN(maxAmount)) {
+        if (maxAmount === "" || isNaN(maxAmount) || parseFloat(maxAmount) <= 0) {
             document.getElementById("error_max_amount").innerText = "Valid Maximum Loan Amount is required!";
-            hasError = true;
-        } else if (parseFloat(maxAmount) < 0) {
-            document.getElementById("error_max_amount").innerText = "Maximum Loan Amount cannot be negative!";
             hasError = true;
         }
 
-        // Stop submission if errors exist
-        if (hasError) return;
-
-        // Prepare form data
-        let formData = new FormData(this);
-
-        // AJAX submission
-        fetch("ajax_add_loan_type.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Success message
-                Swal.fire({
-                    icon: "success",
-                    title: "Success",
-                    text: "Loan Type Added Successfully!",
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-                // Reset form on success
-                document.getElementById("loanForm").reset();
-            } else {
-                // Show error message
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: data.error
-                });
-            }
-        })
-        .catch(error => console.log(error));
+        // AJAX Duplicate Check for Loan Type Name
+        if (!hasError) {
+            fetch("ajax_check_duplicate.php", {
+                method: "POST",
+                body: JSON.stringify({ type_name: typeName }),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.duplicate) {
+                    document.getElementById("error_type_name").innerText = "Loan Type Name already exists!";
+                } else {
+                    // Submit the form if no duplicates
+                    document.getElementById("loanForm").submit();
+                }
+            });
+        }
     });
 });
+
 </script>
 
 </body>

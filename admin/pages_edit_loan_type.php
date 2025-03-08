@@ -51,23 +51,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_loan_type'])) 
     $checkStmt->close();
 
     // Validation checks
-    if ($type_name === "" || ctype_space($type_name)) {
-        $errors['type_name'] = "Loan Type Name is required!";
-        $hasError = true;
-    } elseif (!preg_match('/^[a-zA-Z\s_]+$/', $type_name)) {
-        $errors['type_name'] = "Only letters, spaces, and underscores allowed!";
-        $hasError = true;
-    }
+    // Loan Type Name Validation with Trim Check
+if ($type_name === "" || ctype_space($type_name)) {
+    $errors['type_name'] = "Loan Type Name is required!";
+    $hasError = true;
+} elseif (!preg_match('/^[a-zA-Z\s_]+$/', $type_name)) {
+    $errors['type_name'] = "Only letters, spaces, and underscores allowed!";
+    $hasError = true;
+}
+
 
     if ($description === "" || ctype_space($description)) {
         $errors['description'] = "Description is required!";
         $hasError = true;
     }
 
-    if (!is_numeric($interest_rate) || $interest_rate < 0) {
-        $errors['interest_rate'] = "Interest Rate must be a valid non-negative number!";
+    if (!is_numeric($interest_rate) || $interest_rate < 1 || $interest_rate > 100) {
+        $errors['interest_rate'] = "Interest Rate must be between 1 and 100!";
         $hasError = true;
     }
+    
 
     if (!is_numeric($max_amount) || $max_amount < 0) {
         $errors['max_amount'] = "Max Amount must be a valid non-negative number!";
@@ -156,19 +159,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_loan_type'])) 
                                         <span class="error text-danger"><?php echo $errors['description']; ?></span>
                                     </div>
                                     <div class="form-group">
-                                        <label for="interest_rate">Interest Rate (%)</label>
-                                        <input type="number" class="form-control" id="interest_rate"
-                                            name="interest_rate"
-                                            value="<?php echo htmlspecialchars($loanType->interest_rate); ?>"
-                                            step="0.01" required min="0">
-                                        <span class="error text-danger"><?php echo $errors['interest_rate']; ?></span>
-                                    </div>
-                                    <div class="form-group">
+    <label for="interest_rate">Interest Rate (%)</label>
+    <input type="number" class="form-control" id="interest_rate"
+        name="interest_rate"
+        value="<?php echo htmlspecialchars($loanType->interest_rate); ?>"
+        step="0.01" min="1" max="100" required>
+    <span class="error text-danger"><?php echo $errors['interest_rate']; ?></span>
+</div>
+
+                                    <!-- <div class="form-group">
                                         <label for="max_amount">Max Amount</label>
                                         <input type="number" class="form-control" id="max_amount" name="max_amount"
                                             value="<?php echo htmlspecialchars($loanType->max_amount); ?>" required min="0">
                                         <span class="error text-danger"><?php echo $errors['max_amount']; ?></span>
-                                    </div>
+                                    </div> -->
                                     <button type="submit" name="update_loan_type" class="btn btn-primary">Update Loan
                                         Type</button>
                                     <a href="pages_manage_loan_types.php" class="btn btn-secondary">Cancel</a>
@@ -190,7 +194,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_loan_type'])) 
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="dist/js/adminlte.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+document.getElementById("interest_rate").addEventListener("input", function() {
+    let interestRate = parseFloat(this.value);
+    if (interestRate < 1 || interestRate > 100) {
+        this.setCustomValidity("Interest Rate must be between 1 and 100!");
+    } else {
+        this.setCustomValidity("");
+    }
+});
+</script>
 
 </body>
 
 </html>
+ 
