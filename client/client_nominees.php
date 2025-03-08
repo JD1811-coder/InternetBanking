@@ -56,6 +56,29 @@ $result = $stmt->get_result();
 <!DOCTYPE html>
 <html>
 <?php include("dist/_partials/head.php"); ?>
+<?php if (isset($_SESSION['success'])) { ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '<?php echo $_SESSION['success']; ?>',
+            confirmButtonColor: '#28a745'
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php } ?>
+
+<?php if (isset($_SESSION['error'])) { ?>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '<?php echo $_SESSION['error']; ?>',
+            confirmButtonColor: '#dc3545'
+        });
+    </script>
+    <?php unset($_SESSION['error']); ?>
+<?php } ?>
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">

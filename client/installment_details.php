@@ -21,10 +21,10 @@ $client_balance = $account_row ? $account_row['acc_amount'] : 0;
 
 // Fetch approved loans
 $query = "SELECT la.id, la.loan_type_id, lt.interest_rate, la.loan_amount, 
-                    la.loan_duration_years, la.loan_duration_months, la.application_date 
-            FROM loan_applications la
-            INNER JOIN loan_types lt ON la.loan_type_id = lt.id 
-            WHERE la.status = 'approved' AND la.client_id = ?";
+                        la.loan_duration_years, la.loan_duration_months, la.application_date 
+                FROM loan_applications la
+                INNER JOIN loan_types lt ON la.loan_type_id = lt.id 
+                WHERE la.status = 'approved' AND la.client_id = ?";
 
 $stmt = $mysqli->prepare($query);
 $stmt->bind_param('i', $client_id);
@@ -66,18 +66,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
         }
 
         // Insert the EMI payment record into loan_payments
-      $payment_query = "INSERT INTO loan_payments (client_id, loan_id, emi_date, amount, status) VALUES (?, ?, ?, ?, 'paid')
-                  ON DUPLICATE KEY UPDATE status = 'paid'";
+        $payment_query = "INSERT INTO loan_payments (client_id, loan_id, emi_date, amount, status) 
+                  VALUES (?, ?, ?, ?, 'paid') 
+                  ON DUPLICATE KEY UPDATE status = 'paid', amount = VALUES(amount)";
 
-$stmt = $mysqli->prepare($payment_query);
-$stmt->bind_param('iisd', $client_id, $loan_id, $emi_date, $emi_amount);
+        $stmt = $mysqli->prepare($payment_query);
+        $stmt->bind_param('iisd', $client_id, $loan_id, $emi_date, $emi_amount);
 
-if ($stmt->execute()) {
-    echo json_encode(['status' => 'success', 'message' => "Payment successful! ₹$emi_amount has been deducted."]);
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Payment processing failed!', 'sql_error' => $stmt->error]);
-}
-exit;
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'message' => "Payment successful! ₹$emi_amount has been deducted."]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Payment processing failed!', 'sql_error' => $stmt->error]);
+        }
+        exit;
 
 
         if ($stmt->execute()) {
@@ -159,7 +160,8 @@ exit;
                                                     $due_date_str = $due_date->format("Y-m-d");
 
                                                     // Check if payment is already made
-                                                    $payment_check_query = "SELECT COUNT(*) AS paid FROM loan_payments WHERE client_id = ? AND loan_id = ? AND emi_date = ? AND status = 'paid'";
+                                                    $payment_check_query = "SELECT COUNT(*) AS paid FROM loan_payments 
+                        WHERE client_id = ? AND loan_id = ? AND emi_date = ? AND status = 'paid'";
 
                                                     $stmt = $mysqli->prepare($payment_check_query);
                                                     $stmt->bind_param('iis', $client_id, $row->id, $due_date_str);
@@ -167,6 +169,7 @@ exit;
                                                     $payment_result = $stmt->get_result();
                                                     $payment_row = $payment_result->fetch_assoc();
                                                     $is_paid = $payment_row['paid'] > 0;
+
 
                                                     echo "<tr>";
                                                     echo "<td>" . $count . "</td>";
@@ -191,6 +194,7 @@ exit;
                                                         }
                                                     }
                                                     
+
 
                                                     echo "</td>";
 
@@ -240,14 +244,14 @@ exit;
                         success: function (response) {
                             if (response.status === "success") {
                                 Swal.fire("Success!", response.message, "success").then(() => {
-                                    let button = $("button[onclick='confirmPayment(" + loanId + ", " + emiIndex + ", " + emiAmount + ", \"" + emiDate + "\")']");
-                                    button.removeClass("btn-primary").addClass("btn-success").prop("disabled", true).text("Paid");
+                                    location.reload(); // This will force the page to reload and fetch updated data
                                 });
                             } else {
                                 Swal.fire("Error!", response.message, "error");
                             }
-                           
                         },
+
+
                         error: function (xhr) {
                             Swal.fire("Error!", "Something went wrong! Try again.", "error");
                         }
@@ -255,7 +259,7 @@ exit;
                 }
             });
         }
-  
+
 
     </script>
 

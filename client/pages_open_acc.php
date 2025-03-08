@@ -4,80 +4,81 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $client_id = $_SESSION['client_id'];
-//register new account
+
 if (isset($_POST['open_account'])) {
-    $acc_name = $_POST['acc_name'];
+    $acc_name = trim($_POST['acc_name']);
     $account_number = $_POST['account_number'];
-    $acc_type = trim($_POST['acc_type']); // Trim spaces to avoid mismatches
+    $acc_type = trim($_POST['acc_type']);
     $acc_rates = $_POST['acc_rates'];
     $acc_status = $_POST['acc_status'];
     $acc_amount = $_POST['acc_amount'];
     $client_id = $_SESSION['client_id'];
 
-    // Check existing accounts for the client
-    $check_query = "SELECT acc_type FROM iB_bankAccounts WHERE client_id = ?";
-    $stmt_check = $mysqli->prepare($check_query);
-    $stmt_check->bind_param('i', $client_id);
-    $stmt_check->execute();
-    $stmt_check->store_result();
-    $stmt_check->bind_result($existing_acc_type);
-
-    $existing_accounts = [];
-    $joint_acc_count = 0;
-
-    // Loop through existing accounts
-    while ($stmt_check->fetch()) {
-        $existing_accounts[] = trim($existing_acc_type);
-        if (trim($existing_acc_type) === "Joint Account") {
-            $joint_acc_count++; // Count joint accounts
-        }
+    // Validate account holder name (only letters allowed)
+    if (!preg_match("/^[a-zA-Z ]+$/", $acc_name)) {
+        $err = "Account Holder Name should only contain letters.";
     }
-    $stmt_check->close();
 
-    $total_accounts = count($existing_accounts);
+    // Validate account type selection
+    if ($acc_type == "Select Any iBank Account types" || empty($acc_type)) {
+        $err = "Please select a valid account type.";
+    }
 
-    // Validation logic
-    if ($total_accounts == 0) {
-        // If no accounts exist, allow any account type
-        $allow_account = true;
-    } elseif ($total_accounts == 1 && $existing_accounts[0] !== "Joint Account") {
-        // If the first account is NOT a Joint Account, restrict further account creation
-        $err = "You can only open one non-joint account. Additional accounts must be Joint Accounts.";
+    if (!isset($err)) {
+        // Check existing accounts
+        $check_query = "SELECT acc_type FROM iB_bankAccounts WHERE client_id = ?";
+        $stmt_check = $mysqli->prepare($check_query);
+        $stmt_check->bind_param('i', $client_id);
+        $stmt_check->execute();
+        $stmt_check->store_result();
+        $stmt_check->bind_result($existing_acc_type);
+
+        $existing_accounts = [];
+        $joint_acc_count = 0;
+
+        while ($stmt_check->fetch()) {
+            $existing_accounts[] = trim($existing_acc_type);
+            if (trim($existing_acc_type) === "Joint Account") {
+                $joint_acc_count++;
+            }
+        }
+        $stmt_check->close();
+
+        $total_accounts = count($existing_accounts);
         $allow_account = false;
-    } elseif ($total_accounts >= 1 && in_array("Joint Account", $existing_accounts)) {
-        // If at least one Joint Account exists, allow up to 3
-        if (strcasecmp($acc_type, "Joint Account") !== 0) {
-            $err = "You are only allowed to open Joint Accounts now.";
-            $allow_account = false;
-        } elseif ($joint_acc_count >= 3) {
-            $err = "You can only have a maximum of 3 Joint Accounts.";
-            $allow_account = false;
-        } else {
+
+        if ($total_accounts == 0) {
             $allow_account = true;
+        } elseif ($total_accounts == 1 && $existing_accounts[0] !== "Joint Account") {
+            $err = "You can only open one non-joint account. Additional accounts must be Joint Accounts.";
+        } elseif ($total_accounts >= 1 && in_array("Joint Account", $existing_accounts)) {
+            if (strcasecmp($acc_type, "Joint Account") !== 0) {
+                $err = "You are only allowed to open Joint Accounts now.";
+            } elseif ($joint_acc_count >= 3) {
+                $err = "You can only have a maximum of 3 Joint Accounts.";
+            } else {
+                $allow_account = true;
+            }
         }
-    } else {
-        $allow_account = false;
-    }
 
-    if ($allow_account) {
-        // Insert new account into the database
-        $query = "INSERT INTO iB_bankAccounts 
-              (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id) 
-              VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssssssd', $acc_name, $account_number, $acc_type, $acc_rates, $acc_status, $acc_amount, $client_id);
-        $stmt->execute();
+        if ($allow_account) {
+            $query = "INSERT INTO iB_bankAccounts 
+                      (acc_name, account_number, acc_type, acc_rates, acc_status, acc_amount, client_id) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('ssssssd', $acc_name, $account_number, $acc_type, $acc_rates, $acc_status, $acc_amount, $client_id);
+            $stmt->execute();
 
-        if ($stmt) {
-            $success = "Account Opened Successfully";
-        } else {
-            $err = "Please Try Again Later";
+            if ($stmt) {
+                $success = "Account Opened Successfully";
+            } else {
+                $err = "Please Try Again Later";
+            }
         }
     }
 }
-
-
 ?>
+
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
@@ -181,27 +182,20 @@ if (isset($_POST['open_account'])) {
 
                                             <!--Bank Account Details-->
                                             <div class="row">
-                                                <div class=" col-md-6 form-group">
+                                                <div class="col-md-6 form-group">
                                                     <label for="exampleInputEmail1">iBank Account Type</label>
-                                                    <select class="form-control" onChange="getiBankAccs(this.value);"
-                                                        name="acc_type">
-                                                        <option>Select Any iBank Account types</option>
+                                                    <select class="form-control" name="acc_type" id="acc_type" required>
+                                                        <option value="">Select Any iBank Account Type</option>
                                                         <?php
-                                                        //fetch all iB_Acc_types
                                                         $ret = "SELECT * FROM iB_Acc_types WHERE is_active = 1 ORDER BY RAND()";
                                                         $stmt = $mysqli->prepare($ret);
-                                                        $stmt->execute(); //ok
+                                                        $stmt->execute();
                                                         $res = $stmt->get_result();
-                                                        $cnt = 1;
                                                         while ($row = $res->fetch_object()) {
-
-                                                            ?>
-                                                            <option value="<?php echo $row->name; ?> ">
-                                                                <?php echo $row->name; ?>
-                                                            </option>
-                                                        <?php } ?>
+                                                            echo "<option value='$row->name' data-rate='$row->rate'>$row->name</option>";
+                                                        }
+                                                        ?>
                                                     </select>
-
                                                 </div>
                                                 <div class=" col-md-6 form-group">
                                                     <label for="exampleInputEmail1">Account Type Rates (%)</label>
@@ -223,10 +217,11 @@ if (isset($_POST['open_account'])) {
 
                                             </div>
                                             <div class="row">
-                                                <div class=" col-md-6 form-group">
+
+                                                <div class="col-md-6 form-group">
                                                     <label for="exampleInputEmail1">Account Holder Name</label>
-                                                    <input type="text" name="acc_name" required class="form-control"
-                                                        id="exampleInputEmail1">
+                                                    <input type="text" name="acc_name" required pattern="[A-Za-z ]+"
+                                                        title="Only letters and spaces are allowed" class="form-control">
                                                 </div>
 
                                                 <div class=" col-md-6 form-group">
@@ -281,6 +276,17 @@ if (isset($_POST['open_account'])) {
             bsCustomFileInput.init();
         });
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#acc_type").change(function () {
+            var selectedOption = $(this).find(":selected");
+            var rate = selectedOption.data("rate"); // Get rate from the selected option
+            $("#AccountRates").val(rate); // Set the value
+        });
+    });
+</script>
+
 </body>
 
 </html>

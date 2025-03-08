@@ -5,47 +5,83 @@ include('conf/checklogin.php');
 check_login();
 $client_id = $_SESSION['client_id'];
 
-// Update logged-in user account
+$errors = []; // Store validation errors
+
 if (isset($_POST['update_client_account'])) {
-    $name = $_POST['name'];
-    $phone = $_POST['phone'];
-    $email = $_POST['email'];
-    $aadhaar = $_POST['aadhar_number'];
-    $pan = $_POST['pan_number'];
+    $name = trim($_POST['name']);
+    $phone = trim($_POST['phone']);
+    $email = trim($_POST['email']);
+    $aadhaar = trim($_POST['aadhar_number']);
+    $pan = trim($_POST['pan_number']);
 
-    // Validate inputs
-    if (
-        strlen($phone) === 10 && ctype_digit($phone) &&
-        strlen($aadhaar) === 12 && ctype_digit($aadhaar) &&
-        preg_match('/^[A-Z0-9]{10}$/', $pan)
-    ) {
-        // Process profile picture upload
-        $profile_pic = $_FILES["profile_pic"]["name"];
-        move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "../admin/dist/img/" . $_FILES["profile_pic"]["name"]);
+    // Profile Picture Validation
+    $allowed_extensions = ['jpg', 'jpeg', 'png'];
+    $profile_pic = $_FILES["profile_pic"]["name"];
+    $profile_pic_tmp = $_FILES["profile_pic"]["tmp_name"];
+    $profile_ext = strtolower(pathinfo($profile_pic, PATHINFO_EXTENSION));
 
-        // Update client information in the database
-        $query = "UPDATE iB_clients SET name=?, phone=?, email=?, profile_pic=?, aadhar_number=?, pan_number=? WHERE client_id=?";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('sssssss', $name, $phone, $email, $profile_pic, $aadhaar, $pan, $client_id);
+    // Validate Inputs
+    if (!preg_match('/^[A-Za-z\s]{2,50}$/', $name)) {
+        $errors['name'] = "Name should contain only letters and spaces (2-50 characters).";
+    }
+    if (!preg_match('/^[6789]\d{9}$/', $phone)) {
+        $errors['phone'] = "Phone number must start with 6, 7, 8, or 9 and be exactly 10 digits.";
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = "Invalid email format.";
+    }
+    if (!preg_match('/^\d{12}$/', $aadhaar)) {
+        $errors['aadhaar'] = "Aadhaar number must be exactly 12 digits.";
+    }
+    if (!preg_match('/^[A-Z0-9]{10}$/', $pan)) {
+        $errors['pan'] = "PAN should contain exactly 10 characters (only uppercase letters and digits).";
+    }
+    if (!empty($profile_pic) && !in_array($profile_ext, $allowed_extensions)) {
+        $errors['profile_pic'] = "Profile picture must be in JPG, JPEG, or PNG format.";
+    }
+
+    if (empty($errors)) {
+        // Check for Duplicates
+        $check_query = "SELECT * FROM iB_clients WHERE (phone=? OR email=? OR aadhar_number=? OR pan_number=?) AND client_id != ?";
+        $stmt = $mysqli->prepare($check_query);
+        $stmt->bind_param('sssss', $phone, $email, $aadhaar, $pan, $client_id);
         $stmt->execute();
+        $stmt->store_result();
 
-        if ($stmt) {
-            $success = "Client Account Updated";
+        if ($stmt->num_rows > 0) {
+            $errors['duplicate'] = "Phone, Email, Aadhaar, or PAN already exists. Please use unique details.";
         } else {
-            $err = "Please Try Again Or Try Later";
+            // Process Profile Picture Upload
+            if (!empty($profile_pic)) {
+                $profile_pic_new = time() . "_" . basename($profile_pic);
+                move_uploaded_file($profile_pic_tmp, "../admin/dist/img/" . $profile_pic_new);
+            } else {
+                $profile_pic_new = ""; // Keep existing pic if not updated
+            }
+
+            // Update Client Information
+            $query = "UPDATE iB_clients SET name=?, phone=?, email=?, profile_pic=?, aadhar_number=?, pan_number=? WHERE client_id=?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('sssssss', $name, $phone, $email, $profile_pic_new, $aadhaar, $pan, $client_id);
+            if ($stmt->execute()) {
+                $_SESSION['success'] = "Client Account Updated Successfully."; 
+                header("Location: pages_account.php"); 
+                exit();
+                
+            } else {
+                $errors['database'] = "Error updating account. Please try again.";
+            }
         }
-    } else {
-        $err = "Invalid input. Ensure phone is 10 digits, Aadhaar is 12 digits, and PAN follows format ABCDE1234F.";
     }
 }
 
+// Fetch Client Data
 $ret = "SELECT name, phone, email, profile_pic, aadhar_number, pan_number FROM iB_clients WHERE client_id = ?";
 $stmt = $mysqli->prepare($ret);
 $stmt->bind_param('s', $client_id);
 $stmt->execute();
 $res = $stmt->get_result();
 $row = $res->fetch_object();
-
 ?>
 
 <!-- Log on to codeastro.com for more projects! -->
@@ -92,8 +128,6 @@ $row = $res->fetch_object();
 
                         ";
                 }
-
-
                 ?>
                 <section class="content-header">
                     <div class="container-fluid">
@@ -170,9 +204,10 @@ $row = $res->fetch_object();
                                                         <label for="inputName" class="col-sm-2 col-form-label">Name</label>
                                                         <div class="col-sm-10">
                                                             <input type="text" name="name" required class="form-control"
-                                                                value="<?php echo htmlspecialchars($row->name, ENT_QUOTES, 'UTF-8'); ?>"
-                                                                id="inputName" pattern="[A-Za-z\s]{2,50}"
-                                                                title="Name should only contain letters and spaces (2-50 characters).">
+                                                                value="<?php echo htmlspecialchars($row->name ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                                id="inputName">
+                                                            <small
+                                                                class="text-danger"><?php echo $errors['name'] ?? ''; ?></small>
                                                         </div>
                                                     </div>
 
@@ -180,55 +215,71 @@ $row = $res->fetch_object();
                                                         <label for="inputEmail"
                                                             class="col-sm-2 col-form-label">Email</label>
                                                         <div class="col-sm-10">
-                                                            <input type="email" name="email" required
-                                                                value="<?php echo $row->email; ?>" class="form-control"
+                                                            <input type="email" name="email" required class="form-control"
+                                                                value="<?php echo htmlspecialchars($row->email ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                                 id="inputEmail">
+                                                            <small
+                                                                class="text-danger"><?php echo $errors['email'] ?? ''; ?></small>
                                                         </div>
                                                     </div>
+
                                                     <div class="form-group row">
-                                                        <label for="inputName2"
-                                                            class="col-sm-2 col-form-label">Contact</label>
+                                                        <label for="inputPhone"
+                                                            class="col-sm-2 col-form-label">Phone</label>
                                                         <div class="col-sm-10">
-                                                            <input type="text" class="form-control" required name="phone"
-                                                                value="<?php echo $row->phone; ?>" id="inputName2">
+                                                            <input type="text" name="phone" required class="form-control"
+                                                                value="<?php echo htmlspecialchars($row->phone ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                                id="inputPhone">
+                                                            <small
+                                                                class="text-danger"><?php echo $errors['phone'] ?? ''; ?></small>
                                                         </div>
                                                     </div>
+
                                                     <div class="form-group row">
-                                                        <label for="inputName2" class="col-sm-2 col-form-label">Profile
+                                                        <label for="aadhar_number" class="col-sm-2 col-form-label">Aadhaar
+                                                            Number</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="aadhar_number" required
+                                                                class="form-control"
+                                                                value="<?php echo htmlspecialchars($row->aadhar_number ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                                id="aadhar_number">
+                                                            <small
+                                                                class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row">
+                                                        <label for="pan_number" class="col-sm-2 col-form-label">PAN
+                                                            Number</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="pan_number" required
+                                                                class="form-control"
+                                                                value="<?php echo htmlspecialchars($row->pan_number ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                                id="pan_number">
+                                                            <small
+                                                                class="text-danger"><?php echo $errors['pan_number'] ?? ''; ?></small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row">
+                                                        <label for="profile_pic" class="col-sm-2 col-form-label">Profile
                                                             Picture</label>
                                                         <div class="input-group col-sm-10">
                                                             <div class="custom-file">
                                                                 <input type="file" name="profile_pic"
-                                                                    class=" form-control custom-file-input"
-                                                                    id="exampleInputFile">
-                                                                <label class="custom-file-label  col-form-label"
-                                                                    for="exampleInputFile">Choose file</label>
+                                                                    class="form-control custom-file-input" id="profile_pic">
+                                                                <label class="custom-file-label" for="profile_pic">Choose
+                                                                    file</label>
                                                             </div>
                                                         </div>
+                                                        <small
+                                                            class="text-danger"><?php echo $errors['profile_pic'] ?? ''; ?></small>
                                                     </div>
 
-                                                    <div class="form-group row">
-                                                        <label for="aadhaar" class="col-sm-2 col-form-label">Aadhaar
-                                                            Card</label>
-                                                        <div class="col-sm-10">
-                                                            <input type="text" name="aadhar_number" required
-                                                                class="form-control"
-                                                                value="<?php echo isset($row->aadhar_number) ? htmlspecialchars($row->aadhar_number, ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                                                id="aadhar_number" pattern="\d{12}"
-                                                                title="Aadhaar number should be exactly 12 digits.">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-group row">
-                                                        <label for="pan" class="col-sm-2 col-form-label">PAN Card</label>
-                                                        <div class="col-sm-10">
-                                                            <input type="text" name="pan_number" required
-                                                                class="form-control"
-                                                                value="<?php echo isset($row->pan_number) ? htmlspecialchars($row->pan_number, ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                                                id="pan_number" pattern="[A-Z0-9]{10}"
-                                                                title="PAN should contain exactly 10 characters (only uppercase letters and digits).">
-                                                        </div>
-                                                    </div>
+                                                    <!-- General error message -->
+                                                    <?php if (!empty($errors['general'])): ?>
+                                                        <div class="alert alert-danger"><?php echo $errors['general']; ?></div>
+                                                    <?php endif; ?>
 
                                                     <div class="form-group row">
                                                         <div class="offset-sm-2 col-sm-10">
@@ -310,6 +361,22 @@ $row = $res->fetch_object();
     <script src="dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
+    <!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    <?php if (isset($_SESSION['success'])) { ?>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: "<?php echo $_SESSION['success']; ?>",
+            showConfirmButton: false,
+            timer: 3000
+        });
+        <?php unset($_SESSION['success']); ?> // Clear the session message after showing the alert
+    <?php } ?>
+</script>
+
 </body>
 
 </html>
