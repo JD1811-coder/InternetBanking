@@ -12,31 +12,43 @@ if (isset($_POST['update_staff_account'])) {
     $email = $_POST['email'];
     $sex  = $_POST['sex'];
 
-    // Profile Picture Validation
-    $profile_pic = $_FILES["profile_pic"]["name"];
-    $allowed_extensions = ['jpg', 'jpeg', 'png'];
-    $file_extension = pathinfo($profile_pic, PATHINFO_EXTENSION);
+    // Check for duplicate email or phone (excluding the current staff_number)
+    $checkQuery = "SELECT * FROM iB_staff WHERE (email = ? OR phone = ?) AND staff_number != ?";
+    $stmt = $mysqli->prepare($checkQuery);
+    $stmt->bind_param('sss', $email, $phone, $staff_number);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if (!in_array(strtolower($file_extension), $allowed_extensions)) {
-        $_SESSION['error'] = "Invalid file format. Only JPG, JPEG, and PNG allowed.";
+    if ($result->num_rows > 0) {
+        $_SESSION['error'] = "Email or phone number already exists. Please use a different one.";
     } else {
-        move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "dist/img/" . $profile_pic);
+        // Profile Picture Validation
+        $profile_pic = $_FILES["profile_pic"]["name"];
+        $allowed_extensions = ['jpg', 'jpeg', 'png'];
+        $file_extension = pathinfo($profile_pic, PATHINFO_EXTENSION);
 
-        // Update database
-        $query = "UPDATE iB_staff SET name=?, phone=?, email=?, sex=?, profile_pic=? WHERE staff_number=?";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssssss', $name, $phone, $email, $sex, $profile_pic, $staff_number);
-        $stmt->execute();
-
-        if ($stmt) {
-            $_SESSION['success'] = "Staff Account Updated Successfully!";
-            header("Location: " . $_SERVER['PHP_SELF'] . "?staff_number=" . $staff_number); // Avoid resubmission
-            exit();
+        if (!in_array(strtolower($file_extension), $allowed_extensions)) {
+            $_SESSION['error'] = "Invalid file format. Only JPG, JPEG, and PNG allowed.";
         } else {
-            $_SESSION['error'] = "Please Try Again Or Try Later.";
+            move_uploaded_file($_FILES["profile_pic"]["tmp_name"], "dist/img/" . $profile_pic);
+
+            // Update database
+            $query = "UPDATE iB_staff SET name=?, phone=?, email=?, sex=?, profile_pic=? WHERE staff_number=?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('ssssss', $name, $phone, $email, $sex, $profile_pic, $staff_number);
+            $stmt->execute();
+
+            if ($stmt) {
+                $_SESSION['success'] = "Staff Account Updated Successfully!";
+                header("Location: " . $_SERVER['PHP_SELF'] . "?staff_number=" . $staff_number); // Avoid resubmission
+                exit();
+            } else {
+                $_SESSION['error'] = "Please Try Again Or Try Later.";
+            }
         }
     }
 }
+
 
 //change password
 if (isset($_POST['change_staff_password'])) {

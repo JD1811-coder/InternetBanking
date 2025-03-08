@@ -21,10 +21,10 @@ $client_balance = $account_row ? $account_row['acc_amount'] : 0;
 
 // Fetch approved loans
 $query = "SELECT la.id, la.loan_type_id, lt.interest_rate, la.loan_amount, 
-                 la.loan_duration_years, la.loan_duration_months, la.application_date 
-          FROM loan_applications la
-          INNER JOIN loan_types lt ON la.loan_type_id = lt.id 
-          WHERE la.status = 'approved' AND la.client_id = ?";
+                    la.loan_duration_years, la.loan_duration_months, la.application_date 
+            FROM loan_applications la
+            INNER JOIN loan_types lt ON la.loan_type_id = lt.id 
+            WHERE la.status = 'approved' AND la.client_id = ?";
 
 $stmt = $mysqli->prepare($query);
 $stmt->bind_param('i', $client_id);
@@ -46,23 +46,16 @@ function generate_due_dates($start_date, $months)
     return $due_dates;
 }
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
-    header('Content-Type: application/json'); // Set JSON response type
+    header('Content-Type: application/json');
 
-    // Debugging
-    echo json_encode([
-        'debug' => true,
-        'client_id' => $client_id,
-        'emi_amount' => $_POST['emi_amount'],
-        'emi_date' => $_POST['emi_date'],
-        'loan_id' => $_POST['loan_id'],
-        'client_balance' => $client_balance
-    ]);
-    exit;
+    // Retrieve values from the POST request
+    $loan_id = $_POST['loan_id'];
+    $emi_amount = $_POST['emi_amount'];
+    $emi_date = $_POST['emi_date'];
 
-
-
+    // Check if the client has enough balance
     if ($client_balance >= $emi_amount) {
-        // Deduct balance
+        // Deduct the EMI amount from the client's account
         $update_balance_query = "UPDATE ib_bankaccounts SET acc_amount = acc_amount - ? WHERE client_id = ? AND is_active = 1";
         $stmt = $mysqli->prepare($update_balance_query);
         $stmt->bind_param('di', $emi_amount, $client_id);
@@ -72,33 +65,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
             exit;
         }
 
-        // Insert payment record
-        $payment_query = "INSERT INTO loan_payments (client_id, loan_id, emi_date, amount, status) VALUES (?, ?, ?, ?, 'paid')";
-        $stmt = $mysqli->prepare($payment_query);
-        $stmt->bind_param('iisd', $client_id, $loan_id, $emi_date, $emi_amount);
+        // Insert the EMI payment record into loan_payments
+      $payment_query = "INSERT INTO loan_payments (client_id, loan_id, emi_date, amount, status) VALUES (?, ?, ?, ?, 'paid')
+                  ON DUPLICATE KEY UPDATE status = 'paid'";
+
+$stmt = $mysqli->prepare($payment_query);
+$stmt->bind_param('iisd', $client_id, $loan_id, $emi_date, $emi_amount);
+
+if ($stmt->execute()) {
+    echo json_encode(['status' => 'success', 'message' => "Payment successful! ₹$emi_amount has been deducted."]);
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'Payment processing failed!', 'sql_error' => $stmt->error]);
+}
+exit;
+
 
         if ($stmt->execute()) {
             echo json_encode(['status' => 'success', 'message' => "Payment successful! ₹$emi_amount has been deducted."]);
         } else {
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Payment processing failed!',
-                'sql_error' => $stmt->error
-            ]);
+            echo json_encode(['status' => 'error', 'message' => 'Payment processing failed!', 'sql_error' => $stmt->error]);
         }
-        exit;
-
-
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Insufficient balance! Please deposit money.']);
     }
     exit;
-
-
 }
 
-var_dump($client_id);
-var_dump($client_balance);
+
+
 
 
 ?>
@@ -165,7 +159,8 @@ var_dump($client_balance);
                                                     $due_date_str = $due_date->format("Y-m-d");
 
                                                     // Check if payment is already made
-                                                    $payment_check_query = "SELECT COUNT(*) AS paid FROM loan_payments WHERE client_id = ? AND loan_id = ? AND emi_date = ?";
+                                                    $payment_check_query = "SELECT COUNT(*) AS paid FROM loan_payments WHERE client_id = ? AND loan_id = ? AND emi_date = ? AND status = 'paid'";
+
                                                     $stmt = $mysqli->prepare($payment_check_query);
                                                     $stmt->bind_param('iis', $client_id, $row->id, $due_date_str);
                                                     $stmt->execute();
@@ -181,7 +176,7 @@ var_dump($client_balance);
                                                     echo "<td>";
 
                                                     if ($is_paid) {
-                                                        echo "<button class='btn btn-success btn-sm' disabled>Done</button>";
+                                                        echo "<button class='btn btn-success btn-sm' disabled>Paid</button>";
                                                     } else {
                                                         if ($due_date->format("Y-m") == $current_date->format("Y-m")) {
                                                             echo "<form id='paymentForm-" . $row->id . "-" . $i . "' method='POST' action=''>
@@ -189,15 +184,13 @@ var_dump($client_balance);
                                                                     <input type='hidden' name='emi_date' value='" . $due_date_str . "'>
                                                                     <input type='hidden' name='emi_amount' value='" . $emi . "'>
                                                                   </form>";
-
+                                                    
                                                             echo "<button class='btn btn-primary btn-sm' onclick='confirmPayment(" . $row->id . ", " . $i . ", " . $emi . ", \"" . $due_date_str . "\")'>Pay Now</button>";
-
-
-
                                                         } else {
                                                             echo "<button class='btn btn-secondary btn-sm' disabled>Upcoming</button>";
                                                         }
                                                     }
+                                                    
 
                                                     echo "</td>";
 
@@ -234,40 +227,36 @@ var_dump($client_balance);
                 confirmButtonText: "Yes, Pay Now"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log("Sending AJAX Request...");
-                    console.log("Loan ID:", loanId);
-                    console.log("EMI Amount:", emiAmount);
-                    console.log("EMI Date:", emiDate);
-
                     $.ajax({
-                        url: "emi_schedule.php",  // Make sure this file exists
+                        url: "",
                         type: "POST",
                         data: {
-                            pay_emi: true,
+                            pay_emi: '1',  // Send as string
                             loan_id: loanId,
                             emi_date: emiDate,
                             emi_amount: emiAmount
                         },
                         dataType: "json",
                         success: function (response) {
-                            console.log("Server Response:", response);
                             if (response.status === "success") {
                                 Swal.fire("Success!", response.message, "success").then(() => {
-                                    location.reload(); // Reload page on success
+                                    let button = $("button[onclick='confirmPayment(" + loanId + ", " + emiIndex + ", " + emiAmount + ", \"" + emiDate + "\")']");
+                                    button.removeClass("btn-primary").addClass("btn-success").prop("disabled", true).text("Paid");
                                 });
                             } else {
                                 Swal.fire("Error!", response.message, "error");
                             }
+                           
                         },
-                        error: function (xhr, status, error) {
-                            console.log("AJAX Error:", xhr.responseText);
+                        error: function (xhr) {
                             Swal.fire("Error!", "Something went wrong! Try again.", "error");
                         }
                     });
-
                 }
             });
         }
+  
+
     </script>
 
 

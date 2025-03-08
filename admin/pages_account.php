@@ -6,20 +6,38 @@ check_login();
 $admin_id = $_SESSION['admin_id'];
 //update logged in user account
 if (isset($_POST['update_account'])) {
-    $name = $_POST['name'];
-    $admin_id = $_SESSION['admin_id'];
+    $name = trim($_POST['name']); // Trim spaces
     $email = $_POST['email'];
-    
-    // Update query
-    $query = "UPDATE iB_admin SET name=?, email=? WHERE admin_id=?";
-    $stmt = $mysqli->prepare($query);
-    $rc = $stmt->bind_param('ssi', $name, $email, $admin_id);
-    $stmt->execute();
+    $admin_id = $_SESSION['admin_id'];
 
-    // Check if successful
-    if ($stmt) {
+    // Validate name: must not be empty and should only contain letters and spaces
+    if (empty($name)) {
         echo "<script>
-            setTimeout(function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error!',
+                text: 'Name cannot be empty.',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
+    } elseif (!preg_match("/^[A-Za-z ]+$/", $name)) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error!',
+                text: 'Name should only contain letters and spaces.',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
+    } else {
+        // Proceed with updating the account
+        $query = "UPDATE iB_admin SET name=?, email=? WHERE admin_id=?";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('ssi', $name, $email, $admin_id);
+        if ($stmt->execute()) {
+            echo "<script>
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
@@ -29,20 +47,21 @@ if (isset($_POST['update_account'])) {
                 }).then(() => {
                     window.location.href = 'pages_account.php';
                 });
-            }, 100);
-        </script>";
-    } else {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'Please Try Again Later',
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'OK'
-            });
-        </script>";
+            </script>";
+        } else {
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Please Try Again Later',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            </script>";
+        }
     }
 }
+
 
 //change password
 if (isset($_POST['change_password'])) {
@@ -108,7 +127,7 @@ if (isset($_POST['change_password'])) {
                         alt='User profile picture'>
                         ";
                 }
-            ?>
+                ?>
                 <section class="content-header">
                     <div class="container-fluid">
                         <div class="row mb-2">
@@ -158,8 +177,10 @@ if (isset($_POST['change_password'])) {
                                 <div class="card">
                                     <div class="card-header p-2">
                                         <ul class="nav nav-pills">
-                                            <li class="nav-item"><a class="nav-link active" href="#update_Profile" data-toggle="tab">Update Profile</a></li>
-                                            <li class="nav-item"><a class="nav-link" href="#Change_Password" data-toggle="tab">Change Password</a></li>
+                                            <li class="nav-item"><a class="nav-link active" href="#update_Profile"
+                                                    data-toggle="tab">Update Profile</a></li>
+                                            <li class="nav-item"><a class="nav-link" href="#Change_Password"
+                                                    data-toggle="tab">Change Password</a></li>
                                         </ul>
                                     </div>
                                     <!-- /.card-header -->
@@ -168,34 +189,40 @@ if (isset($_POST['change_password'])) {
                                             <!-- / Update Profile -->
                                             <div class="tab-pane active" id="update_Profile">
                                                 <form method="post" class="form-horizontal">
-                                                <div class="form-group row">
-    <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-    <div class="col-sm-10">
-        <input type="text" name="name" required class="form-control" 
-               value="<?php echo htmlspecialchars($row->name, ENT_QUOTES, 'UTF-8'); ?>" 
-               id="inputName" 
-               pattern="^[A-Za-z\s]{2,50}$" 
-               title="Name should contain only letters and spaces (2-50 characters)"
-               oninput="this.setCustomValidity('')" 
-               oninvalid="this.setCustomValidity('Please enter a valid name (only letters and spaces, 2-50 characters)')">
-    </div>
-</div>
+                                                    <div class="form-group row">
+                                                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="name" required class="form-control"
+                                                                value="<?php echo htmlspecialchars($row->name, ENT_QUOTES, 'UTF-8'); ?>"
+                                                                id="inputName" pattern="^[A-Za-z\s]{2,50}$"
+                                                                title="Name should contain only letters and spaces (2-50 characters)"
+                                                                oninput="this.setCustomValidity('')"
+                                                                oninvalid="this.setCustomValidity('Please enter a valid name (only letters and spaces, 2-50 characters)')">
+                                                        </div>
+                                                    </div>
 
                                                     <div class="form-group row">
-                                                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                                                        <label for="inputEmail"
+                                                            class="col-sm-2 col-form-label">Email</label>
                                                         <div class="col-sm-10">
-                                                            <input type="email" name="email" required value="<?php echo $row->email; ?>" class="form-control" id="inputEmail">
+                                                            <input type="email" name="email" required
+                                                                value="<?php echo $row->email; ?>" class="form-control"
+                                                                id="inputEmail">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="inputName2" class="col-sm-2 col-form-label">Number</label>
+                                                        <label for="inputName2"
+                                                            class="col-sm-2 col-form-label">Number</label>
                                                         <div class="col-sm-10">
-                                                            <input type="text" class="form-control" required readonly name="number" value="<?php echo $row->number; ?>" id="inputName2">
+                                                            <input type="text" class="form-control" required readonly
+                                                                name="number" value="<?php echo $row->number; ?>"
+                                                                id="inputName2">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="offset-sm-2 col-sm-10">
-                                                            <button name="update_account" type="submit" class="btn btn-outline-success">Update Account</button>
+                                                            <button name="update_account" type="submit"
+                                                                class="btn btn-outline-success">Update Account</button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -205,26 +232,33 @@ if (isset($_POST['change_password'])) {
                                             <div class="tab-pane" id="Change_Password">
                                                 <form method="post" class="form-horizontal">
                                                     <div class="form-group row">
-                                                        <label for="inputName" class="col-sm-2 col-form-label">Old Password</label>
+                                                        <label for="inputName" class="col-sm-2 col-form-label">Old
+                                                            Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" class="form-control" required id="inputName">
+                                                            <input type="password" class="form-control" required
+                                                                id="inputName">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="inputEmail" class="col-sm-2 col-form-label">New Password</label>
+                                                        <label for="inputEmail" class="col-sm-2 col-form-label">New
+                                                            Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" name="password" class="form-control" required id="inputEmail">
+                                                            <input type="password" name="password" class="form-control"
+                                                                required id="inputEmail">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="inputName2" class="col-sm-2 col-form-label">Confirm New Password</label>
+                                                        <label for="inputName2" class="col-sm-2 col-form-label">Confirm New
+                                                            Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" name="confirm_password" class="form-control" required id="inputName2">
+                                                            <input type="password" name="confirm_password"
+                                                                class="form-control" required id="inputName2">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="offset-sm-2 col-sm-10">
-                                                            <button type="submit" name="change_password" class="btn btn-outline-success">Change Password</button>
+                                                            <button type="submit" name="change_password"
+                                                                class="btn btn-outline-success">Change Password</button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -265,5 +299,7 @@ if (isset($_POST['change_password'])) {
     <script src="dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
+    <script></script>
 </body>
+
 </html>

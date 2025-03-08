@@ -15,9 +15,21 @@ if (isset($_POST['create_staff_account'])) {
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
     $sex = $_POST['sex'];
+    $aadhaar_number = trim($_POST['aadhaar_number']);
+    $pan = trim($_POST['pan']);
     $profile_pic = $_FILES["profile_pic"]["name"];
     $allowed_extensions = ['jpg', 'jpeg', 'png'];
     $file_extension = strtolower(pathinfo($profile_pic, PATHINFO_EXTENSION));
+
+    // Aadhaar validation (12 digits, should not start with 0 or 1)
+    if (!preg_match('/^[2-9][0-9]{11}$/', $aadhaar_number)) {
+        $errors['aa aadhaar_numberdhaar'] = "Invalid Aadhaar number. Must be 12 digits and cannot start with 0 or 1.";
+    }
+
+    // PAN validation (5 uppercase letters, 4 digits, 1 uppercase letter)
+    if (!preg_match('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/', $pan)) {
+        $errors['pan'] = "Invalid PAN format. Must be in format: ABCDE1234F.";
+    }
 
     // Validate profile picture format
     if (!in_array($file_extension, $allowed_extensions)) {
@@ -28,65 +40,35 @@ if (isset($_POST['create_staff_account'])) {
     if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
         $errors['password'] = "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.";
     }
+
     if (!preg_match('/^[6789]\d{9}$/', $phone)) {
         $errors['phone'] = "Phone number must start with 6, 7, 8, or 9 and be exactly 10 digits.";
     }
-    // Validate email format strictly
+
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = "Invalid email format. Please enter a valid email address.";
     }
 
-
     if (empty($errors)) {
-        // Encrypt password
         $hashed_password = sha1(md5($password));
 
-        // Check for duplicate name, phone, or email
-        $check_query = "SELECT name, phone, email FROM iB_staff WHERE name = ? OR phone = ? OR email = ?";
+        $check_query = "SELECT phone, email,  aadhaar_number, pan FROM iB_staff WHERE phone = ? OR email = ? OR  aadhaar_number = ? OR pan = ?";
         $check_stmt = $mysqli->prepare($check_query);
-        $check_stmt->bind_param('sss', $name, $phone, $email);
+        $check_stmt->bind_param('ssss', $phone, $email, $aadhaar, $pan);
         $check_stmt->execute();
         $check_stmt->store_result();
 
         if ($check_stmt->num_rows > 0) {
-            $check_stmt->bind_result($existing_name, $existing_phone, $existing_email);
-            $check_stmt->fetch();
-
-            if ($existing_name == $name) {
-                $errors['name'] = "Staff name already exists!";
-            }
-            if ($existing_phone == $phone) {
-                $errors['phone'] = "Phone number already exists!";
-            }
-            if ($existing_email == $email) {
-                $errors['email'] = "Email already exists!";
-            }
-            if (empty(trim($name))) {
-                $errors['name'] = "Staff name cannot be empty or contain only spaces.";
-            }
-            if (empty(trim($phone))) {
-                $errors['phone'] = "Phone number cannot be empty or contain only spaces.";
-            }
-            if (empty(trim($email))) {
-                $errors['email'] = "Email cannot be empty or contain only spaces.";
-            }
-            if (empty(trim($password))) {
-                $errors['password'] = "Password cannot be empty or contain only spaces.";
-            }
-
-
-
+            $errors['general'] = "Phone, Email,  aadhaar_number, or PAN already exists!";
         } else {
-            // Upload profile picture
             $target_dir = "dist/img/";
             $target_file = $target_dir . basename($_FILES["profile_pic"]["name"]);
             move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file);
 
-            // Insert into database
-            $query = "INSERT INTO iB_staff (name, staff_number, phone, email, password, sex, profile_pic) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO iB_staff (name, staff_number, phone, email, password, sex,  aadhaar_number, pan, profile_pic) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $mysqli->prepare($query);
-            $stmt->bind_param('sssssss', $name, $staff_number, $phone, $email, $hashed_password, $sex, $profile_pic);
+            $stmt->bind_param('sssssssss', $name, $staff_number, $phone, $email, $hashed_password, $sex, $aadhaar_number, $pan, $profile_pic);
 
             if ($stmt->execute()) {
                 $success = true;
@@ -100,6 +82,7 @@ if (isset($_POST['create_staff_account'])) {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -173,7 +156,20 @@ if (isset($_POST['create_staff_account'])) {
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                <label>Aadhaar Number</label>
+                                                <input type="text" name="aadhaar_number" class="form-control">
+                                                <small
+                                                    class="text-danger"><?php echo $errors['aadhaar_number'] ?? ''; ?></small>
+                                            </div>
 
+                                            <div class="col-md-6 form-group">
+                                                <label>PAN Number</label>
+                                                <input type="text" name="pan" class="form-control">
+                                                <small class="text-danger"><?php echo $errors['pan'] ?? ''; ?></small>
+                                            </div>
+                                        </div>
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Email</label>
@@ -223,6 +219,45 @@ if (isset($_POST['create_staff_account'])) {
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'
             });
+            // JavaScript to handle form submission using AJAX
+$(document).ready(function () {
+    $("#staffForm").submit(function (e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+        
+        $.ajax({
+            url: "process_staff.php", // Backend script to handle form processing
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                let res = JSON.parse(response);
+                
+                // Clear previous error messages
+                $(".text-danger").text("");
+                
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Staff Account Created Successfully!',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        location.reload(); // Reload to reset form
+                    });
+                } else {
+                    // Display validation errors
+                    $.each(res.errors, function (key, value) {
+                        $("[name='" + key + "']").next(".text-danger").text(value);
+                    });
+                }
+            }
+        });
+    });
+});
+
         </script>
     <?php endif; ?>
 

@@ -1,14 +1,11 @@
-
-
-
-
-
 <?php
 session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
+
+$errors = []; // Array to store validation errors
 
 if (isset($_POST['update_client_account'])) {
     $name = trim($_POST['name']);
@@ -25,65 +22,59 @@ if (isset($_POST['update_client_account'])) {
     $profile_pic_tmp = $_FILES["profile_pic"]["tmp_name"];
     $profile_pic_ext = strtolower(pathinfo($profile_pic, PATHINFO_EXTENSION));
 
+    // Validation rules
     if (empty($name) || empty($phone) || empty($email) || empty($address)) {
-        $_SESSION['swal_message'] = ['error', 'All fields are required!'];
-    } elseif (empty($profile_pic)) {  // Ensure profile pic is selected
-        $_SESSION['swal_message'] = ['error', 'Profile picture is required!'];
-    } elseif (!in_array($profile_pic_ext, $allowed_extensions)) { // Check image format
-        $_SESSION['swal_message'] = ['error', 'Only JPG, JPEG, and PNG files are allowed!'];
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['swal_message'] = ['error', 'Invalid email format!'];
-    } elseif (!preg_match('/^[987][0-9]{9}$/', $phone)) {
-        $_SESSION['swal_message'] = ['error', 'Phone number must be 10 digits and start with 9, 8, or 7!'];
-    
-    } elseif (!preg_match('/^[0-9]{12}$/', $aadhar_number)) {
-        $_SESSION['swal_message'] = ['error', 'Aadhaar number must be exactly 12 digits!'];
-    } elseif (!preg_match('/^[[A-Z]{5}[0-9]{4}[A-Z]{1}$/', $pan_number)) {
-        $_SESSION['swal_message'] = ['error', 'Invalid PAN number format!'];
-
-
-    } else {
-        move_uploaded_file($profile_pic_tmp, "dist/img/" . $profile_pic);
-
-        $query = "UPDATE iB_clients SET name=?, phone=?, email=?, address=?, aadhar_number=?, pan_number=?, profile_pic=? WHERE client_number = ?";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ssssssss', $name, $phone, $email, $address, $aadhar_number, $pan_number, $profile_pic, $client_number);
-        $stmt->execute();
-
+        $errors['general'] = "All fields are required!";
     }
+    if (empty($profile_pic)) {
+        $errors['profile_pic'] = "Profile picture is required!";
+    } elseif (!in_array($profile_pic_ext, $allowed_extensions)) {
+        $errors['profile_pic'] = "Only JPG, JPEG, and PNG files are allowed!";
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = "Invalid email format!";
+    }
+    if (!preg_match('/^[987][0-9]{9}$/', $phone)) {
+        $errors['phone'] = "Phone number must be 10 digits and start with 9, 8, or 7!";
+    }
+    if (!preg_match('/^[2-9][0-9]{11}$/', $aadhar_number)) { // Aadhaar should not start with 0 or 1
+        $errors['aadhar_number'] = "Aadhaar number must be 12 digits and cannot start with 0 or 1!";
+    }
+    if (!preg_match('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/', $pan_number)) {
+        $errors['pan_number'] = "Invalid PAN number format!";
+    }
+
+    // If no errors, proceed with the update
+  // If no errors, proceed with the update
+if (empty($errors)) {
+    // Fetch existing profile picture if no new one is uploaded
+    if (!empty($profile_pic)) {
+        move_uploaded_file($profile_pic_tmp, "dist/img/" . $profile_pic);
+    } else {
+        $query = "SELECT profile_pic FROM iB_clients WHERE client_number = ?";
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param('s', $client_number);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res->fetch_assoc();
+        $profile_pic = $row['profile_pic']; // Keep existing picture
+    }
+
+    // Update query
+    $query = "UPDATE iB_clients SET name=?, phone=?, email=?, address=?, aadhar_number=?, pan_number=?, profile_pic=? WHERE client_number=?";
+    $stmt = $mysqli->prepare($query);
+    $stmt->bind_param('ssssssss', $name, $phone, $email, $address, $aadhar_number, $pan_number, $profile_pic, $client_number);
+    $stmt->execute();
+
+    $_SESSION['swal_message'] = ['success', 'Profile updated successfully!'];
     header("Location: " . $_SERVER['PHP_SELF'] . "?client_number=$client_number");
     exit();
 }
 
-if (isset($_POST['change_client_password'])) {
-    $new_password = trim($_POST['password']);
-    $confirm_password = trim($_POST['confirm_password']);
 
-    if (empty($new_password) || empty($confirm_password)) {
-        $_SESSION['swal_message'] = ['error', 'All fields are required!'];
-    } elseif ($new_password !== $confirm_password) {
-        $_SESSION['swal_message'] = ['error', 'Passwords do not match!'];
-    } elseif (strlen($new_password) < 6) {
-        $_SESSION['swal_message'] = ['error', 'Password must be at least 6 characters!'];
-    } else {
-        $password = sha1(md5($new_password));
-        $client_number = $_GET['client_number'];
-
-        $query = "UPDATE iB_clients SET password=? WHERE client_number=?";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('ss', $password, $client_number);
-        $stmt->execute();
-
-        if ($stmt) {
-            $_SESSION['swal_message'] = ['success', 'Password Updated!'];
-        } else {
-            $_SESSION['swal_message'] = ['error', 'Please try again later!'];
-        }
-    }
-    header("Location: " . $_SERVER['PHP_SELF'] . "?client_number=$client_number");
-    exit();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -230,9 +221,12 @@ if (isset($_POST['change_client_password'])) {
                                                         <label class="col-sm-2 col-form-label">Aadhaar Number</label>
                                                         <div class="col-sm-10">
                                                             <input type="text" name="aadhar_number" class="form-control"
-                                                                value="<?php echo $row->aadhar_number; ?>">
+                                                                value="<?php echo $row->aadhar_number; ?>"
+                                                                pattern="^[2-9][0-9]{11}$"
+                                                                title="Aadhaar number must be 12 digits and cannot start with 0 or 1">
                                                         </div>
                                                     </div>
+
                                                     <div class="form-group row">
                                                         <label class="col-sm-2 col-form-label">PAN Number</label>
                                                         <div class="col-sm-10">
@@ -249,10 +243,13 @@ if (isset($_POST['change_client_password'])) {
                                                                     class="form-control custom-file-input"
                                                                     id="exampleInputFile">
                                                                 <label class="custom-file-label col-form-label"
-                                                                    for="exampleInputFile">Choose file</label>
+                                                                    for="exampleInputFile">
+                                                                    <?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?>
+                                                                </label>
                                                             </div>
                                                         </div>
                                                     </div>
+
                                                     <div class="form-group row">
                                                         <div class="offset-sm-2 col-sm-10">
                                                             <button name="update_client_account" type="submit"
@@ -308,9 +305,9 @@ if (isset($_POST['change_client_password'])) {
                 </section><!-- /.content -->
             <?php } ?>
             <?php
-          if (isset($_SESSION['swal_message'])) {
-              list($type, $message) = $_SESSION['swal_message'];
-              echo "<script>
+            if (isset($_SESSION['swal_message'])) {
+                list($type, $message) = $_SESSION['swal_message'];
+                echo "<script>
                   document.addEventListener('DOMContentLoaded', function() {
                       Swal.fire({
                           icon: '$type',
@@ -320,9 +317,9 @@ if (isset($_POST['change_client_password'])) {
                       });
                   });
               </script>";
-              unset($_SESSION['swal_message']);
-          }
-          ?>
+                unset($_SESSION['swal_message']);
+            }
+            ?>
         </div><!-- /.content-wrapper -->
         <?php include("dist/_partials/footer.php"); ?>
         <!-- Control Sidebar -->
@@ -340,21 +337,21 @@ if (isset($_POST['change_client_password'])) {
     <script src="dist/js/demo.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector("form").addEventListener("submit", function (e) {
-        let aadhar = document.querySelector("input[name='aadhar_number']").value;
-        let pan = document.querySelector("input[name='pan_number']").value;
-        
-        if (!/^[0-9]{12}$/.test(aadhar)) {
-            Swal.fire("Error", "Aadhaar number must be exactly 12 digits!", "error");
-            e.preventDefault();
-        } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
-            Swal.fire("Error", "Invalid PAN number format!", "error");
-            e.preventDefault();
-        }
-    });
-});
-</script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector("form").addEventListener("submit", function (e) {
+                let aadhar = document.querySelector("input[name='aadhar_number']").value;
+                let pan = document.querySelector("input[name='pan_number']").value;
+
+                if (!/^[0-9]{12}$/.test(aadhar)) {
+                    Swal.fire("Error", "Aadhaar number must be exactly 12 digits!", "error");
+                    e.preventDefault();
+                } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+                    Swal.fire("Error", "Invalid PAN number format!", "error");
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 
 </body>
 
