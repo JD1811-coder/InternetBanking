@@ -30,12 +30,12 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <!-- User Panel -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                    <div class="image"><?php echo $profile_picture; ?></div>
-                    <div class="info">
-                        <a href="#" class="d-block"><?php echo $row->name; ?></a>
-                    </div>
-                </div>
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+    <div class="image"><?php echo $profile_picture; ?></div>
+    <div class="info">
+        <a href="#" class="d-block"><?php echo $row->name; ?></a>
+    </div>
+</div>
 
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
@@ -124,7 +124,7 @@
                             </ul>
                         </li>
 
-
+                        <li class="nav-header">Advanced Modules</li>
                         <li class="nav-item">
                             <a href="pages_transactions_engine.php" class="nav-link">
                                 <i class="nav-icon fas fa-exchange-alt"></i>
