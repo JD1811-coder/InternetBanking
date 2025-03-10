@@ -50,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['apply_for_loan'])) {
         $errors['loan_duration_years'] = "Enter valid years (0-20).";
     }
 
-    if (!preg_match("/^\d{1,2}$/", $loan_duration_months) || $loan_duration_months < 1 || $loan_duration_months > 12) {
-        $errors['loan_duration_months'] = "Enter valid months (1-12).";
+    if (!preg_match("/^\d{1,2}$/", $loan_duration_months) || $loan_duration_months < 0 || $loan_duration_months > 12) {
+        $errors['loan_duration_months'] = "Enter valid months (0-12).";
     }
 
     if (empty($errors)) {
@@ -68,6 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['apply_for_loan'])) {
 
         if ($stmt->affected_rows > 0) {
             $success = "Loan application submitted successfully!";
+            header("Location: loan_status.php");
+    exit;
         } else {
             $errors['general'] = "Error applying for loan.";
         }

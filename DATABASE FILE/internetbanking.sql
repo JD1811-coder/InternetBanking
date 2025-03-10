@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 15, 2025 at 12:11 PM
+-- Generation Time: May 10, 2025 at 12:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,6 +34,13 @@ CREATE TABLE `client_feedback` (
   `feedback_message` text NOT NULL,
   `submission_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `client_feedback`
+--
+
+INSERT INTO `client_feedback` (`id`, `client_id`, `subject`, `feedback_message`, `submission_date`) VALUES
+(6, 8, 'Complaint Regarding Debit Card Issue', 'Dear Customer Support Team,\n\nI am facing an issue with my debit card ending in 2895. Recently, I attempted to use it for an online transaction, but it was declined despite having sufficient balance. Additionally, I tried withdrawing cash from an ATM, but the transaction failed, and the amount was deducted from my account.\n\nI kindly request you to investigate this issue and process a refund for the deducted amount. Please let me know if any further details are required. Your prompt assistance in resolving this matter would be greatly appreciated.\n\nLooking forward to your response.', '2025-04-14 09:00:55');
 
 -- --------------------------------------------------------
 
@@ -115,10 +122,10 @@ CREATE TABLE `ib_bankaccounts` (
 
 INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type`, `acc_rates`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
 (14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 31063.00, 5, '2025-03-02 15:26:59.154925', 1),
-(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 820836.00, 8, '2025-03-02 15:11:23.771478', 1),
+(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 791071.00, 8, '2025-05-10 10:04:06.748761', 1),
 (16, 'Harshit Rana', '705239816', ' Retirement ', '10', 'Active', 61712.00, 6, '2025-03-06 10:07:10.847487', 1),
 (23, 'Jenil Dhola', '573608192', 'Savings', '15', 'Active', 5633.00, 11, '2025-04-15 09:31:31.620167', 1),
-(35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 0.00, 15, '2025-03-06 10:07:41.268040', 1);
+(35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 15600.00, 15, '2025-05-10 10:14:44.401548', 1);
 
 -- --------------------------------------------------------
 
@@ -149,7 +156,7 @@ CREATE TABLE `ib_clients` (
 INSERT INTO `ib_clients` (`client_id`, `name`, `phone`, `address`, `email`, `aadhar_number`, `pan_number`, `password`, `profile_pic`, `client_number`, `is_active`, `otp`, `otp_expiry`) VALUES
 (5, 'Hari Pandya', '7412560000', '114 Allace Avenue', 'harryden@mail.com', '996544392776', 'FXYYY8710N', '55c3b5386c486feb662a0785f340938f518d547f', '', 'iBank-CLIENT-7014', 1, NULL, NULL),
 (6, 'Harshit Rana', '7412545454', '23 Hinkle Deegan Lake Road', 'reyes@mail.com', '489954692767', 'YFGOZ3386S', '55c3b5386c486feb662a0785f340938f518d547f', 'user-profile-min.png', 'iBank-CLIENT-1698', 1, NULL, NULL),
-(8, 'arin gabani', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'jenildhola1811@gmail.com', '234567890354', 'IHXPD1193P', '55c3b5386c486feb662a0785f340938f518d547f', 'v2.jpg', 'iBank-CLIENT-0423', 1, NULL, NULL),
+(8, 'arin gabani', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'jenildhola1811@gmail.com', '234567890354', 'IHXPD1193P', '$2y$10$UAVdv8DrRbL4LrXWZ4nlK.wzJmOEb/WSLl6tnrBEW6NU7KqA2PhGO', '1744621056_arin.jpg', 'iBank-CLIENT-0423', 1, '552614', '2025-04-14 14:35:30'),
 (11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXEQ23467', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', '', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
 (15, 'Sahil Gohil', '6352419685', 'A-103, Riivanta Riverview, Variyav, Surat', 'cleints2023@gmail.com', '741852963159', 'OPKFW7221Z', '$2y$10$tnXEHcPfGDA/hDMbeQd/Z.CFd5AlFASauXVLC7BN7ImCIbogDP/BS', '', 'iBank-CLIENT-0458', 1, '625736', '2025-03-02 22:08:23');
 
@@ -261,7 +268,9 @@ INSERT INTO `ib_notifications` (`notification_id`, `notification_details`, `crea
 (105, 'Jenil Dhola has deposited Rs. 5000 into bank account 23', '2025-03-02 11:36:14.289504', 1),
 (106, 'Harry Den Has Withdrawn Rs. 50000 From Bank Account 357146928', '2025-03-02 11:41:27.165799', 1),
 (107, 'Jenil Dhola Has Withdrawn Rs. 100 From Bank Account 573608192', '2025-05-08 09:26:34.840175', 1),
-(108, 'Jenil Dhola has deposited Rs. 100000 into bank account 23', '2025-03-07 16:54:24.102925', 1);
+(108, 'Jenil Dhola has deposited Rs. 100000 into bank account 23', '2025-03-07 16:54:24.102925', 1),
+(109, 'Sahil Gohil has deposited Rs. 10000 into bank account 35', '2025-05-10 10:09:03.123606', 1),
+(110, 'Sahil Gohil has deposited Rs. 20000 into bank account 35', '2025-05-10 10:14:37.731518', 1);
 
 -- --------------------------------------------------------
 
@@ -396,7 +405,9 @@ INSERT INTO `ib_transactions` (`tr_id`, `tr_code`, `account_id`, `tr_type`, `tr_
 (169, 'gN6TabdDErCO2yXKRQhe', 14, 'Withdrawal', 'Success ', 5, '50000', NULL, '2025-03-02 11:41:27.164055', 1),
 (184, 'q3VHEGI1U0NOle47L96D', 23, 'Transfer', 'Success', 11, '487', '705239816', '2025-03-02 13:01:59.000000', 1),
 (202, 'epkXFV51faQcD06mEPCT', 23, 'Withdrawal', 'Success ', 11, '100', NULL, '2025-05-08 09:26:34.837289', 1),
-(204, 'GFcYuTbBtK8xVCjhlDo9', 23, 'Deposit', 'Success', 11, '100000', NULL, '2025-03-07 16:54:24.102416', 1);
+(204, 'GFcYuTbBtK8xVCjhlDo9', 23, 'Deposit', 'Success', 11, '100000', NULL, '2025-03-07 16:54:24.102416', 1),
+(205, 'HTGrbpeXFZmMKIBYtjJE', 35, 'Deposit', 'Success', 15, '10000', NULL, '2025-05-10 10:09:03.122898', 1),
+(206, 'ptqK1Zv8eXLkm5bgz49R', 35, 'Deposit', 'Success', 15, '20000', NULL, '2025-05-10 10:14:37.730581', 1);
 
 -- --------------------------------------------------------
 
@@ -429,7 +440,9 @@ CREATE TABLE `loan_applications` (
 
 INSERT INTO `loan_applications` (`id`, `applicant_name`, `loan_amount`, `application_date`, `status`, `reviewed_by`, `admin_review_id`, `review_date`, `staff_remark`, `admin_remark`, `client_id`, `loan_type_id`, `is_approved_by_staff`, `income_salary`, `loan_duration_years`, `loan_duration_months`) VALUES
 (27, 'utsav cheta', 800000.00, '2025-03-05 11:38:24', 'approved', 3, 2, '2025-03-05 11:52:42', 'good', 'all good', 11, 2, 0, 80000.00, 10, 6),
-(28, 'darshan lakhani', 120000.00, '2025-03-05 13:49:35', 'approved', 3, 2, '2025-03-05 13:50:23', 'good', 'ok', 15, 11, 0, 25000.00, 1, 6);
+(28, 'darshan lakhani', 120000.00, '2025-03-05 13:49:35', 'approved', 3, 2, '2025-03-05 13:50:23', 'good', 'ok', 15, 11, 0, 25000.00, 1, 6),
+(29, 'Arin Gabani', 120000.00, '2025-04-14 14:37:02', 'approved', 3, 2, '2025-04-14 14:52:51', 'go green', 'go green', 8, 9, 0, 30000.00, 3, 6),
+(31, 'Arin gabani', 300000.00, '2025-04-14 14:47:07', 'approved', 3, 2, '2025-04-14 14:53:12', 'padhega india tabhi to badhega india', 'go study', 8, 5, 0, 30000.00, 7, 0);
 
 -- --------------------------------------------------------
 
@@ -453,11 +466,14 @@ CREATE TABLE `loan_payments` (
 
 INSERT INTO `loan_payments` (`id`, `client_id`, `loan_id`, `emi_date`, `amount`, `status`, `created_at`) VALUES
 (1, 11, 27, '2025-04-08', 11587.00, 'paid', '2025-04-13 17:55:10'),
-(4, 11, 27, '2025-04-01', 11587.00, 'paid', '2025-04-15 18:01:18'),
 (7, 11, 27, '2025-04-21', 11587.00, 'paid', '2025-04-18 18:11:22'),
-(8, 11, 27, '2025-04-28', 11587.00, 'paid', '2025-04-18 18:16:10'),
 (9, 11, 27, '2025-04-16', 11587.00, 'paid', '2025-04-15 08:58:28'),
-(10, 11, 27, '2025-04-11', 11587.00, 'paid', '2025-04-15 09:31:31');
+(11, 8, 31, '2025-05-09', 5009.00, 'paid', '2025-05-14 09:24:16'),
+(12, 8, 29, '2025-05-25', 3243.00, 'paid', '2025-05-10 09:48:21'),
+(13, 8, 31, '2025-05-21', 5009.00, 'paid', '2025-05-10 09:53:30'),
+(14, 8, 31, '2025-05-19', 5009.00, 'paid', '2025-05-10 09:55:30'),
+(15, 8, 29, '2025-05-27', 3243.00, 'paid', '2025-05-10 10:03:13'),
+(17, 15, 28, '2025-05-10', 7200.00, 'paid', '2025-05-10 10:09:17');
 
 -- --------------------------------------------------------
 
@@ -621,7 +637,7 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT for table `client_feedback`
 --
 ALTER TABLE `client_feedback`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `ib_acc_types`
@@ -657,7 +673,7 @@ ALTER TABLE `ib_nominees`
 -- AUTO_INCREMENT for table `ib_notifications`
 --
 ALTER TABLE `ib_notifications`
-  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
 
 --
 -- AUTO_INCREMENT for table `ib_staff`
@@ -675,19 +691,19 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=207;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`
 --
 ALTER TABLE `loan_applications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `loan_payments`
 --
 ALTER TABLE `loan_payments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `loan_types`
