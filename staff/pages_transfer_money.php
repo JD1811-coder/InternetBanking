@@ -368,7 +368,24 @@ if (isset($_POST['deposit'])) {
         });
 
     </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector("form").addEventListener("submit", function (event) {
+        var transactionAmount = parseFloat(document.querySelector('input[name="transaction_amt"]').value);
 
+        if (isNaN(transactionAmount) || transactionAmount <= 0) {
+            Swal.fire({
+                icon: "error",
+                title: "Invalid Amount!",
+                text: "Amount must be greater than zero.",
+                confirmButtonText: "OK"
+            });
+            event.preventDefault();
+        }
+    });
+});
+
+</script>
     <script>
         $(document).ready(function () {
             $("#receiving_acc_no").change(function () {
