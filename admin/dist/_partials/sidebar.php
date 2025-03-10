@@ -126,6 +126,12 @@
 
                         <li class="nav-header">Advanced Modules</li>
                         <li class="nav-item">
+                            <a href="pages_balance_enquiries.php" class="nav-link">
+                            <i class="fas fa-coins"></i>
+                                <p>Balance Enquiries</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="pages_transactions_engine.php" class="nav-link">
                                 <i class="nav-icon fas fa-exchange-alt"></i>
                                 <p>Transactions History</p>

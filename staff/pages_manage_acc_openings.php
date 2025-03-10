@@ -65,68 +65,57 @@ if (isset($_GET['deleteBankAcc'])) {
               </div>
               <div class="card-body">
                 <table id="example1" class="table table-hover table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Acc Number</th>
-                      <th>Rate</th>
-                      <th>Acc Type</th>
-                      <th>Acc Owner</th>
-                      <th>Date Opened</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    //fetch all iB_Accs
-                    $ret = "SELECT ba.*, c.name 
-                    FROM iB_bankAccounts ba 
-                    JOIN ib_clients c ON ba.client_id = c.client_id 
-                    ORDER BY RAND()";
-            
+                <thead>
+  <tr>
+    <th>#</th>
+    <th>Name</th>
+    <th>Acc Number</th>
+    <th>Rate</th>
+    <th>Acc Type</th>
+    <th>Acc Owner</th>
+    <th>Balance</th> <!-- New column -->
+    <th>Date Opened</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+  <?php
+  // Fetch all iB_Accs with balance
+  $ret = "SELECT ba.*, c.name, ba.acc_amount  
+          FROM iB_bankAccounts ba 
+          JOIN ib_clients c ON ba.client_id = c.client_id 
+          ORDER BY RAND()";
 
-                    $stmt = $mysqli->prepare($ret);
-                    $stmt->execute(); //ok
-                    $res = $stmt->get_result();
-                    $cnt = 1;
-                    while ($row = $res->fetch_object()) {
-                      //Trim Timestamp to DD-MM-YYYY : H-M-S
-                      $dateOpened = $row->created_at;
+  $stmt = $mysqli->prepare($ret);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  $cnt = 1;
 
-                      ?>
+  while ($row = $res->fetch_object()) {
+    $dateOpened = $row->created_at;
+  ?>
 
-                      <tr>
-                        <td><?php echo $cnt; ?></td>
-                        <td><?php echo $row->acc_name; ?></td>
-                        <td><?php echo $row->account_number; ?></td>
-                        <td><?php echo $row->acc_rates; ?>%</td>
-                        <td><?php echo $row->acc_type; ?></td>
-                        <td><?php echo $row->name; ?></td>
-                        <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
-                        <td>
-                          <a class="btn btn-success btn-sm"
-                            href="pages_update_client_accounts.php?account_id=<?php echo $row->account_id; ?>">
-                            <i class="fas fa-cogs"></i>
-                            <!-- <i class="fas fa-briefcase"></i> -->
-                            Manage
-                          </a>
-
-                          <a class="btn btn-danger btn-sm"
-                            href="pages_manage_acc_openings.php?deleteBankAcc=<?php echo $row->account_id; ?>">
-                            <i class="fas fa-times"></i>
-                            <!-- <i class="fas fa-briefcase"></i> -->
-                            Close Account
-                          </a>
-
-
-                        </td>
-
-                      </tr>
-                      <?php $cnt = $cnt + 1;
-                    } ?>
-                    </tfoot>
-                </table>
+    <tr>
+      <td><?php echo $cnt; ?></td>
+      <td><?php echo $row->acc_name; ?></td>
+      <td><?php echo $row->account_number; ?></td>
+      <td><?php echo $row->acc_rates; ?>%</td>
+      <td><?php echo $row->acc_type; ?></td>
+      <td><?php echo $row->name; ?></td>
+      <td><?php echo number_format($row->acc_amount, 2); ?> </td> <!-- Display balance -->
+      <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
+      <td>
+        <a class="btn btn-success btn-sm" href="pages_update_client_accounts.php?account_id=<?php echo $row->account_id; ?>">
+          <i class="fas fa-cogs"></i> Manage
+        </a>
+        <a class="btn btn-danger btn-sm" href="pages_manage_acc_openings.php?deleteBankAcc=<?php echo $row->account_id; ?>">
+          <i class="fas fa-times"></i> Close Account
+        </a>
+      </td>
+    </tr>
+  <?php $cnt++; } ?>
+</tbody>
+ </table>
               </div>
               <!-- /.card-body -->
             </div>

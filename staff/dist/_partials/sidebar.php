@@ -107,12 +107,12 @@
                 </p>
               </a>
               <ul class="nav nav-treeview">
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                   <a href="pages_open_acc.php" class="nav-link">
                     <i class="fas fa-lock-open nav-icon"></i>
                     <p>Open iBank Acc</p>
                   </a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                   <a href="pages_manage_acc_openings.php" class="nav-link">
                     <i class="fas fa-cog nav-icon"></i>

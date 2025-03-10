@@ -70,7 +70,7 @@ $admin_id = $_SESSION['admin_id'];
                                                 <th>Account No.</th>
                                                 <th>Rate</th>
                                                 <th>Acc. Type</th>
-                                                <th>Acc. Owner</th>
+                                                <!-- <th>Acc. Owner</th> -->
                                                 <th>Date Opened</th>
                                                 <th>Action</th>
                                             </tr>
@@ -97,7 +97,7 @@ $admin_id = $_SESSION['admin_id'];
                                                     <td><?php echo $row->account_number; ?></td>
                                                     <td><?php echo $row->acc_rates; ?>%</td>
                                                     <td><?php echo $row->acc_type; ?></td>
-                                                    <td><?php echo $row->client_name; ?></td>
+                                                    <!-- <td><?php echo $row->client_name; ?></td> -->
                                                     <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
                                                     <td>
                                                         <a class="btn btn-success btn-sm" href="pages_check_client_acc_balance.php?account_id=<?php echo $row->account_id; ?>&acccount_number=<?php echo $row->account_number; ?>">
