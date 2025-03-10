@@ -11,8 +11,8 @@ if (isset($_POST['update_client_account'])) {
     $name = trim($_POST['name']);
     $phone = trim($_POST['phone']);
     $email = trim($_POST['email']);
-    $aadhaar = trim($_POST['aadhar_number']);
-    $pan = trim($_POST['pan_number']);
+    $aadhaar_number = trim($_POST['aadhar_number']);
+    $pan_number = trim($_POST['pan_number']);
 
     // Profile Picture Validation
     $allowed_extensions = ['jpg', 'jpeg', 'png'];
@@ -30,11 +30,14 @@ if (isset($_POST['update_client_account'])) {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = "Invalid email format.";
     }
-    if (!preg_match('/^\d{12}$/', $aadhaar)) {
-        $errors['aadhaar'] = "Aadhaar number must be exactly 12 digits.";
-    }
-    if (!preg_match('/^[A-Z0-9]{10}$/', $pan)) {
-        $errors['pan'] = "PAN should contain exactly 10 characters (only uppercase letters and digits).";
+    $aadhar_number = trim($_POST['aadhar_number']);
+if (!preg_match('/^(?!0{12}$)\d{12}$/', $aadhar_number)) {
+    $err = "Invalid Aadhaar Number. It must be 12 digits and cannot be all zeros.";
+}
+
+    
+    if (!preg_match('/^[A-Z0-9]{10}$/', $pan_number)) {
+        $errors['pan_number'] = "PAN should contain exactly 10 characters (only uppercase letters and digits).";
     }
     if (!empty($profile_pic) && !in_array($profile_ext, $allowed_extensions)) {
         $errors['profile_pic'] = "Profile picture must be in JPG, JPEG, or PNG format.";
@@ -42,15 +45,19 @@ if (isset($_POST['update_client_account'])) {
 
     if (empty($errors)) {
         // Check for Duplicates
-        $check_query = "SELECT * FROM iB_clients WHERE (phone=? OR email=? OR aadhar_number=? OR pan_number=?) AND client_id != ?";
-        $stmt = $mysqli->prepare($check_query);
-        $stmt->bind_param('sssss', $phone, $email, $aadhaar, $pan, $client_id);
-        $stmt->execute();
-        $stmt->store_result();
+       // Check for duplicate entries
+$check_query = "SELECT * FROM iB_staff WHERE email=? OR phone=? OR aadhar_number=? OR pan_number=?";
+$stmt = $mysqli->prepare($check_query);
+$stmt->bind_param('ssss', $email, $phone, $aadhar_number, $pan_number);
+$stmt->execute();
+$result = $stmt->get_result();
 
-        if ($stmt->num_rows > 0) {
-            $errors['duplicate'] = "Phone, Email, Aadhaar, or PAN already exists. Please use unique details.";
-        } else {
+if ($result->num_rows > 0) {
+    $err = "Email, Phone, aadhaar_number, or PAN Number already exists.";
+} else {
+    // Proceed with the update/insert logic
+}
+ {
             // Process Profile Picture Upload
             if (!empty($profile_pic)) {
                 $profile_pic_new = time() . "_" . basename($profile_pic);
@@ -62,7 +69,7 @@ if (isset($_POST['update_client_account'])) {
             // Update Client Information
             $query = "UPDATE iB_clients SET name=?, phone=?, email=?, profile_pic=?, aadhar_number=?, pan_number=? WHERE client_id=?";
             $stmt = $mysqli->prepare($query);
-            $stmt->bind_param('sssssss', $name, $phone, $email, $profile_pic_new, $aadhaar, $pan, $client_id);
+            $stmt->bind_param('sssssss', $name, $phone, $email, $profile_pic_new, $aadhaar_number, $pan_number, $client_id);
             if ($stmt->execute()) {
                 $_SESSION['success'] = "Client Account Updated Successfully."; 
                 header("Location: pages_account.php"); 
@@ -236,17 +243,13 @@ $row = $res->fetch_object();
                                                     </div>
 
                                                     <div class="form-group row">
-                                                        <label for="aadhar_number" class="col-sm-2 col-form-label">Aadhaar
-                                                            Number</label>
-                                                        <div class="col-sm-10">
-                                                            <input type="text" name="aadhar_number" required
-                                                                class="form-control"
-                                                                value="<?php echo htmlspecialchars($row->aadhar_number ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                                                                id="aadhar_number">
-                                                            <small
-                                                                class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
-                                                        </div>
-                                                    </div>
+    <label for="inputAadhar" class="col-sm-2 col-form-label">Aadhaar Number</label>
+    <div class="col-sm-10">
+        <input type="text" name="aadhar" required class="form-control" id="inputAadhar" pattern="^(?!0{12}$)\d{12}$">
+        <div id="aadharError" class="text-danger"></div>
+    </div>
+</div>
+
 
                                                     <div class="form-group row">
                                                         <label for="pan_number" class="col-sm-2 col-form-label">PAN
@@ -376,7 +379,48 @@ $row = $res->fetch_object();
         <?php unset($_SESSION['success']); ?> // Clear the session message after showing the alert
     <?php } ?>
 </script>
+<script>
+    $(document).ready(function() {
+        $('#inputAadhar, #inputEmail, #inputPhone').on('blur', function() {
+            var fieldName = $(this).attr('name');
+            var fieldValue = $(this).val().trim();
 
+            if (fieldValue) {  // Check if field is not empty before AJAX call
+                $.ajax({
+                    url: 'check_duplicates.php',
+                    method: 'POST',
+                    data: { fieldName: fieldName, fieldValue: fieldValue },
+                    success: function(response) {
+                        if (response === 'duplicate') {
+                            $('#' + fieldName + 'Error').text(fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + " already exists.");
+                        } else {
+                            $('#' + fieldName + 'Error').text('');
+                        }
+                    }
+                });
+            } else {
+                $('#' + fieldName + 'Error').text('');
+            }
+        });
+    });
+    </script>
+    <script>
+    if ('<?php echo $success ?? ''; ?>') {
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: '<?php echo $success; ?>'
+    });
+}
+
+if ('<?php echo $err ?? ''; ?>') {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: '<?php echo $err; ?>'
+    });
+}
+</script>
 </body>
 
 </html>
