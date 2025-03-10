@@ -1,4 +1,6 @@
 <?php
+
+use const Dom\NO_MODIFICATION_ALLOWED_ERR;
 session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
@@ -22,8 +24,8 @@ if (isset($_POST['update_client_account'])) {
     }
 
     // Duplicate Aadhaar Check
-    $stmt = $mysqli->prepare("SELECT COUNT(*) FROM iB_clients WHERE aadhar_number = ?");
-    $stmt->bind_param('s', $aadhar_number);
+    $stmt = $mysqli->prepare("SELECT COUNT(*) FROM iB_clients WHERE aadhar_number = ? AND client_number != ?");
+    $stmt->bind_param('ss', $aadhar_number, $client_number);
     $stmt->execute();
     $stmt->bind_result($count);
     $stmt->fetch();
@@ -159,11 +161,11 @@ if (isset($_POST['change_client_password'])) {
                 } else {
                     $profile_picture = "
                         <img class=' img-fluid'
-                        src='dist/img/$row->profile_pic'
+                        src='../admin/dist/img/$row->profile_pic'
                         alt='User profile picture'>
                         ";
                 }
-                ?>
+                ?>  
                 <section class="content-header">
                     <div class="container-fluid">
                         <div class="row mb-2">
@@ -288,7 +290,7 @@ if (isset($_POST['change_client_password'])) {
                                                                     class="form-control custom-file-input"
                                                                     id="exampleInputFile">
                                                                 <label class="custom-file-label col-form-label"
-                                                                    for="exampleInputFile">Choose file</label>
+                                                                    for="exampleInputFile" ><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
                                                             </div>
                                                         </div>
                                                     </div>

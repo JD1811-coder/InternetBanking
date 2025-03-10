@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 10, 2025 at 12:16 PM
+-- Generation Time: Mar 10, 2025 at 07:42 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -63,14 +63,14 @@ CREATE TABLE `ib_acc_types` (
 --
 
 INSERT INTO `ib_acc_types` (`acctype_id`, `name`, `description`, `rate`, `code`, `is_active`, `min_balance`) VALUES
-(1, 'Savings Account', '<p>Savings accounts&nbsp;are typically the first official bank account anybody opens. Children may open an account with a parent to begin a pattern of saving. Teenagers open accounts to stash cash earned&nbsp;from a first job&nbsp;or household chores.</p><p>Savings accounts are an excellent place to park&nbsp;emergency cash. Opening a savings account also marks the beginning of your relationship with a financial institution. For example, when joining a credit union, your &ldquo;share&rdquo; or savings account establishes your membership.</p>', '20', 'ACC-CAT-4EZFO', 1, 1000.00),
+(1, 'Savings Account', '<p>Savings accounts&nbsp;are typically the first official bank account anybody opens. Children may open an account with a parent to begin a pattern of saving. Teenagers open accounts to stash cash earned&nbsp;from a first job&nbsp;or household chores.</p><p>Savings accounts are an excellent place to park&nbsp;emergency cash. Opening a savings account also marks the beginning of your relationship with a financial institution. For example, when joining a credit union, your &ldquo;share&rdquo; or savings account establishes your membership.</p>', '7', 'ACC-CAT-4EZFO', 1, 1000.00),
 (2, ' Retirement Account', '<p>Retirement accounts&nbsp;offer&nbsp;tax advantages. In very general terms, you get to&nbsp;avoid paying income tax on interest&nbsp;you earn from a savings account or CD each year. But you may have to pay taxes on those earnings at a later date. Still, keeping your money sheltered from taxes may help you over the long term. Most banks offer IRAs (both&nbsp;Traditional IRAs&nbsp;and&nbsp;Roth IRAs), and they may also provide&nbsp;retirement accounts for small businesses</p>', '10', 'ACC-CAT-1QYDV', 1, 0.00),
-(4, 'Recurring deposit Account', '<p><strong>Recurring deposit account or RD account</strong> is opened by those who want to save certain amount of money regularly for a certain period of time and earn a higher interest rate.&nbsp;In RD&nbsp;account a&nbsp;fixed amount is deposited&nbsp;every month for a specified period and the total amount is repaid with interest at the end of the particular fixed period.&nbsp;</p><p>The period of deposit is minimum six months and maximum ten years.&nbsp;The interest rates vary&nbsp;for different plans based on the amount one saves and the period of time and also on banks. No withdrawals are allowed from the RD account. However, the bank may allow to close the account before the maturity period.</p><p>These accounts can be opened in single or joint names. Banks are also providing the Nomination facility to the RD account holders.&nbsp;</p>', '15', 'ACC-CAT-VBQLE', 1, 2000.00),
-(5, 'Fixed Deposit Account', '<p>In <strong>Fixed Deposit Account</strong> (also known as <strong>FD Account</strong>), a particular sum of money is deposited in a bank for specific&nbsp;period of time. It&rsquo;s one time deposit and one time take away (withdraw) account.&nbsp;The money deposited in this account can not be withdrawn before the expiry of period.&nbsp;</p><p>However, in case of need,&nbsp; the depositor can ask for closing the fixed deposit prematurely by paying a penalty. The penalty amount varies with banks.</p><p>A high interest rate is paid on fixed deposits. The rate of interest paid for fixed deposit vary according to amount, period and also from bank to bank.</p>', '40', 'ACC-CAT-A86GO', 1, 10000.00),
-(7, 'Current account', '<p><strong>Current account</strong> is mainly for business per<strong>s</strong>ons, firms, companies, public enterprises etc and are never used for the purpose of investment or savings.These deposits are the most liquid deposits and there are no limits for number of transactions or the amount of transactions in a day. While, there is no interest paid on amount held in the account, banks charges certain &nbsp;service charges, on such accounts. The current accounts do not have any fixed maturity as thegadegagagase are on continuous basis accounts.</p>', '20', 'ACC-CAT-4O8QW', 1, 5000.00),
+(4, 'Recurring deposit Account', '<p><strong>Recurring deposit account or RD account</strong> is opened by those who want to save certain amount of money regularly for a certain period of time and earn a higher interest rate.&nbsp;In RD&nbsp;account a&nbsp;fixed amount is deposited&nbsp;every month for a specified period and the total amount is repaid with interest at the end of the particular fixed period.&nbsp;</p><p>The period of deposit is minimum six months and maximum ten years.&nbsp;The interest rates vary&nbsp;for different plans based on the amount one saves and the period of time and also on banks. No withdrawals are allowed from the RD account. However, the bank may allow to close the account before the maturity period.</p><p>These accounts can be opened in single or joint names. Banks are also providing the Nomination facility to the RD account holders.&nbsp;</p>', '11', 'ACC-CAT-VBQLE', 1, 2000.00),
+(5, 'Fixed Deposit Account', '<p>In <strong>Fixed Deposit Account</strong> (also known as <strong>FD Account</strong>), a particular sum of money is deposited in a bank for specific&nbsp;period of time. It&rsquo;s one time deposit and one time take away (withdraw) account.&nbsp;The money deposited in this account can not be withdrawn before the expiry of period.&nbsp;</p><p>However, in case of need,&nbsp; the depositor can ask for closing the fixed deposit prematurely by paying a penalty. The penalty amount varies with banks.</p><p>A high interest rate is paid on fixed deposits. The rate of interest paid for fixed deposit vary according to amount, period and also from bank to bank.</p>', '22', 'ACC-CAT-A86GO', 1, 10000.00),
+(7, 'Current account', '<p><strong>Current account</strong> is mainly for business per<strong>s</strong>ons, firms, companies, public enterprises etc and are never used for the purpose of investment or savings.These deposits are the most liquid deposits and there are no limits for number of transactions or the amount of transactions in a day. While, there is no interest paid on amount held in the account, banks charges certain &nbsp;service charges, on such accounts. The current accounts do not have any fixed maturity as thegadegagagase are on continuous basis accounts.</p>', '0', 'ACC-CAT-4O8QW', 1, 5000.00),
 (8, 'Salary Account', '<p>A <strong>salary account</strong> is a bank account where an employer directly deposits an employee&rsquo;s salary. It usually has <strong>zero balance requirements</strong>, <strong>free debit card and chequebook</strong>, <strong>higher transaction limits</strong>, <strong>overdraft facility</strong>, and <strong>easy loan approvals</strong>. It also provides <strong>internet and mobile banking</strong> for seamless transactions.</p>', '6.5', 'ACC-CAT-27DQV', 1, 0.00),
 (9, 'Minor Account', '<p>A Minor Account is a special type of bank account designed for individuals below the legal adult age, typically managed by a parent or guardian. These accounts help minors develop financial literacy and savings habits from an early age. While the account is in the minor&rsquo;s name, the guardian has control over transactions, withdrawals, and fund management until the minor reaches adulthood. Many banks offer minor accounts with benefits like zero minimum balance, higher interest rates, and restrictions on certain transactions to ensure financial safety. Upon reaching the legal age, the minor can convert the account into a regular savings account.</p>', '3.5', 'ACC-CAT-UBY52', 1, 500.00),
-(11, 'Joint Account', 'A Joint Account is a shared bank account owned by two or more individuals, allowing them to manage and access funds collectively. It is commonly used by spouses, business partners, family members, or anyone who wishes to share financial responsibilities. This type of account offers convenience for handling shared expenses such as household bills, savings, or business transactions. Depending on the account terms, withdrawals and transactions may require authorization from one or all account holders. A joint account promotes financial transparency and trust while providing an efficient way to manage funds together.', '10', 'ACC-CAT-8IQVP', 1, 0.00);
+(11, 'Joint Account', '<p>A Joint Account is a shared bank account owned by two or more individuals, allowing them to manage and access funds collectively. It is commonly used by spouses, business partners, family members, or anyone who wishes to share financial responsibilities. This type of account offers convenience for handling shared expenses such as household bills, savings, or business transactions. Depending on the account terms, withdrawals and transactions may require authorization from one or all account holders. A joint account promotes financial transparency and trust while providing an efficient way to manage funds together.</p>', '3.5', 'ACC-CAT-8IQVP', 1, 1000.00);
 
 -- --------------------------------------------------------
 
@@ -121,11 +121,11 @@ CREATE TABLE `ib_bankaccounts` (
 --
 
 INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type`, `acc_rates`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
-(14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 31063.00, 5, '2025-03-02 15:26:59.154925', 1),
-(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 791071.00, 8, '2025-05-10 10:04:06.748761', 1),
-(16, 'Harshit Rana', '705239816', ' Retirement ', '10', 'Active', 61712.00, 6, '2025-03-06 10:07:10.847487', 1),
+(14, 'Hari pandya', '357146928', 'Current account ', '20', 'Active', 5663.00, 5, '2025-03-10 15:41:39.918221', 1),
+(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 789871.00, 8, '2025-03-10 14:59:08.450451', 1),
+(16, 'Harshit Rana', '705239816', ' Retirement ', '10', 'Active', 62212.00, 6, '2025-03-10 14:58:05.920595', 1),
 (23, 'Jenil Dhola', '573608192', 'Savings', '15', 'Active', 5633.00, 11, '2025-04-15 09:31:31.620167', 1),
-(35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 15600.00, 15, '2025-05-10 10:14:44.401548', 1);
+(35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 19924.00, 15, '2025-03-10 16:16:32.130232', 1);
 
 -- --------------------------------------------------------
 
@@ -154,11 +154,11 @@ CREATE TABLE `ib_clients` (
 --
 
 INSERT INTO `ib_clients` (`client_id`, `name`, `phone`, `address`, `email`, `aadhar_number`, `pan_number`, `password`, `profile_pic`, `client_number`, `is_active`, `otp`, `otp_expiry`) VALUES
-(5, 'Hari Pandya', '7412560000', '114 Allace Avenue', 'harryden@mail.com', '996544392776', 'FXYYY8710N', '55c3b5386c486feb662a0785f340938f518d547f', '', 'iBank-CLIENT-7014', 1, NULL, NULL),
-(6, 'Harshit Rana', '7412545454', '23 Hinkle Deegan Lake Road', 'reyes@mail.com', '489954692767', 'YFGOZ3386S', '55c3b5386c486feb662a0785f340938f518d547f', 'user-profile-min.png', 'iBank-CLIENT-1698', 1, NULL, NULL),
-(8, 'arin gabani', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'jenildhola1811@gmail.com', '234567890354', 'IHXPD1193P', '$2y$10$UAVdv8DrRbL4LrXWZ4nlK.wzJmOEb/WSLl6tnrBEW6NU7KqA2PhGO', '1744621056_arin.jpg', 'iBank-CLIENT-0423', 1, '552614', '2025-04-14 14:35:30'),
-(11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXEQ23467', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', '', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
-(15, 'Sahil Gohil', '6352419685', 'A-103, Riivanta Riverview, Variyav, Surat', 'cleints2023@gmail.com', '741852963159', 'OPKFW7221Z', '$2y$10$tnXEHcPfGDA/hDMbeQd/Z.CFd5AlFASauXVLC7BN7ImCIbogDP/BS', '', 'iBank-CLIENT-0458', 1, '625736', '2025-03-02 22:08:23');
+(5, 'Hari Pandya', '7412560000', '114 Allace Avenue', 'harryden@mail.com', '996544392775', 'FXYYY8710N', '55c3b5386c486feb662a0785f340938f518d547f', 'UCmSSTlG_400x400.jpg', 'iBank-CLIENT-7014', 1, NULL, NULL),
+(6, 'Harshit Rana', '7412545454', '23 Hinkle Deegan Lake Road', 'reyes@mail.com', '489954692767', 'YFGOZ3386S', '55c3b5386c486feb662a0785f340938f518d547f', 'download.jpg', 'iBank-CLIENT-1698', 1, NULL, NULL),
+(8, 'arin gabani', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'jenildhola1811@gmail.com', '234567890355', 'IHXPD1193P', '$2y$10$UAVdv8DrRbL4LrXWZ4nlK.wzJmOEb/WSLl6tnrBEW6NU7KqA2PhGO', '1744559923_arin.jpg', 'iBank-CLIENT-0423', 1, '552614', '2025-04-14 14:35:30'),
+(11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXEQ2346Q', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', 'JD1.jpeg', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
+(15, 'Sahil Gohil', '6352419645', 'A-103, Riivanta Riverview, Variyav, Surat', 'cleintss2023@gmail.com', '876587658765', 'OPKFW7221P', '$2y$10$tnXEHcPfGDA/hDMbeQd/Z.CFd5AlFASauXVLC7BN7ImCIbogDP/BS', '1741630492_sahil.jpg', 'iBank-CLIENT-0458', 1, '625736', '2025-03-02 22:08:23');
 
 -- --------------------------------------------------------
 
@@ -186,7 +186,8 @@ CREATE TABLE `ib_nominees` (
 
 INSERT INTO `ib_nominees` (`id`, `client_id`, `nominee_name`, `relation`, `nominee_email`, `nominee_phone`, `nominee_address`, `created_at`, `is_active`, `aadhar_number`, `pan_number`) VALUES
 (1, 11, 'Bhavnaben Dhola', 'Mother', 'jenildhola1811@gmail.com', '99025063124', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-20 06:29:08', 1, '785496325896', 'IHXOD1193P'),
-(6, 11, 'dineshbhai dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-28 17:00:36', 1, '978546321574', 'OPKFW7221Z');
+(6, 11, 'dineshbhai dhola', 'Father', 'jenildhola1811@gmail.com', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', '2025-02-28 17:00:36', 1, '978546321574', 'OPKFW7221Z'),
+(9, 15, 'dilipbhai gohil', 'Father', 'Dilip123@gmail.com', '7689567865', 'Parth Complex, Dhanmora,Surat', '2025-03-10 14:06:27', 1, '876563768452', 'VDIKA7345S');
 
 -- --------------------------------------------------------
 
@@ -270,7 +271,49 @@ INSERT INTO `ib_notifications` (`notification_id`, `notification_details`, `crea
 (107, 'Jenil Dhola Has Withdrawn Rs. 100 From Bank Account 573608192', '2025-05-08 09:26:34.840175', 1),
 (108, 'Jenil Dhola has deposited Rs. 100000 into bank account 23', '2025-03-07 16:54:24.102925', 1),
 (109, 'Sahil Gohil has deposited Rs. 10000 into bank account 35', '2025-05-10 10:09:03.123606', 1),
-(110, 'Sahil Gohil has deposited Rs. 20000 into bank account 35', '2025-05-10 10:14:37.731518', 1);
+(110, 'Sahil Gohil has deposited Rs. 20000 into bank account 35', '2025-05-10 10:14:37.731518', 1),
+(111, 'Sahil Gohil has deposited Rs. 0 into bank account 35', '2025-03-10 13:55:07.600201', 1),
+(112, 'Sahil Gohil has deposited Rs. 0 into bank account 35', '2025-03-10 13:56:26.212009', 1),
+(113, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 13:58:31.383023', 1),
+(114, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 13:59:55.939828', 1),
+(115, 'Hari Pandya Has Withdrawn Rs. -1 From Bank Account 357146928', '2025-03-10 14:13:52.617812', 1),
+(116, 'Hari Pandya Has Withdrawn Rs. -10000 From Bank Account 357146928', '2025-03-10 14:15:22.130324', 1),
+(117, 'Hari Pandya Has Withdrawn Rs. 1 From Bank Account 357146928', '2025-03-10 14:16:09.576538', 1),
+(118, 'Hari Pandya Has Withdrawn Rs. 0 From Bank Account 357146928', '2025-03-10 14:16:26.303856', 1),
+(119, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 14:17:11.091503', 1),
+(120, 'Hari Pandya Has Withdrawn Rs. 1 From Bank Account 357146928', '2025-03-10 14:20:44.658987', 1),
+(121, 'Hari Pandya Has Withdrawn Rs. 0 From Bank Account 357146928', '2025-03-10 14:21:01.178761', 1),
+(122, 'Hari Pandya Has Withdrawn Rs. 0 From Bank Account 357146928', '2025-03-10 14:21:16.629031', 1),
+(123, 'Hari Pandya Has Withdrawn Rs. -1 From Bank Account 357146928', '2025-03-10 14:21:34.361824', 1),
+(124, 'Hari Pandya Has Withdrawn Rs. 10000 From Bank Account 357146928', '2025-03-10 14:48:17.402657', 1),
+(125, 'Sahil Gohil Has Withdrawn Rs. 100 From Bank Account 964031285', '2025-03-10 14:57:36.801831', 1),
+(126, 'Sahil Gohil Has Withdrawn Rs. 15000 From Bank Account 964031285', '2025-03-10 14:57:48.759843', 1),
+(127, 'Hari Pandya Has Withdrawn Rs. 100 From Bank Account 357146928', '2025-03-10 15:02:27.706796', 1),
+(128, 'Sahil Gohil has deposited Rs. 20000 into bank account 35', '2025-03-10 15:16:21.012073', 1),
+(129, 'Hari Pandya Has Withdrawn Rs. 25000 From Bank Account 357146928', '2025-03-10 15:25:49.600803', 1),
+(130, 'Hari Pandya Has Withdrawn Rs. 1 From Bank Account 357146928', '2025-03-10 15:26:02.350246', 1),
+(131, 'Hari Pandya Has Withdrawn Rs. 100 From Bank Account 357146928', '2025-03-10 15:26:09.577235', 1),
+(132, 'Hari Pandya Has Withdrawn Rs. 100 From Bank Account 357146928', '2025-03-10 15:27:05.683161', 1),
+(133, 'Hari Pandya Has Withdrawn Rs. -1 From Bank Account 357146928', '2025-03-10 15:30:35.430361', 1),
+(134, 'Hari Pandya Has Withdrawn Rs. 100 From Bank Account 357146928', '2025-03-10 15:41:39.929704', 1),
+(135, 'Sahil Gohil Has Withdrawn Rs. -1 From Bank Account 964031285', '2025-03-10 15:43:09.343191', 1),
+(136, 'Sahil Gohil Has Withdrawn Rs. -10 From Bank Account 964031285', '2025-03-10 15:43:25.079138', 1),
+(137, 'Sahil Gohil Has Withdrawn Rs. -1 From Bank Account 964031285', '2025-03-10 15:50:13.438727', 1),
+(138, 'Sahil Gohil Has Withdrawn Rs. -1 From Bank Account 964031285', '2025-03-10 15:51:37.547886', 1),
+(139, 'Sahil Gohil Has Withdrawn Rs. 1 From Bank Account 964031285', '2025-03-10 15:51:49.442232', 1),
+(140, 'Sahil Gohil Has Withdrawn Rs. 1 From Bank Account 964031285', '2025-03-10 15:53:15.213669', 1),
+(141, 'Sahil Gohil has deposited Rs. 1 into bank account 35', '2025-03-10 15:59:25.101694', 1),
+(142, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 16:00:12.318133', 1),
+(143, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 16:06:29.045512', 1),
+(144, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 16:08:21.949085', 1),
+(145, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 16:08:47.832639', 1),
+(146, 'Sahil Gohil Has Withdrawn Rs. -12 From Bank Account 964031285', '2025-03-10 16:09:20.980224', 1),
+(147, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 16:10:04.542000', 1),
+(148, 'Sahil Gohil Has Withdrawn Rs. 100 From Bank Account 964031285', '2025-03-10 16:14:44.816740', 1),
+(149, 'Sahil Gohil Has Withdrawn Rs. 100 From Bank Account 964031285', '2025-03-10 16:14:53.095940', 1),
+(150, 'Sahil Gohil Has Withdrawn Rs. 0 From Bank Account 964031285', '2025-03-10 16:15:04.042354', 1),
+(151, 'Sahil Gohil Has Withdrawn Rs. 100 From Bank Account 964031285', '2025-03-10 16:16:19.668470', 1),
+(152, 'Sahil Gohil Has Withdrawn Rs. 1000 From Bank Account 964031285', '2025-03-10 16:16:32.137183', 1);
 
 -- --------------------------------------------------------
 
@@ -404,10 +447,15 @@ INSERT INTO `ib_transactions` (`tr_id`, `tr_code`, `account_id`, `tr_type`, `tr_
 (168, '8pWHm4oSnVQx5fzrPh2Z', 15, 'Transfer', 'Success', 8, '10000', '573608192', '2025-03-02 11:40:54.000000', 1),
 (169, 'gN6TabdDErCO2yXKRQhe', 14, 'Withdrawal', 'Success ', 5, '50000', NULL, '2025-03-02 11:41:27.164055', 1),
 (184, 'q3VHEGI1U0NOle47L96D', 23, 'Transfer', 'Success', 11, '487', '705239816', '2025-03-02 13:01:59.000000', 1),
-(202, 'epkXFV51faQcD06mEPCT', 23, 'Withdrawal', 'Success ', 11, '100', NULL, '2025-05-08 09:26:34.837289', 1),
 (204, 'GFcYuTbBtK8xVCjhlDo9', 23, 'Deposit', 'Success', 11, '100000', NULL, '2025-03-07 16:54:24.102416', 1),
-(205, 'HTGrbpeXFZmMKIBYtjJE', 35, 'Deposit', 'Success', 15, '10000', NULL, '2025-05-10 10:09:03.122898', 1),
-(206, 'ptqK1Zv8eXLkm5bgz49R', 35, 'Deposit', 'Success', 15, '20000', NULL, '2025-05-10 10:14:37.730581', 1);
+(221, 'odatixyL1lAkwQ5YvJqE', 35, 'Withdrawal', 'Success ', 15, '100', NULL, '2025-03-10 14:57:36.799022', 1),
+(222, 'By1riua2vCHdpOTM4Vwx', 35, 'Withdrawal', 'Success ', 15, '15000', NULL, '2025-03-10 14:57:48.757350', 1),
+(223, 'LY1eniNRZa3jrGJVASMg', 35, 'Transfer', 'Success', 15, '500', '705239816', '2025-03-10 14:58:05.000000', 1),
+(224, 'Du4YrlhWLvKEJ2TjUbiq', 15, 'Transfer', 'Success', 8, '1200', '964031285', '2025-03-10 14:59:08.000000', 1),
+(225, 'qyTUpZM8YRE6kwxCGesL', 14, 'Withdrawal', 'Success ', 5, '100', NULL, '2025-03-10 15:02:27.704852', 1),
+(226, 'YHkWqvzF6CUV0DZoL1hI', 35, 'Deposit', 'Success', 15, '20000', NULL, '2025-03-10 15:16:21.011716', 1),
+(232, 'hVXqGiUJnkSMAdfebucK', 14, 'Withdrawal', 'Success ', 5, '100', NULL, '2025-03-10 15:41:39.927793', 1),
+(246, 'QTgdjuokWS1iMUxqzIGR', 35, 'Withdrawal', 'Success ', 15, '100', NULL, '2025-03-10 16:14:44.813876', 1);
 
 -- --------------------------------------------------------
 
@@ -667,13 +715,13 @@ ALTER TABLE `ib_clients`
 -- AUTO_INCREMENT for table `ib_nominees`
 --
 ALTER TABLE `ib_nominees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `ib_notifications`
 --
 ALTER TABLE `ib_notifications`
-  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=153;
 
 --
 -- AUTO_INCREMENT for table `ib_staff`
@@ -691,7 +739,7 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=207;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=251;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`

@@ -11,7 +11,7 @@ if (isset($_POST['update_client_account'])) {
     $name = trim($_POST['name']);
     $phone = trim($_POST['phone']);
     $email = trim($_POST['email']);
-    $aadhaar_number = trim($_POST['aadhar_number']);
+    $aadhar_number = trim($_POST['aadhar_number']);
     $pan_number = trim($_POST['pan_number']);
 
     // Profile Picture Validation
@@ -30,12 +30,12 @@ if (isset($_POST['update_client_account'])) {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = "Invalid email format.";
     }
-    $aadhar_number = trim($_POST['aadhar_number']);
-if (!preg_match('/^(?!0{12}$)\d{12}$/', $aadhar_number)) {
-    $err = "Invalid Aadhaar Number. It must be 12 digits and cannot be all zeros.";
-}
+    // $aadhar_number = trim($_POST['aadhar_number']);  
+    if (!preg_match('/^[2-9]\d{11}$/', $aadhar_number)) {
+        $errors['aadhar_number'] = "Invalid Aadhaar Number. It must be 12 digits and not starts with 0 or 1";
+    }
 
-    
+
     if (!preg_match('/^[A-Z0-9]{10}$/', $pan_number)) {
         $errors['pan_number'] = "PAN should contain exactly 10 characters (only uppercase letters and digits).";
     }
@@ -45,19 +45,17 @@ if (!preg_match('/^(?!0{12}$)\d{12}$/', $aadhar_number)) {
 
     if (empty($errors)) {
         // Check for Duplicates
-       // Check for duplicate entries
-$check_query = "SELECT * FROM iB_staff WHERE email=? OR phone=? OR aadhar_number=? OR pan_number=?";
-$stmt = $mysqli->prepare($check_query);
-$stmt->bind_param('ssss', $email, $phone, $aadhar_number, $pan_number);
-$stmt->execute();
-$result = $stmt->get_result();
+        $check_query = "SELECT * FROM iB_clients WHERE email=? OR phone=? OR aadhar_number=? OR pan_number=?";
+        $stmt = $mysqli->prepare($check_query);
+        $stmt->bind_param('ssss', $email, $phone, $aadhar_number, $pan_number);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-if ($result->num_rows > 0) {
-    $err = "Email, Phone, aadhaar_number, or PAN Number already exists.";
-} else {
-    // Proceed with the update/insert logic
-}
- {
+        if ($result->num_rows > 0) {
+            $err = "Email, Phone, aadhaar_number, or PAN Number already exists.";
+        } else {
+            // Proceed with the update/insert logic
+        } {
             // Process Profile Picture Upload
             if (!empty($profile_pic)) {
                 $profile_pic_new = time() . "_" . basename($profile_pic);
@@ -69,12 +67,12 @@ if ($result->num_rows > 0) {
             // Update Client Information
             $query = "UPDATE iB_clients SET name=?, phone=?, email=?, profile_pic=?, aadhar_number=?, pan_number=? WHERE client_id=?";
             $stmt = $mysqli->prepare($query);
-            $stmt->bind_param('sssssss', $name, $phone, $email, $profile_pic_new, $aadhaar_number, $pan_number, $client_id);
+            $stmt->bind_param('sssssss', $name, $phone, $email, $profile_pic_new, $aadhar_number, $pan_number, $client_id);
             if ($stmt->execute()) {
-                $_SESSION['success'] = "Client Account Updated Successfully."; 
-                header("Location: pages_account.php"); 
+                $_SESSION['success'] = "Client Account Updated Successfully.";
+                header("Location: pages_account.php");
                 exit();
-                
+
             } else {
                 $errors['database'] = "Error updating account. Please try again.";
             }
@@ -89,6 +87,19 @@ $stmt->bind_param('s', $client_id);
 $stmt->execute();
 $res = $stmt->get_result();
 $row = $res->fetch_object();
+
+
+// Fetch user details from the database (adjust the query as needed)
+$user_id = $_SESSION['client_id']; // Assuming user ID is stored in session
+$query = "SELECT aadhar_number FROM ib_clients WHERE client_id = ?";
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param("i",  $client_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
+?>
+
 ?>
 
 <!-- Log on to codeastro.com for more projects! -->
@@ -241,14 +252,20 @@ $row = $res->fetch_object();
                                                                 class="text-danger"><?php echo $errors['phone'] ?? ''; ?></small>
                                                         </div>
                                                     </div>
+                                                    
+
 
                                                     <div class="form-group row">
-    <label for="inputAadhar" class="col-sm-2 col-form-label">Aadhaar Number</label>
-    <div class="col-sm-10">
-        <input type="text" name="aadhar" required class="form-control" id="inputAadhar" pattern="^(?!0{12}$)\d{12}$">
-        <div id="aadharError" class="text-danger"></div>
-    </div>
-</div>
+                                                        <label for="inputAadhar" class="col-sm-2 col-form-label">Aadhar
+                                                            Number</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" name="aadhar_number" required class="form-control"
+                                                                id="inputAadhar"  value="<?php echo htmlspecialchars($aadhar_number); ?>">
+                                                                <small
+                                                                class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
+                                                            <div id="aadharError" class="text-danger"></div>
+                                                        </div>
+                                                    </div>
 
 
                                                     <div class="form-group row">
@@ -271,8 +288,8 @@ $row = $res->fetch_object();
                                                             <div class="custom-file">
                                                                 <input type="file" name="profile_pic"
                                                                     class="form-control custom-file-input" id="profile_pic">
-                                                                <label class="custom-file-label" for="profile_pic">Choose
-                                                                    file</label>
+                                                                <label class="custom-file-label" for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
+                                                                    
                                                             </div>
                                                         </div>
                                                         <small
@@ -365,62 +382,62 @@ $row = $res->fetch_object();
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
     <!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-    <?php if (isset($_SESSION['success'])) { ?>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: "<?php echo $_SESSION['success']; ?>",
-            showConfirmButton: false,
-            timer: 3000
-        });
-        <?php unset($_SESSION['success']); ?> // Clear the session message after showing the alert
-    <?php } ?>
-</script>
-<script>
-    $(document).ready(function() {
-        $('#inputAadhar, #inputEmail, #inputPhone').on('blur', function() {
-            var fieldName = $(this).attr('name');
-            var fieldValue = $(this).val().trim();
-
-            if (fieldValue) {  // Check if field is not empty before AJAX call
-                $.ajax({
-                    url: 'check_duplicates.php',
-                    method: 'POST',
-                    data: { fieldName: fieldName, fieldValue: fieldValue },
-                    success: function(response) {
-                        if (response === 'duplicate') {
-                            $('#' + fieldName + 'Error').text(fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + " already exists.");
-                        } else {
-                            $('#' + fieldName + 'Error').text('');
-                        }
-                    }
-                });
-            } else {
-                $('#' + fieldName + 'Error').text('');
-            }
-        });
-    });
+    <script>
+        <?php if (isset($_SESSION['success'])) { ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "<?php echo $_SESSION['success']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['success']); ?> // Clear the session message after showing the alert
+        <?php } ?>
     </script>
     <script>
-    if ('<?php echo $success ?? ''; ?>') {
-    Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: '<?php echo $success; ?>'
-    });
-}
+        $(document).ready(function () {
+            $('#inputAadhar, #inputEmail, #inputPhone').on('blur', function () {
+                var fieldName = $(this).attr('name');
+                var fieldValue = $(this).val().trim();
 
-if ('<?php echo $err ?? ''; ?>') {
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: '<?php echo $err; ?>'
-    });
-}
-</script>
+                if (fieldValue) {  // Check if field is not empty before AJAX call
+                    $.ajax({
+                        url: 'check_duplicates.php',
+                        method: 'POST',
+                        data: { fieldName: fieldName, fieldValue: fieldValue },
+                        success: function (response) {
+                            if (response === 'duplicate') {
+                                $('#' + fieldName + 'Error').text(fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + " already exists.");
+                            } else {
+                                $('#' + fieldName + 'Error').text('');
+                            }
+                        }
+                    });
+                } else {
+                    $('#' + fieldName + 'Error').text('');
+                }
+            });
+        });
+    </script>
+    <script>
+        if ('<?php echo $success ?? ''; ?>') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: '<?php echo $success; ?>'
+            });
+        }
+
+        if ('<?php echo $err ?? ''; ?>') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '<?php echo $err; ?>'
+            });
+        }
+    </script>
 </body>
 
 </html>

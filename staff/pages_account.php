@@ -157,7 +157,7 @@
                                                     <b>StaffNo: </b> <a class="float-right"><?php echo $row->staff_number; ?></a>
                                                 </li>
                                                 <li class="list-group-item">
-                                                    <b>Gender: </b> <a class="float-right"><?php echo $row->sex; ?></a>
+                                                    <b aria-readonly="">Gender: </b> <a class="float-right" ><?php echo $row->sex; ?></a>
                                                 </li>
 
                                             </ul>
