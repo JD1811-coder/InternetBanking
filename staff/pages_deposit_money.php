@@ -184,7 +184,7 @@ Swal.fire({
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label for="exampleInputPassword1">Deposit Amount(Rs.)</label>
-                                                <input type="number" min="0" name="transaction_amt" required
+                                                <input type="number" min="1" name="transaction_amt" required
                                                     class="form-control">
                                             </div>
                                         </div>
