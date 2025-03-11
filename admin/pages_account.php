@@ -63,31 +63,176 @@ if (isset($_POST['update_account'])) {
 }
 
 
-//change password
+// Change password
 if (isset($_POST['change_password'])) {
+    $old_password = sha1(md5($_POST['old_password'])); // Hash the old password input
     $new_password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
-    if ($new_password != $confirm_password) {
-        $err = "New password and confirm password do not match.";
+    $admin_id = $_SESSION['admin_id'];
+
+    // Fetch the current password from the database
+$query = "SELECT password FROM iB_admin WHERE admin_id = ?";
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param('i', $admin_id);
+$stmt->execute();
+$stmt->bind_result($db_password);
+$stmt->fetch();
+$stmt->close();
+
+// Debugging - Print the stored password (Remove this in production)
+echo "<script>console.log('Stored Password: $db_password');</script>";
+
+    // Verify old password
+    if ($old_password !== $db_password) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Old password is incorrect!',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
+    } elseif ($new_password !== $confirm_password) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'New password and confirm password do not match!',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
     } else {
-        $password = sha1(md5($new_password));
-        $admin_id = $_SESSION['admin_id'];
-        //insert unto certain table in database
-        $query = "UPDATE iB_admin  SET password=? WHERE  admin_id=?";
-        $stmt = $mysqli->prepare($query);
-        //bind parameters
-        $rc = $stmt->bind_param('si', $password, $admin_id);
-        $stmt->execute();
-        //declare a variable which will be passed to alert function
-        if ($stmt) {
-            $success = "Password Updated";
+        // Hash new password and update
+        $hashed_password = sha1(md5($new_password));
+        $update_query = "UPDATE iB_admin SET password=? WHERE admin_id=?";
+        $update_stmt = $mysqli->prepare($update_query);
+        $update_stmt->bind_param('si', $hashed_password, $admin_id);
+        if ($update_stmt->execute()) {
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Password updated successfully!',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'pages_account.php';
+                });
+            </script>";
         } else {
-            $err = "Please Try Again Or Try Later";
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Please try again later.',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            </script>";
         }
+        $update_stmt->close();
     }
 }
+// Change password
+if (isset($_POST['change_password'])) {
+    $old_password = sha1(md5($_POST['old_password'])); // Hash the entered old password
+    $new_password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    $admin_id = $_SESSION['admin_id'];
+
+    // Fetch stored password from DB
+    $query = "SELECT password FROM iB_admin WHERE admin_id = ?";
+    $stmt = $mysqli->prepare($query);
+    $stmt->bind_param('i', $admin_id);
+    $stmt->execute();
+    $stmt->bind_result($db_password);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Debugging: Print stored password (Remove this in production)
+    error_log("Stored Password: " . $db_password);
+    error_log("Entered Old Password: " . $old_password);
+
+    // Check if the stored password is retrieved correctly
+    if (!$db_password) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Error fetching password from database!',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
+        exit;
+    }
+
+    // Verify old password
+    if ($old_password !== $db_password) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Old password is incorrect!',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
+        exit;
+    }
+
+    // Check if new password matches confirm password
+    if ($new_password !== $confirm_password) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'New password and confirm password do not match!',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
+        exit;
+    }
+
+    // Hash new password and update
+    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+    $update_query = "UPDATE iB_admin SET password=? WHERE admin_id=?";
+    $update_stmt = $mysqli->prepare($update_query);
+    $update_stmt->bind_param('si', $hashed_password, $admin_id);
+    
+    if ($update_stmt->execute()) {
+        echo "<script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Password updated successfully!',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'pages_account.php';
+            });
+        </script>";
+    } else {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Please try again later.',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        </script>";
+    }
+
+    $update_stmt->close();
+}
+
 ?>
-<!-- Log on to codeastro.com for more projects! -->
+
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
@@ -232,13 +377,14 @@ if (isset($_POST['change_password'])) {
                                             <div class="tab-pane" id="Change_Password">
                                                 <form method="post" class="form-horizontal">
                                                     <div class="form-group row">
-                                                        <label for="inputName" class="col-sm-2 col-form-label">Old
+                                                        <label for="oldPassword" class="col-sm-2 col-form-label">Old
                                                             Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" class="form-control" required
-                                                                id="inputName">
+                                                            <input type="password" name="old_password" class="form-control"
+                                                                required id="oldPassword">
                                                         </div>
                                                     </div>
+
                                                     <div class="form-group row">
                                                         <label for="inputEmail" class="col-sm-2 col-form-label">New
                                                             Password</label>

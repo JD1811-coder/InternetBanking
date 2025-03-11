@@ -439,7 +439,7 @@ ORDER BY t.created_at DESC
         exportEnabled: false,
         animationEnabled: true,
         title: {
-          text: "Accounts Per Acc Types "
+          text: " A/C Types "
         },
         legend: {
           cursor: "pointer",

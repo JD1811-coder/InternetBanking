@@ -200,7 +200,7 @@ $stmt->close();
             <!-- /.iBank Acc types -->
 
             <!--iBank Accounts-->
-            <div class="col-12 col-sm-6 col-md-3">
+            <!-- <div class="col-12 col-sm-6 col-md-3">
               <div class="info-box mb-3">
                 <span class="info-box-icon bg-purple elevation-1"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
@@ -209,7 +209,7 @@ $stmt->close();
                 </div>
               </div>
             </div>
-            <!-- iBank Acc-->
+            iBank Acc -->
           </div>
 
           <div class="row">
@@ -498,7 +498,7 @@ $stmt->close();
         exportEnabled: false,
         animationEnabled: true,
         title: {
-          text: "Accounts Per Acc Types "
+          text: "A/C Types "
         },
         legend: {
           cursor: "pointer",
