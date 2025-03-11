@@ -352,22 +352,40 @@ if (isset($_POST['deposit'])) {
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
     <script type="text/javascript">
-        $(document).ready(function () {
-            bsCustomFileInput.init();
-        });
+    $(document).ready(function () {
+        bsCustomFileInput.init();
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelector("form").addEventListener("submit", function (event) {
                 var senderAccount = "<?php echo $account_number; ?>"; // Fetch sender's account number
                 var receivingAccount = document.getElementById("receiving_acc_no").value;
+                var enteredAmount = parseFloat(document.getElementById("amount").value); // Get entered amount
+                var availableBalance = parseFloat("<?php echo $available_balance; ?>"); // Fetch available balance from PHP
 
+                // Self-transfer check
                 if (receivingAccount === senderAccount) {
                     alert("You cannot transfer money to your own account.");
                     event.preventDefault();
+                    return; // Exit early
+                }
+
+                // Amount exceeds balance check
+                if (enteredAmount > availableBalance) {
+                    alert("Insufficient funds. The entered amount exceeds the available balance.");
+                    event.preventDefault();
+                    return; // Exit early
+                }
+
+                // Optional: Check if the entered amount is zero or negative
+                if (enteredAmount <= 0) {
+                    alert("Please enter a valid amount greater than zero.");
+                    event.preventDefault();
+                    return;
                 }
             });
         });
+    });
+</script>
 
-    </script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("form").addEventListener("submit", function (event) {

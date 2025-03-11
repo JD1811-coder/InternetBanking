@@ -75,6 +75,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['apply_for_loan'])) {
         }
     }
 }
+
+$applicant_name = "";
+
+// Check if 'client_id' is stored in cookies
+if (isset($_COOKIE['client_id'])) {
+    $client_id = $_COOKIE['client_id'];
+
+    // Fetch applicant name from database
+    $stmt = $mysqli->prepare("SELECT name FROM iB_clients WHERE client_id = ?");
+    $stmt->bind_param('i', $client_id);
+    $stmt->execute();
+    $stmt->bind_result($applicant_name);
+    $stmt->fetch();
+    $stmt->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -110,11 +125,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['apply_for_loan'])) {
                                         <?php } ?>
 
                                         <div class="form-group">
-                                            <label>Applicant Name</label>
-                                            <input type="text" name="applicant_name" class="form-control" 
-                                                   value="<?php echo $_POST['applicant_name'] ?? ''; ?>">
-                                            <small class="text-danger"><?php echo $errors['applicant_name'] ?? ''; ?></small>
-                                        </div>
+    <label>Applicant Name</label>
+    <input type="text" name="applicant_name" class="form-control" 
+           value="<?php echo htmlspecialchars($applicant_name); ?>" readonly>
+    <small class="text-danger"><?php echo $errors['applicant_name'] ?? ''; ?></small>
+</div>
+
 
                                         <div class="form-group">
                                             <label>Loan Type</label>

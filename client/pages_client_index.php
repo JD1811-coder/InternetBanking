@@ -1,12 +1,20 @@
 <?php
 session_start();
-include('conf/config.php'); // Get configuration file
+include('conf/config.php'); // Configuration file
 
+// Auto-login if session is missing but cookie exists
+if (!isset($_SESSION['client_id']) && isset($_COOKIE['client_id'])) {
+    $_SESSION['client_id'] = $_COOKIE['client_id'];
+    header("location:pages_dashboard.php");
+    exit();
+}
+
+// Login logic
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Fetch the hashed password from the database
+    // Fetch client details from the database
     $stmt = $mysqli->prepare("SELECT client_id, password FROM iB_clients WHERE email=? AND is_active=1");
     $stmt->bind_param('s', $email);
     $stmt->execute();
@@ -14,9 +22,13 @@ if (isset($_POST['login'])) {
     $stmt->fetch();
     $stmt->close();
 
-    // Verify password using password_verify()
+    // Verify password
     if ($hashed_password && password_verify($password, $hashed_password)) {
         $_SESSION['client_id'] = $client_id; // Assign session to client ID
+
+        // Save client_id in cookie (valid for 7 days)
+        setcookie("client_id", $client_id, time() + (7 * 24 * 60 * 60), "/", "", true, true);
+
         header("location:pages_dashboard.php");
         exit();
     } else {
@@ -24,8 +36,8 @@ if (isset($_POST['login'])) {
     }
 }
 
-/* Persist System Settings On Brand */
-$ret = "SELECT * FROM `iB_SystemSettings` ";
+// System Settings
+$ret = "SELECT * FROM `iB_SystemSettings`";
 $stmt = $mysqli->prepare($ret);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -59,6 +71,7 @@ $auth = $res->fetch_object();
                             </div>
                         </div>
                     </div>
+
                     <div class="input-group mb-3">
                         <input type="password" name="password" class="form-control" placeholder="Password" required>
                         <div class="input-group-append">
@@ -67,6 +80,7 @@ $auth = $res->fetch_object();
                             </div>
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-8">
                             <div class="icheck-primary">
