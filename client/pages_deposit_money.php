@@ -154,7 +154,7 @@ if (isset($_POST['transaction'])) {
                                                 </div>
                                                 <div class="col-md-6 form-group">
                                                     <label for="exampleInputPassword1">Transaction Amount(Rs.)</label>
-                                                    <input type="number" min="0" name="transaction_amt" required class="form-control">
+                                                    <input type="number" min="1" name="transaction_amt" required class="form-control">
                                                 </div>
                                             </div>
                                             <input type="hidden" name="tr_type" value="Deposit">
@@ -191,7 +191,7 @@ if (isset($_POST['transaction'])) {
         var acc_balance = <?php echo $acc_amount; ?>; // Fetch balance from PHP
         var tr_type = document.querySelector('input[name="tr_type"]').value;
 
-        if (isNaN(transaction_amt) || transaction_amt <= 0) {
+        if (isNaN(transaction_amt) || transaction_amt <= 1) {
             alert("Please enter a valid positive number for transaction amount.");
             event.preventDefault();
         } else if (tr_type === 'Withdrawal' && transaction_amt > acc_balance) {

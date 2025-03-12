@@ -243,54 +243,24 @@ WHERE a.account_id = ?";
     <script src="dist/js/demo.js"></script>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelector("form").addEventListener("submit", function (event) {
-                var transaction_amt = parseFloat(document.getElementById("transaction_amt").value);
-                var acc_amount = <?php echo $acc_amount; ?>; // Fetch current balance from PHP
+    document.querySelector("form").addEventListener("submit", function (event) {
+        var transaction_amt = parseFloat(document.getElementById("transaction_amt").value);
+        var acc_amount = <?php echo $acc_amount; ?>; // Current balance
+        var min_balance = <?php echo $min_balance; ?>; // Minimum balance required
+        var remaining_balance = acc_amount - transaction_amt;
 
-                if (isNaN(transaction_amt) || transaction_amt <= 0) {
-                    alert("Please enter a valid positive number for withdrawal amount.");
-                    event.preventDefault();
-                }
-                // else if (transaction_amt > acc_amount) {
-                //     alert("Insufficient Balance! Your Current Balance is Rs. " + acc_amount);
-                //     event.preventDefault();
-                // }
-            });
-        });
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelector("form").addEventListener("submit", function (event) {
-                var transaction_amt = parseFloat(document.getElementById("transaction_amt").value);
-                var acc_amount = <?php echo $acc_amount; ?>; // Current balance
-                var min_balance = <?php echo $min_balance; ?>; // Minimum balance required
-                var remaining_balance = acc_amount - transaction_amt;
-
-                if (isNaN(transaction_amt) || transaction_amt <= 0) {
-                    event.preventDefault();
-                    Swal.fire({
-                        icon: "error",
-                        title: "Invalid Amount!",
-                        text: "Please enter a valid positive number for withdrawal.",
-                        confirmButtonColor: "#d33"
-                    });
-                } else if (transaction_amt > acc_amount) {
-                    event.preventDefault();
-                    Swal.fire({
-                        icon: "error",
-                        title: "Insufficient Balance!",
-                        text: "Your Current Balance is Rs. " + acc_amount,
-                        confirmButtonColor: "#d33"
-                    });
-                } else if (remaining_balance < min_balance) {
-                    event.preventDefault();
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Minimum Balance Required!",
-                        text: "Minimum balance of Rs. " + min_balance + " is required in your account. Your withdrawal exceeds this limit.",
-                        confirmButtonColor: "#f39c12"
-                    });
-                }
-            });
-        });
+        if (isNaN(transaction_amt) || transaction_amt <= 0) {
+            alert("Error: Please enter a valid positive number greater than zero for withdrawal.");
+            event.preventDefault();
+        } else if (transaction_amt > acc_amount) {
+            alert("Error: Insufficient Balance! Your Current Balance is Rs. " + acc_amount);
+            event.preventDefault();
+        } else if (remaining_balance < min_balance) {
+            alert("Warning: Minimum balance of Rs. " + min_balance + " is required in your account. Your withdrawal exceeds this limit.");
+            event.preventDefault();
+        }
+    });
+});
 
     </script>
 

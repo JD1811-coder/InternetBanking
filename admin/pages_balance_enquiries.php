@@ -83,13 +83,11 @@ $admin_id = $_SESSION['admin_id'];
                         <td><?php echo $row->email; ?></td>
                         <td><?php echo $row->address; ?></td>
                         <td>
-                          <a class="badge badge-success" href="pages_view_client_bank_acc.php?client_number=<?php echo $row->client_number; ?>&client_id=<?php echo $row->client_id; ?>">
-                            <i class="fas fa-eye"></i>
-                            <i class="fas fa-briefcase"></i>
-                            Check Bank Accounts
-                          </a>
+  <a class="btn btn-success btn-sm" href="pages_view_client_bank_acc.php?client_number=<?php echo $row->client_number; ?>&client_id=<?php echo $row->client_id; ?>">
+    <i class="fas fa-eye"></i> View Bank Accounts
+  </a>
+</td>
 
-                        </td>
 
                       </tr>
                     <?php $cnt = $cnt + 1;

@@ -65,7 +65,15 @@ $admin_id = $_SESSION['admin_id'];
 
 
         $account_id = $_GET['account_id'];
-        $ret = "SELECT * FROM  iB_bankAccounts WHERE account_id =? ";
+        $ret = "SELECT a.*, 
+        c.name ,
+        c.client_number, 
+        c.email AS client_email, 
+        c.phone AS client_phone
+ FROM iB_bankAccounts a 
+ JOIN iB_clients c ON a.client_id = c.client_id 
+ WHERE a.account_id = ?
+  ";
         $stmt = $mysqli->prepare($ret);
         $stmt->bind_param('i', $account_id);
         $stmt->execute(); //ok
@@ -90,14 +98,14 @@ $admin_id = $_SESSION['admin_id'];
                     <div class="container-fluid">
                         <div class="row mb-2">
                             <div class="col-sm-6">
-                                <h1><?php echo $row->client_name; ?> iBanking Account Balance</h1>
+                                <h1><?php echo $row->name; ?> iBanking Account Balance</h1>
                             </div>
                             <div class="col-sm-6">
                                 <ol class="breadcrumb float-sm-right">
                                     <li class="breadcrumb-item"><a href="pages_dashboard.php">Dashboard</a></li>
                                     <li class="breadcrumb-item"><a href="pages_balance_enquiries.php">Finances</a></li>
                                     <li class="breadcrumb-item"><a href="pages_balance_enquiries.php">Balances</a></li>
-                                    <li class="breadcrumb-item active"><?php echo $row->client_name; ?> Accs</li>
+                                    <li class="breadcrumb-item active"><?php echo $row->name; ?> Accs</li>
                                 </ol>
                             </div>
                         </div>
@@ -126,7 +134,7 @@ $admin_id = $_SESSION['admin_id'];
                                         <div class="col-sm-6 invoice-col">
                                             Account Holder
                                             <address>
-                                                <strong><?php echo $row->client_name; ?></strong><br>
+                                                <strong><?php echo $row->name; ?></strong><br>
                                                 <?php echo $row->client_number; ?><br>
                                                 <?php echo $row->client_email; ?><br>
                                                 Phone: <?php echo $row->client_phone; ?><br>
@@ -203,7 +211,7 @@ $admin_id = $_SESSION['admin_id'];
                                                         <td>Rs. <?php echo $money_in; ?></td>
                                                     </tr>
                                                     <tr>
-                                                        <th>Banking Intrest:</th>
+                                                        <th>Banking Interest:</th>
                                                         <td>Rs. <?php echo $rate_amt; ?></td>
                                                     </tr>
                                                     <tr>
