@@ -94,7 +94,7 @@ if (isset($_COOKIE['client_id'])) {
     $client_id = $_COOKIE['client_id'];
 
     // Fetch old password from database
-    $stmt = $mysqli->prepare("SELECT password FROM ib_admin WHERE admin_id = ?");
+    $stmt = $mysqli->prepare("SELECT password FROM ib_admin WHERE admin _id = ?");
     $stmt->bind_param('i', $client_id);
     $stmt->execute();
     $stmt->bind_result($hashed_password);
@@ -320,3 +320,5 @@ if (isset($_COOKIE['client_id'])) {
 </body>
 
 </html>
+
+<!-- Updated -->
