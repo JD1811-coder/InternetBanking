@@ -77,7 +77,7 @@ JOIN iB_clients c ON a.client_id = c.client_id;
                       //Trim Timestamp to DD-MM-YYYY : H-M-S
                       $dateOpened = $row->created_at;
 
-                    ?>
+                      ?>
 
                       <tr>
                         <td><?php echo $cnt; ?></td>
@@ -87,7 +87,8 @@ JOIN iB_clients c ON a.client_id = c.client_id;
                         <td><?php echo $row->acc_type; ?></td>
                         <td><?php echo $row->name; ?></td>
                         <td>
-                          <a class="btn btn-success btn-sm" href="pages_deposit_money.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>">
+                          <a class="btn btn-success btn-sm"
+                            href="pages_deposit_money.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>">
                             <i class="fas fa-money-bill-alt"></i>
                             <i class="fas fa-upload"></i>
                             Deposit Money
@@ -96,7 +97,7 @@ JOIN iB_clients c ON a.client_id = c.client_id;
                         </td>
 
                       </tr>
-                    <?php $cnt = $cnt + 1;
+                      <?php $cnt = $cnt + 1;
                     } ?>
                     </tfoot>
                 </table>
@@ -135,7 +136,7 @@ JOIN iB_clients c ON a.client_id = c.client_id;
   <script src="dist/js/demo.js"></script>
   <!-- page script -->
   <script>
-    $(function() {
+    $(function () {
       $("#example1").DataTable();
       $('#example2').DataTable({
         "paging": true,

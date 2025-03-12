@@ -3,7 +3,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$staff_id = $_SESSION['staff_id'];
+
 
 //clear notifications and alert user that they are cleared
 if (isset($_GET['Clear_Notifications'])) {
@@ -93,7 +93,7 @@ $stmt->fetch();
 $stmt->close();
 
 //return total number of  iBank initial cash->balances
-$client_id = $_SESSION['client_id'];
+// $client_id = $_SESSION['client_id'];
 $result = "SELECT SUM(acc_amount) FROM iB_bankAccounts";
 $stmt = $mysqli->prepare($result);
 // $stmt->bind_param('i', $client_id);
@@ -172,7 +172,7 @@ $stmt->close();
             <div class="clearfix hidden-md-up"></div>
 
             <!--Ibank Acc types-->
-            <div class="col-12 col-sm-6 col-md-4">
+            <!-- <div class="col-12 col-sm-6 col-md-4">
               <div class="info-box mb-3">
                 <span class="info-box-icon bg-success elevation-1"><i class="fas fa-briefcase"></i></span>
                 <div class="info-box-content">
@@ -180,7 +180,7 @@ $stmt->close();
                   <span class="info-box-number"><?php echo $iB_AccsType; ?></span>
                 </div>
               </div>
-            </div>
+            </div> -->
             <!-- /.iBank Acc types -->
 
             <!--iBank Accounts-->
@@ -487,7 +487,7 @@ $stmt->close();
         exportEnabled: false,
         animationEnabled: true,
         title: {
-          text: "Accounts Per Acc Types "
+          text: "A/C Types "
         },
         legend: {
           cursor: "pointer",

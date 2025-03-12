@@ -276,19 +276,27 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
 
 
 
+
+
                                                     <div class="form-group row">
                                                         <label for="inputAadhar" class="col-sm-2 col-form-label">Aadhar
                                                             Number</label>
                                                         <div class="col-sm-10">
 <<<<<<< HEAD
+<<<<<<< HEAD
                                                             <input type="text" name="aadhar_number" required class="form-control"
                                                                 id="inputAadhar"  value="<?php echo htmlspecialchars($aadhar_number); ?>">
                                                                 <small
 =======
+=======
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
                                                             <input type="text" name="aadhar_number" required
                                                                 class="form-control" id="inputAadhar"
                                                                 value="<?php echo htmlspecialchars($aadhar_number); ?>">
                                                             <small
+<<<<<<< HEAD
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
+=======
 >>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
                                                                 class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
                                                             <div id="aadharError" class="text-danger"></div>
@@ -317,8 +325,14 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
                                                                 <input type="file" name="profile_pic"
                                                                     class="form-control custom-file-input" id="profile_pic">
 <<<<<<< HEAD
+<<<<<<< HEAD
                                                                 <label class="custom-file-label" for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
                                                                     
+=======
+                                                                <label class="custom-file-label"
+                                                                    for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
+
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
 =======
                                                                 <label class="custom-file-label"
                                                                     for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
@@ -365,6 +379,9 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
                                                                 readonly>
                                                         </div>
                                                     </div>
+<<<<<<< HEAD
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
+=======
 >>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
 
                                                     <div class="form-group row">

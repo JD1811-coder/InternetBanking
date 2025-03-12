@@ -91,17 +91,23 @@ $old_password = "";
 
 // Check if 'client_id' is stored in cookies
 <<<<<<< HEAD
+<<<<<<< HEAD
 if (isset($_COOKIE['client_id'])) {
     $client_id = $_COOKIE['client_id'];
 
     // Fetch old password from database
     $stmt = $mysqli->prepare("SELECT password FROM ib_admin WHERE admin _id = ?");
 =======
+=======
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
 if (isset($_COOKIE['admin_id'])) {
     $client_id = $_COOKIE['admin_id'];
 
     // Fetch old password from database
     $stmt = $mysqli->prepare("SELECT password FROM ib_admin WHERE admin_id = ?");
+<<<<<<< HEAD
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
+=======
 >>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
     $stmt->bind_param('i', $client_id);
     $stmt->execute();

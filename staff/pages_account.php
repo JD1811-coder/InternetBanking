@@ -71,8 +71,13 @@ $old_password = "";
 
 // Check if 'client_id' is stored in cookies
 <<<<<<< HEAD
+<<<<<<< HEAD
 if (isset($_COOKIE['client_id'])) {
     $client_id = $_COOKIE['client_id'];
+=======
+if (isset($_COOKIE['staff_id'])) {  
+    $client_id = $_COOKIE['staff_id'];
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
 =======
 if (isset($_COOKIE['staff_id'])) {  
     $client_id = $_COOKIE['staff_id'];

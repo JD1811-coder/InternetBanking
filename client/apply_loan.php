@@ -133,17 +133,21 @@ if (isset($_COOKIE['client_id'])) {
 
 
                                         <div class="form-group">
-                                            <label>Loan Type</label>
-                                            <select name="loan_type_id" class="form-control">
-                                                <option value="">Select Loan Type</option>
-                                                <?php foreach ($loan_types as $type) { ?>
-                                                    <option value="<?php echo $type['id']; ?>" 
-                                                        <?php echo (isset($_POST['loan_type_id']) && $_POST['loan_type_id'] == $type['id']) ? 'selected' : ''; ?>>
-                                                        <?php echo htmlspecialchars($type['type_name']); ?>
-                                                    </option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
+    <label>Loan Type</label>
+    <select name="loan_type_id" id="loan_type_id" class="form-control">
+        <option value="">Select Loan Type</option>
+        <?php foreach ($loan_types as $type) { ?>
+            <option value="<?php echo $type['id']; ?>">
+                <?php echo htmlspecialchars($type['type_name']); ?>
+            </option>
+        <?php } ?>
+    </select>
+</div>
+
+<div class="form-group">
+    <label>Interest Rate (%)</label>
+    <input type="text" id="interest_rate" class="form-control" readonly>
+</div>
 
                                         <div class="form-group">
                                             <label>Loan Amount</label>
@@ -197,6 +201,28 @@ if (isset($_COOKIE['client_id'])) {
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="dist/js/adminlte.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#loan_type_id').change(function() {
+        var loanTypeId = $(this).val();
+        
+        if (loanTypeId) {
+            $.ajax({
+                url: 'get_interest_rate.php',
+                type: 'GET',
+                data: { loan_type_id: loanTypeId },
+                dataType: 'json',
+                success: function(response) {
+                    $('#interest_rate').val(response.interest_rate);
+                }
+            });
+        } else {
+            $('#interest_rate').val('');
+        }
+    });
+});
+</script>
 
 </body>
 </html>
