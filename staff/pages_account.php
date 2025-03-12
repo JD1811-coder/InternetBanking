@@ -1,4 +1,4 @@
-    <?php
+<?php
     session_start();
     include('conf/config.php');
     include('conf/checklogin.php');
@@ -70,8 +70,13 @@
 $old_password = "";
 
 // Check if 'client_id' is stored in cookies
+<<<<<<< HEAD
 if (isset($_COOKIE['client_id'])) {
     $client_id = $_COOKIE['client_id'];
+=======
+if (isset($_COOKIE['staff_id'])) {  
+    $client_id = $_COOKIE['staff_id'];
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
 
     // Fetch old password from database
     $stmt = $mysqli->prepare("SELECT password FROM ib_staff WHERE staff_id = ?");

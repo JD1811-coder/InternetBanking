@@ -87,6 +87,38 @@ $stmt->bind_param('s', $client_id);
 $stmt->execute();
 $res = $stmt->get_result();
 $row = $res->fetch_object();
+
+
+$old_password = "";
+
+// Check if 'client_id' is stored in cookies
+if (isset($_COOKIE['client_id'])) {
+    $client_id = $_COOKIE['client_id'];
+
+    // Fetch old password from database
+    $stmt = $mysqli->prepare("SELECT password FROM iB_clients WHERE client_id = ?");
+    $stmt->bind_param('i', $client_id);
+    $stmt->execute();
+    $stmt->bind_result($hashed_password);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Decrypt or mask the password for display purposes
+    $old_password = "********"; // For security, show masked password
+}
+
+
+// Fetch user details from the database (adjust the query as needed)
+$user_id = $_SESSION['client_id']; // Assuming user ID is stored in session
+$query = "SELECT aadhar_number FROM ib_clients WHERE client_id = ?";
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param("i", $client_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
+?>
+
 ?>
 
 <!-- Log on to codeastro.com for more projects! -->
@@ -242,13 +274,22 @@ $row = $res->fetch_object();
                                                     
 
 
+
+
                                                     <div class="form-group row">
                                                         <label for="inputAadhar" class="col-sm-2 col-form-label">Aadhar
                                                             Number</label>
                                                         <div class="col-sm-10">
+<<<<<<< HEAD
                                                             <input type="text" name="aadhar_number" required class="form-control"
                                                                 id="inputAadhar"  value="<?php echo htmlspecialchars($aadhar_number); ?>">
                                                                 <small
+=======
+                                                            <input type="text" name="aadhar_number" required
+                                                                class="form-control" id="inputAadhar"
+                                                                value="<?php echo htmlspecialchars($aadhar_number); ?>">
+                                                            <small
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
                                                                 class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
                                                             <div id="aadharError" class="text-danger"></div>
                                                         </div>
@@ -275,8 +316,14 @@ $row = $res->fetch_object();
                                                             <div class="custom-file">
                                                                 <input type="file" name="profile_pic"
                                                                     class="form-control custom-file-input" id="profile_pic">
+<<<<<<< HEAD
                                                                 <label class="custom-file-label" for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
                                                                     
+=======
+                                                                <label class="custom-file-label"
+                                                                    for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
+
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
                                                             </div>
                                                         </div>
                                                         <small
@@ -300,6 +347,7 @@ $row = $res->fetch_object();
                                             <!-- /Change Password -->
                                             <div class="tab-pane" id="Change_Password">
                                                 <form method="post" class="form-horizontal">
+<<<<<<< HEAD
                                                 <div class="form-group row">
     <label for="inputName" class="col-sm-2 col-form-label">Old Password</label>
     <div class="col-sm-10">
@@ -307,6 +355,17 @@ $row = $res->fetch_object();
                value="<?php echo htmlspecialchars($old_password); ?>" readonly>
     </div>
 </div>
+=======
+                                                    <div class="form-group row">
+                                                        <label for="inputName" class="col-sm-2 col-form-label">Old
+                                                            Password</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" class="form-control" id="inputName"
+                                                                value="<?php echo htmlspecialchars($old_password); ?>"
+                                                                readonly>
+                                                        </div>
+                                                    </div>
+>>>>>>> d7356e327a33847caeaf3a10e6f80448beb15f93
 
                                                     <div class="form-group row">
                                                         <label for="inputEmail" class="col-sm-2 col-form-label">New
