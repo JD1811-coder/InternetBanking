@@ -109,6 +109,10 @@ $stmt->bind_result($new_amt);
 $stmt->fetch();
 $stmt->close();
 //Withdrawal Computations
+$iB_deposits = isset($iB_deposits) ? $iB_deposits : 0;
+$iB_withdrawal = isset($iB_withdrawal) ? $iB_withdrawal : 0;
+$iB_Transfers = isset($iB_Transfers) ? $iB_Transfers : 0;
+$TotalBalInAccount = isset($TotalBalInAccount) ? $TotalBalInAccount : 0;
 
 ?>
 

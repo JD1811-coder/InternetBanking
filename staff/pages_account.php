@@ -1,4 +1,4 @@
-    <?php
+<?php
     session_start();
     include('conf/config.php');
     include('conf/checklogin.php');
@@ -65,6 +65,26 @@
             $err = "Please Try Again Or Try Later";
         }
     }
+
+    
+$old_password = "";
+
+// Check if 'client_id' is stored in cookies
+if (isset($_COOKIE['staff_id'])) {  
+    $client_id = $_COOKIE['staff_id'];
+
+    // Fetch old password from database
+    $stmt = $mysqli->prepare("SELECT password FROM ib_staff WHERE staff_id = ?");
+    $stmt->bind_param('i', $client_id);
+    $stmt->execute();
+    $stmt->bind_result($hashed_password);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Decrypt or mask the password for display purposes
+    $old_password = "********"; // For security, show masked password
+}
+
     ?>
 
     <!DOCTYPE html>
@@ -271,12 +291,13 @@
                                                 <!-- /Change Password -->
                                                 <div class="tab-pane" id="Change_Password">
                                                     <form method="post" class="form-horizontal" id="changePasswordForm">
-                                                        <div class="form-group row">
-                                                            <label for="inputOldPassword" class="col-sm-2 col-form-label">Old Password</label>
-                                                            <div class="col-sm-10">
-                                                                <input type="password" name="old_password" class="form-control" required id="inputOldPassword">
-                                                            </div>
-                                                        </div>
+                                                    <div class="form-group row">
+    <label for="inputName" class="col-sm-2 col-form-label">Old Password</label>
+    <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputName" 
+               value="<?php echo htmlspecialchars($old_password); ?>" readonly>
+    </div>
+</div>
                                                         <div class="form-group row">
                                                             <label for="inputNewPassword" class="col-sm-2 col-form-label">New Password</label>
                                                             <div class="col-sm-10">

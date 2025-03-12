@@ -89,11 +89,30 @@ $res = $stmt->get_result();
 $row = $res->fetch_object();
 
 
+$old_password = "";
+
+// Check if 'client_id' is stored in cookies
+if (isset($_COOKIE['client_id'])) {
+    $client_id = $_COOKIE['client_id'];
+
+    // Fetch old password from database
+    $stmt = $mysqli->prepare("SELECT password FROM iB_clients WHERE client_id = ?");
+    $stmt->bind_param('i', $client_id);
+    $stmt->execute();
+    $stmt->bind_result($hashed_password);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Decrypt or mask the password for display purposes
+    $old_password = "********"; // For security, show masked password
+}
+
+
 // Fetch user details from the database (adjust the query as needed)
 $user_id = $_SESSION['client_id']; // Assuming user ID is stored in session
 $query = "SELECT aadhar_number FROM ib_clients WHERE client_id = ?";
 $stmt = $mysqli->prepare($query);
-$stmt->bind_param("i",  $client_id);
+$stmt->bind_param("i", $client_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
@@ -252,16 +271,17 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
                                                                 class="text-danger"><?php echo $errors['phone'] ?? ''; ?></small>
                                                         </div>
                                                     </div>
-                                                    
+
 
 
                                                     <div class="form-group row">
                                                         <label for="inputAadhar" class="col-sm-2 col-form-label">Aadhar
                                                             Number</label>
                                                         <div class="col-sm-10">
-                                                            <input type="text" name="aadhar_number" required class="form-control"
-                                                                id="inputAadhar"  value="<?php echo htmlspecialchars($aadhar_number); ?>">
-                                                                <small
+                                                            <input type="text" name="aadhar_number" required
+                                                                class="form-control" id="inputAadhar"
+                                                                value="<?php echo htmlspecialchars($aadhar_number); ?>">
+                                                            <small
                                                                 class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
                                                             <div id="aadharError" class="text-danger"></div>
                                                         </div>
@@ -288,8 +308,9 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
                                                             <div class="custom-file">
                                                                 <input type="file" name="profile_pic"
                                                                     class="form-control custom-file-input" id="profile_pic">
-                                                                <label class="custom-file-label" for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
-                                                                    
+                                                                <label class="custom-file-label"
+                                                                    for="profile_pic"><?php echo !empty($row->profile_pic) ? basename($row->profile_pic) : "Choose file"; ?></label>
+
                                                             </div>
                                                         </div>
                                                         <small
@@ -317,10 +338,12 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
                                                         <label for="inputName" class="col-sm-2 col-form-label">Old
                                                             Password</label>
                                                         <div class="col-sm-10">
-                                                            <input type="password" class="form-control" required
-                                                                id="inputName">
+                                                            <input type="text" class="form-control" id="inputName"
+                                                                value="<?php echo htmlspecialchars($old_password); ?>"
+                                                                readonly>
                                                         </div>
                                                     </div>
+
                                                     <div class="form-group row">
                                                         <label for="inputEmail" class="col-sm-2 col-form-label">New
                                                             Password</label>

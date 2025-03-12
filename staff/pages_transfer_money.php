@@ -3,40 +3,33 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$client_id = $_SESSION['client_id'];
+$staff_id = $_SESSION['staff_id'];
+
 if (isset($_POST['deposit'])) {
     if (isset($_GET['account_id']) && isset($_GET['client_id'])) {
         $tr_code = $_POST['tr_code'];
-        $account_id = intval($_GET['account_id']);  // Sender's Account ID (Sanitize input)
-        $client_id = intval($_GET['client_id']); // Ensure client ID is an integer
-        $transaction_amt = floatval($_POST['transaction_amt']); // Convert amount to float
-        $receiving_acc_no = trim($_POST['receiving_acc_no']); // Trim whitespace
+        $account_id = $_GET['account_id'];  // Sender's Account ID
+        $client_id = $_GET['client_id'];
+        $transaction_amt = $_POST['transaction_amt'];
+        $receiving_acc_no = $_POST['receiving_acc_no'];
 
         // Validate input
-        if ($transaction_amt <= 0) {
+        if (!is_numeric($transaction_amt) || $transaction_amt <= 0) {
             $err = "Invalid amount. Please enter an amount greater than zero.";
         } else {
-            $mysqli->autocommit(FALSE); // Start Transaction
+            // Start Database Transaction
+            $mysqli->autocommit(FALSE);
 
-            // Fetch Sender's Balance & Account Type
-            $query = "SELECT acc_amount, acc_type FROM ib_bankaccounts WHERE account_id = ?";
+            // Fetch Sender's Current Balance
+            $query = "SELECT acc_amount FROM ib_bankaccounts WHERE account_id = ?";
             $stmt = $mysqli->prepare($query);
             $stmt->bind_param('i', $account_id);
             $stmt->execute();
-            $stmt->bind_result($sender_balance, $acc_type);
+            $stmt->bind_result($sender_balance);
             $stmt->fetch();
             $stmt->close();
 
-            // Fetch Minimum Balance for Account Type
-            $query = "SELECT min_balance FROM ib_acc_types WHERE name = ?";
-            $stmt = $mysqli->prepare($query);
-            $stmt->bind_param('s', $acc_type);
-            $stmt->execute();
-            $stmt->bind_result($min_balance);
-            $stmt->fetch();
-            $stmt->close();
-
-            // Fetch Receiver's Account Details
+            // Fetch Receiver's Account ID & Current Balance
             $query = "SELECT account_id, acc_amount FROM ib_bankaccounts WHERE account_number = ?";
             $stmt = $mysqli->prepare($query);
             $stmt->bind_param('s', $receiving_acc_no);
@@ -45,43 +38,73 @@ if (isset($_POST['deposit'])) {
             $stmt->fetch();
             $stmt->close();
 
-            // Validate Receiver's Account
-            if (!$receiver_account_id) {
-                echo '<script>
-                Swal.fire("Error", "Invalid Receiving Account!", "error");
-                </script>';
-                $mysqli->autocommit(TRUE);
-                exit;
-            }
+            // Fetch Sender's Account Type and Minimum Balance Requirement
+            $query = "SELECT acc_type, acc_amount FROM ib_bankaccounts WHERE account_id = ?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('i', $account_id);
+            $stmt->execute();
+            $stmt->bind_result($acc_type, $sender_balance);
+            $stmt->fetch();
+            $stmt->close();
 
-            // Prevent Self-Transfer
-            if ($account_id == $receiver_account_id) {
-                echo '<script>
-                Swal.fire("Error", "You cannot transfer to your own account!", "error");
-                </script>';
-                $mysqli->autocommit(TRUE);
-                exit;
-            }
+            // Fetch Minimum Balance for the Account Type
+            $query = "SELECT min_balance FROM ib_acc_types WHERE name = ?";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('s', $acc_type);
+            $stmt->execute();
+            $stmt->bind_result($min_balance);
+            $stmt->fetch();
+            $stmt->close();
 
-            // Check Sufficient Funds & Minimum Balance
+            // Calculate the new sender balance after deduction
             $new_sender_balance = $sender_balance - $transaction_amt;
-            if ($transaction_amt > $sender_balance) {
+
+            // Validate if sender maintains the required minimum balance
+            if ($new_sender_balance < $min_balance) {
                 echo '<script>
-                Swal.fire("Error", "Insufficient Balance!", "error");
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Transaction Failed!",
+                        text: "You must maintain a minimum balance of Rs. ' . $min_balance . ' in your ' . $acc_type . ' account.",
+                        confirmButtonText: "OK"
+                    });
+                });
                 </script>';
-            } elseif ($new_sender_balance < $min_balance) {
+            } elseif ($transaction_amt > $sender_balance) {
                 echo '<script>
-                Swal.fire("Error", "Minimum balance requirement not met!", "error");
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Insufficient Balance!",
+                        text: "Your Current Balance is Rs. ' . $sender_balance . '",
+                        confirmButtonText: "OK"
+                    });
+                });
                 </script>';
-            } else {
-                // Deduct from Sender
+            } elseif (!is_numeric($transaction_amt) || $transaction_amt <= 0) {
+                echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Invalid Amount!",
+                        text: "Please enter an amount greater than zero.",
+                        confirmButtonText: "OK"
+                    });
+                });
+                </script>';
+            } else{
+            
+
+                // Deduct amount from sender
+                $new_sender_balance = $sender_balance - $transaction_amt;
                 $update_sender_query = "UPDATE ib_bankaccounts SET acc_amount = ? WHERE account_id = ?";
                 $stmt = $mysqli->prepare($update_sender_query);
                 $stmt->bind_param('di', $new_sender_balance, $account_id);
                 $stmt->execute();
                 $stmt->close();
 
-                // Add to Receiver
+                // Add amount to receiver
                 $new_receiver_balance = $receiver_balance + $transaction_amt;
                 $update_receiver_query = "UPDATE ib_bankaccounts SET acc_amount = ? WHERE account_id = ?";
                 $stmt = $mysqli->prepare($update_receiver_query);
@@ -97,28 +120,31 @@ if (isset($_POST['deposit'])) {
                 $stmt->execute();
                 $stmt->close();
 
-                // Commit Transaction
+                // Commit Changes
                 $mysqli->commit();
-
                 echo '<script>
-                Swal.fire({
-                    icon: "success",
-                    title: "Success!",
-                    text: "Money Transferred Successfully!",
-                    confirmButtonText: "OK"
-                }).then(() => {
-                    window.location.href = "pages_transfers.php";
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success!",
+                        text: "Money Transferred Successfully!",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        window.location.href = "pages_transfers.php";
+                    });
                 });
                 </script>';
+                
+            
             }
 
-            $mysqli->autocommit(TRUE); // Restore Auto-Commit
+            // Enable Autocommit Again
+            $mysqli->autocommit(TRUE);
         }
     } else {
         $err = "Required parameters not set.";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -243,29 +269,30 @@ if (isset($_POST['deposit'])) {
                                             </div>
 
                                             <div class="row">
-                                            <div class="col-md-4 form-group">
-    <label for="receiving_acc_name">Receiving Account Name</label>
-    <select name="receiving_acc_name" id="receiving_acc_name" required class="form-control">
-        <option value="">Select Receiving Account</option>
-        <?php
-        include('conf/config.php'); // Ensure this is included
-        $query = "SELECT account_number, acc_name FROM ib_bankaccounts WHERE account_id != ?";
-        $stmt = $mysqli->prepare($query);
-        $stmt->bind_param('i', $account_id);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        while ($row = $res->fetch_object()) {
-            echo "<option value='{$row->acc_name}'>{$row->acc_name}</option>";
-        }
-        ?>
-    </select>
-</div>
+                                                <div class="col-md-4 form-group">
+                                                    <label for="receiving_acc_no">Receiving Account Number</label>
+                                                    <select name="receiving_acc_no" id="receiving_acc_no" required
+                                                        class="form-control">
+                                                        <option value="">Select Receiving Account</option>
+                                                        <?php
+                                                        // Fetch all bank accounts except the sender's own account
+                                                        $ret = "SELECT account_number, acc_name FROM ib_bankaccounts WHERE account_id != ?";
+                                                        $stmt = $mysqli->prepare($ret);
+                                                        $stmt->bind_param('i', $account_id);
+                                                        $stmt->execute();
+                                                        $res = $stmt->get_result();
+                                                        while ($row = $res->fetch_object()) {
+                                                            echo "<option value='{$row->account_number}'>{$row->account_number}</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
 
-<div class="col-md-4 form-group">
-    <label for="receiving_acc_number">Receiving Account Number</label>
-    <input type="text" name="receiving_acc_number" id="receiving_acc_number" readonly required class="form-control">
-</div>
-
+                                                <div class="col-md-4 form-group">
+                                                    <label for="receiving_acc_name">Receiving Account Name</label>
+                                                    <input type="text" name="receiving_acc_name" id="receiving_acc_name"
+                                                        readonly required class="form-control">
+                                                </div>
 
 
 
@@ -341,54 +368,51 @@ if (isset($_POST['deposit'])) {
         });
 
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelector("form").addEventListener("submit", function (event) {
-                var transactionAmount = parseFloat(document.querySelector('input[name="transaction_amt"]').value);
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector("form").addEventListener("submit", function (event) {
+        var transactionAmount = parseFloat(document.querySelector('input[name="transaction_amt"]').value);
 
-                if (isNaN(transactionAmount) || transactionAmount <= 0) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Invalid Amount!",
-                        text: "Amount must be greater than zero.",
-                        confirmButtonText: "OK"
-                    });
-                    event.preventDefault();
-                }
+        if (isNaN(transactionAmount) || transactionAmount <= 0) {
+            Swal.fire({
+                icon: "error",
+                title: "Invalid Amount!",
+                text: "Amount must be greater than zero.",
+                confirmButtonText: "OK"
             });
-        });
-
-    </script>
-        <script>
-      $(document).ready(function () {
-    $("#receiving_acc_name").change(function () {
-        var accountName = $(this).val(); // Get selected account name
-
-        if (accountName) {
-            $.ajax({
-                type: "POST",
-                url: "get_account_number.php", // Backend script to fetch account number
-                data: { account_name: accountName },
-                dataType: "json",
-                success: function (response) {
-                    if (response.success) {
-                        $("#receiving_acc_number").val(response.account_number);
-                    } else {
-                        alert("Account number not found.");
-                    }
-                },
-                error: function () {
-                    alert("Failed to fetch account details.");
-                }
-            });
-        } else {
-            $("#receiving_acc_number").val(""); // Clear field if no selection
+            event.preventDefault();
         }
     });
 });
 
-    </script>
+</script>
+    <script>
+        $(document).ready(function () {
+            $("#receiving_acc_no").change(function () {
+                var accountNumber = $(this).val();
 
+                if (accountNumber) {
+                    $.ajax({
+                        type: "POST",
+                        url: "get_account_name.php",
+                        data: {
+                            account_number: accountNumber
+                        },
+                        dataType: "json",
+                        success: function (response) {
+                            $("#receiving_acc_name").val(response.acc_name);
+                        },
+                        error: function () {
+                            alert("Failed to fetch account details.");
+                        }
+                    });
+                }
+                // else {
+                //     $("#receiving_acc_name").val(""); // Clear the field if no account is selected
+                // }
+            });
+        });
+    </script>
 </body>
 
 </html>
