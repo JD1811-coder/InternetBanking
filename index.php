@@ -77,7 +77,7 @@ while ($sys = $res->fetch_object()) {
                 <p class="lead">
                     Experience secure and seamless banking with DigiBankX. We provide modern digital banking solutions, ensuring quick transactions, easy account management, and hassle-free loan applications.
                 </p>
-                <a href="client/pages_client_signup.php" class="btn btn-primary">Open an Account</a>
+                <a href="client/pages_client_signup.php" target="_blank" class="btn btn-primary">Open an Account</a>
             </div>
         </section>
 

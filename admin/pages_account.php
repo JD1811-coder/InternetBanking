@@ -227,7 +227,7 @@
                                                             <div class="col-sm-10">
                                                                 <input type="email" name="email" required
                                                                     value="<?php echo $row->email; ?>" class="form-control"
-                                                                    id="inputEmail">
+                                                                    id="inputEmail" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">

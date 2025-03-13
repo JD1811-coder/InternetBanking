@@ -80,6 +80,7 @@ if (isset($_POST['create_staff_account'])) {
 
             if ($stmt->execute()) {
                 $success = true;
+                
             } else {
                 $errors['general'] = "Error! Please try again later.";
             }
@@ -210,6 +211,7 @@ if (isset($_POST['create_staff_account'])) {
                                             <button type="submit" name="create_staff_account"
                                                 class="btn btn-success">Add
                                                 Staff</button>
+                                                
                                         </div>
                                 </form>
                             </div>
@@ -224,6 +226,9 @@ if (isset($_POST['create_staff_account'])) {
 
     <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Load SweetAlert2 from a reliable CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
     <?php if ($success): ?>
         <script>

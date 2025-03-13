@@ -104,14 +104,17 @@ if (isset($_GET['deleteBankAcc'])) {
       <td><?php echo $row->name; ?></td>
       <td><?php echo number_format($row->acc_amount, 2); ?> </td> <!-- Display balance -->
       <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
-      <td>
+      <td class="text-center">
+    <div class="d-flex justify-content-center gap-2">
         <a class="btn btn-success btn-sm" href="pages_update_client_accounts.php?account_id=<?php echo $row->account_id; ?>">
-          <i class="fas fa-cogs"></i> Manage
+            <i class="fas fa-cogs"></i> Manage
         </a>
         <a class="btn btn-danger btn-sm" href="pages_manage_acc_openings.php?deleteBankAcc=<?php echo $row->account_id; ?>">
-          <i class="fas fa-times"></i> Close Account
+            <i class="fas fa-times"></i> Close Account
         </a>
-      </td>
+    </div>
+</td>
+
     </tr>
   <?php $cnt++; } ?>
 </tbody>

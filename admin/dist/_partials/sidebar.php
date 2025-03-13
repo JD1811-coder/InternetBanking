@@ -1,4 +1,15 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <style>
+        .user-panel .info {
+    text-align: left;
+}
+
+.nav-sidebar .nav-item > a {
+    text-align: left;
+    padding-left: 10px; /* Adjust padding if needed */
+}
+
+    </style>
     <!-- Load logged-in admin details -->
     <?php
     $admin_id = $_SESSION['admin_id'];
@@ -126,11 +137,12 @@
 
                         <li class="nav-header">Advanced Modules</li>
                         <li class="nav-item">
-                            <a href="pages_balance_enquiries.php" class="nav-link">
-                            <i class="fas fa-coins"></i>
-                                <p>Balance Enquiries</p>
-                            </a>
-                        </li>
+    <a href="pages_balance_enquiries.php" class="nav-link">
+        <i class="nav-icon fas fa-coins"></i>
+        <p class="ml-2">Balance Enquiries</p>
+    </a>
+</li>
+
                         <li class="nav-item">
                             <a href="pages_transactions_engine.php" class="nav-link">
                                 <i class="nav-icon fas fa-exchange-alt"></i>
@@ -138,20 +150,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-rupee-sign"></i>
-                                <p>Financial Reports <i class="fas fa-angle-left right"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item"><a href="pages_financial_reporting_deposits.php" class="nav-link"><i
-                                            class="fas fa-file-upload nav-icon"></i> Deposits</a></li>
-                                <li class="nav-item"><a href="pages_financial_reporting_withdrawals.php" class="nav-link"><i
-                                            class="fas fa-cart-arrow-down nav-icon"></i> Withdrawals</a></li>
-                                <li class="nav-item"><a href="pages_financial_reporting_transfers.php" class="nav-link"><i
-                                            class="fas fa-random nav-icon"></i> Transfers</a></li>
-                            </ul>
-                        </li>
+                        
 
                         <li class="nav-item">
                             <a href="pages_system_settings.php" class="nav-link">

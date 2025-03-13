@@ -65,7 +65,27 @@ if (isset($_POST['update_staff_account'])) {
             }
         }
     }
+
 }
+    $old_password = "";
+
+    if (isset($_SESSION['staff_id'])) {
+        $admin_id = $_SESSION['staff_id'];
+
+        // Fetch old password from database
+        $stmt = $mysqli->prepare("SELECT password FROM iB_staff WHERE staff_id = ?");
+        $stmt->bind_param('i', $admin_id);
+        $stmt->execute();
+        $stmt->bind_result($hashed_password);
+        $stmt->fetch();
+        $stmt->close();
+
+        // Mask the password for security purposes
+        $old_password = str_repeat("*", 8); // Shows 8 asterisks instead of actual password
+    } else {
+        $old_password = "********"; // Default masked value if no session exists
+    }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -234,14 +254,13 @@ if (isset($_POST['update_staff_account'])) {
                                             <!-- /Change Password -->
                                             <div class="tab-pane" id="Change_Password">
                                                 <form method="post" id="changePasswordForm" class="form-horizontal">
-                                                    <div class="form-group row">
-                                                        <label for="inputName" class="col-sm-2 col-form-label">Old
-                                                            Password</label>
-                                                        <div class="col-sm-10">
-                                                            <input type="password" class="form-control" required
-                                                                id="oldPassword">
-                                                        </div>
-                                                    </div>
+                                                <div class="form-group row">
+    <label for="oldPassword" class="col-sm-2 col-form-label">Old Password</label>
+    <div class="col-sm-10">
+        <input type="password" class="form-control" id="oldPassword"
+            value="<?php echo htmlspecialchars($old_password); ?>" readonly>
+    </div>
+</div>
                                                     <div class="form-group row">
                                                         <label for="inputEmail" class="col-sm-2 col-form-label">New
                                                             Password</label>
