@@ -295,99 +295,128 @@ $TotalBalInAccount = isset($TotalBalInAccount) ? $TotalBalInAccount : 0;
           </div>
           <!-- /.row -->
 
-          <!-- Main row -->
           <div class="row">
-            <!-- Left col -->
-            <div class="col-md-12">
-              <!-- TABLE: Transactions -->
-              <div class="card">
-                <div class="card-header border-transparent">
-                  <h3 class="card-title">Latest Transactions</h3>
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header border-transparent">
+        <h3 class="card-title">Latest Transactions</h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
+          </button>
+          <button type="button" class="btn btn-tool" data-card-widget="remove">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover m-0">
+            <thead>
+              <tr>
+                <th>Transaction Code</th>
+                <th>Account No.</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Acc. Owner</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+              // Define Pagination
+              $limit = 10; // Transactions per page
+              $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+              $offset = ($page - 1) * $limit;
 
-                  <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                      <i class="fas fa-minus"></i>
-                    </button>
-                    <button type="button" class="btn btn-tool" data-card-widget="remove">
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div><!-- Log on to codeastro.com for more projects! -->
-                <!-- /.card-header -->
-                <div class="card-body p-0">
-                  <div class="table-responsive">
-                    <table class="table table-striped table-hover m-0">
-                      <thead>
-                        <tr>
-                          <th>Transaction Code</th>
-                          <th>Account No.</th>
-                          <th>Type</th>
-                          <th>Amount</th>
-                          <th>Acc. Owner</th>
-                          <th>Timestamp</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        //Get latest transactions ;
-                        $client_id = $_SESSION['client_id'];
-                        $ret = "SELECT 
-    t.*,  
-    b.account_number, 
-    b.acc_type, 
-    COALESCE(b.acc_name, 'N/A') AS account_owner, 
-    COALESCE(c.name, 'N/A') AS client_name
-FROM iB_Transactions t
-LEFT JOIN ib_bankaccounts b ON t.account_id = b.account_id
-LEFT JOIN ib_clients c ON t.client_id = c.client_id
-WHERE t.client_id = ?
-ORDER BY t.created_at DESC
- ";
-                        $stmt = $mysqli->prepare($ret);
-                        $stmt->bind_param('i', $client_id);
-                        $stmt->execute(); //ok
-                        $res = $stmt->get_result();
-                        $cnt = 1;
-                        while ($row = $res->fetch_object()) {
-                          /* Trim Transaction Timestamp to 
-                           *  User Uderstandable Formart  DD-MM-YYYY :
-                           */
-                          $transTstamp = $row->created_at;
-                          //Perfom some lil magic here
-                          if ($row->tr_type == 'Deposit') {
-                            $alertClass = "<span class='badge badge-success'>$row->tr_type</span>";
-                          } elseif ($row->tr_type == 'Withdrawal') {
-                            $alertClass = "<span class='badge badge-danger'>$row->tr_type</span>";
-                          } else {
-                            $alertClass = "<span class='badge badge-warning'>$row->tr_type</span>";
-                          }
-                          ?>
-                          <tr>
-                            <td><?php echo $row->tr_code; ?></a></td>
-                            <td><?php echo $row->account_number; ?></td>
-                            <td><?php echo $alertClass; ?></td>
-                            <td>Rs.<?php echo $row->transaction_amt; ?></td>
-                            <td><?php echo $row->client_name; ?></td>
-                            <td><?php echo date("d-M-Y h:m:s ", strtotime($transTstamp)); ?></td>
-                          </tr>
+              // Get total transactions count
+              $client_id = $_SESSION['client_id'];
+              $countQuery = "SELECT COUNT(*) AS total FROM iB_Transactions WHERE client_id = ?";
+              $countStmt = $mysqli->prepare($countQuery);
+              $countStmt->bind_param('i', $client_id);
+              $countStmt->execute();
+              $countResult = $countStmt->get_result();
+              $totalRows = $countResult->fetch_object()->total;
+              $totalPages = ceil($totalRows / $limit);
 
-                        <?php } ?>
+              // Fetch paginated transactions
+              $query = "SELECT 
+                  t.*,  
+                  b.account_number, 
+                  b.acc_type, 
+                  COALESCE(b.acc_name, 'N/A') AS account_owner, 
+                  COALESCE(c.name, 'N/A') AS client_name
+                FROM iB_Transactions t
+                LEFT JOIN ib_bankaccounts b ON t.account_id = b.account_id
+                LEFT JOIN ib_clients c ON t.client_id = c.client_id
+                WHERE t.client_id = ?
+                ORDER BY t.created_at DESC
+                LIMIT ? OFFSET ?";
 
-                      </tbody>
-                    </table>
-                  </div>
-                  <!-- /.table-responsive -->
-                </div>
-                <!-- /.card-body -->
-                <div class="card-footer clearfix">
-                  <a href="pages_transactions_engine.php" class="btn btn-sm btn-info float-left">View All</a>
-                </div>
-                <!-- /.card-footer -->
-              </div>
-              <!-- /.card -->
-            </div>
-            <!-- /.col -->
-          </div>
+              $stmt = $mysqli->prepare($query);
+              if ($stmt) {
+                $stmt->bind_param("iii", $client_id, $limit, $offset);
+                $stmt->execute();
+                $res = $stmt->get_result();
+
+                while ($row = $res->fetch_object()) {
+                  $transTstamp = $row->created_at ?? 'N/A';
+
+                  // Badge Color for Transaction Type
+                  if ($row->tr_type == 'Deposit') {
+                    $alertClass = "<span class='badge badge-success'>$row->tr_type</span>";
+                  } elseif ($row->tr_type == 'Withdrawal') {
+                    $alertClass = "<span class='badge badge-danger'>$row->tr_type</span>";
+                  } else {
+                    $alertClass = "<span class='badge badge-warning'>$row->tr_type</span>";
+                  }
+              ?>
+                  <tr>
+                    <td><?php echo htmlspecialchars($row->tr_code ?? 'N/A'); ?></td>
+                    <td><?php echo htmlspecialchars($row->account_number ?? 'N/A'); ?></td>
+                    <td><?php echo $alertClass; ?></td>
+                    <td>Rs. <?php echo htmlspecialchars($row->transaction_amt ?? '0.00'); ?></td>
+                    <td><?php echo isset($row->client_name) ? htmlspecialchars($row->client_name) : 'N/A'; ?></td>
+                    <td><?php echo $transTstamp !== 'N/A' ? date("d-M-Y h:i:s A", strtotime($transTstamp)) : 'N/A'; ?></td>
+                  </tr>
+              <?php }
+              } else {
+                echo "<tr><td colspan='6'>Error fetching transactions.</td></tr>";
+              }
+              ?>
+            </tbody>
+          </table>
+        </div>
+        <!-- /.table-responsive -->
+      </div>
+      <!-- /.card-body -->
+      <div class="card-footer clearfix">
+        <a href="pages_transactions_engine.php" class="btn btn-sm btn-info float-left">View All</a>
+
+        <!-- Pagination -->
+        <ul class="pagination pagination-sm float-right">
+          <?php if ($page > 1) : ?>
+            <li class="page-item"><a class="page-link" href="?page=<?php echo ($page - 1); ?>">« Prev</a></li>
+          <?php endif; ?>
+
+          <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+            <li class="page-item <?php echo ($page == $i) ? 'active' : ''; ?>">
+              <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+            </li>
+          <?php endfor; ?>
+
+          <?php if ($page < $totalPages) : ?>
+            <li class="page-item"><a class="page-link" href="?page=<?php echo ($page + 1); ?>">Next »</a></li>
+          <?php endif; ?>
+        </ul>
+      </div>
+      <!-- /.card-footer -->
+    </div>
+    <!-- /.card -->
+  </div>
+</div>
+ </div>
           <!-- /.row -->
         </div>
         <!--/. container-fluid -->
