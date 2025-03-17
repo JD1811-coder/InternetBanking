@@ -3,7 +3,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$client_id = $_SESSION['client_id'];
+$client_id = $_SESSION['staff_id'];
 
 ?>
 <!-- Log on to codeastro.com for more projects! -->
@@ -66,22 +66,29 @@ $client_id = $_SESSION['client_id'];
 
         $account_id = $_GET['account_id'];
         $ret = "SELECT a.*, 
-       c.name ,
-       c.client_number, 
-       c.email AS client_email, 
-       c.phone AS client_phone
-FROM iB_bankAccounts a 
-JOIN iB_clients c ON a.client_id = c.client_id 
-WHERE a.account_id = ?
- ";
+                c.name, 
+                c.client_number, 
+                c.email AS client_email, 
+                c.phone AS client_phone,
+                t.name AS acc_type,
+                t.rate AS acc_rates
+         FROM iB_bankAccounts a 
+         JOIN iB_clients c ON a.client_id = c.client_id 
+         LEFT JOIN ib_acc_types t ON a.acc_type_id = t.acctype_id
+         WHERE a.account_id = ?";
+        
         $stmt = $mysqli->prepare($ret);
+        if (!$stmt) {
+            die("Query Preparation Failed: " . $mysqli->error);
+        }
         $stmt->bind_param('i', $account_id);
-        $stmt->execute(); //ok
+        $stmt->execute();
         $res = $stmt->get_result();
+        
         $cnt = 1;
         while ($row = $res->fetch_object()) {
             //compute rate
-            $banking_rate = ($row->acc_rates) / 100;
+            // $banking_rate = ($row->acc_rates) / 100;
             //compute Money out
             $money_out = $withdrawal + $Transfer;
             //compute the balance
@@ -210,10 +217,10 @@ WHERE a.account_id = ?
                                                         <th>Sub Total:</th>
                                                         <td>Rs. <?php echo $money_in; ?></td>
                                                     </tr>
-                                                    <tr>
+                                                    <!-- <tr>
                                                         <th>Banking Intrest:</th>
                                                         <td>Rs. <?php echo $rate_amt; ?></td>
-                                                    </tr>
+                                                    </tr> -->
                                                     <tr>
                                                         <th>Total Balance:</th>
                                                         <td>Rs. <?php echo $totalMoney; ?></td>

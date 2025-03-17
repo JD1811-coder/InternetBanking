@@ -67,17 +67,28 @@ if (isset($_GET['RollBack_Transaction'])) {
                                                 <th>Account Owner</th>
                                                 <!-- <th>Client Name</th> -->
                                                 <th>Timestamp</th>
-                                                <th>Action</th>
+                                                <th>Action</th> 
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php
-                                            $ret = "SELECT t.tr_id, t.tr_code, b.account_number, b.acc_type, t.tr_type, t.transaction_amt, 
-                                                        b.acc_name AS account_owner, c.name AS client_name, t.created_at
-                                                FROM iB_Transactions t
-                                                JOIN ib_bankaccounts b ON t.account_id = b.account_id
-                                                JOIN ib_clients c ON t.client_id = c.client_id
-                                                ORDER BY t.created_at DESC";
+                                           $ret = "SELECT 
+                                           t.tr_id, 
+                                           t.tr_code, 
+                                           b.account_number, 
+                                           bt.name AS acc_type,  -- Fetching Account Type Name
+                                           bt.rate AS acc_rates,  -- Fetching Account Interest Rate
+                                           t.tr_type, 
+                                           t.transaction_amt, 
+                                           b.acc_name AS account_owner, 
+                                           c.name AS client_name, 
+                                           t.created_at
+                                       FROM iB_Transactions t
+                                       JOIN ib_bankaccounts b ON t.account_id = b.account_id
+                                       JOIN ib_clients c ON t.client_id = c.client_id
+                                       JOIN ib_acc_types bt ON b.acc_type_id = bt.acctype_id  -- Added Join for Account Type
+                                       ORDER BY t.created_at DESC";
+                               
                                             $stmt = $mysqli->prepare($ret);
                                             $stmt->execute();
                                             $res = $stmt->get_result();

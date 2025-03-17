@@ -65,10 +65,11 @@ $staff_id = $_SESSION['staff_id'];
                   <tbody><!-- Log on to codeastro.com for more projects! -->
                     <?php
                     //fetch all iB_Accs
-                      $ret = "SELECT a.*, c.name 
-FROM ib_bankaccounts a 
-JOIN ib_clients c ON a.client_id = c.client_id
-ORDER BY a.created_at DESC";
+                      $ret = "SELECT a.*, c.name AS acc_owner, t.name AS acc_type, t.rate AS acc_rates
+        FROM ib_bankaccounts a
+        JOIN ib_clients c ON a.client_id = c.client_id
+        JOIN ib_acc_types t ON a.acc_type_id = t.acctype_id
+        ORDER BY a.created_at DESC";
 
                     $stmt = $mysqli->prepare($ret);
                     $stmt->execute(); //ok
@@ -80,24 +81,23 @@ ORDER BY a.created_at DESC";
 
                       ?>
 
-                      <tr>
-                        <td><?php echo $cnt; ?></td>
-                        <td><?php echo $row->acc_name; ?></td>
-                        <td><?php echo $row->account_number; ?></td>
-                        <td><?php echo $row->acc_rates; ?>%</td>
-                        <td><?php echo $row->acc_type; ?></td>
-                        <td><?php echo $row->name; ?></td>
-                        <td>
-                          <a class="btn btn-success btn-sm"
-                            href="pages_deposit_money.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>">
-                            <i class="fas fa-money-bill-alt"></i>
-                            <i class="fas fa-upload"></i>
-                            Deposit Money
-                          </a>
+<tr>
+    <td><?php echo $cnt; ?></td>
+    <td><?php echo $row->acc_name; ?></td>
+    <td><?php echo $row->account_number; ?></td>
+    <td><?php echo $row->acc_rates; ?>%</td>
+    <td><?php echo $row->acc_type; ?></td>
+    <td><?php echo $row->acc_owner; ?></td>
+    <td>
+        <a class="btn btn-success btn-sm"
+           href="pages_deposit_money.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>">
+            <i class="fas fa-money-bill-alt"></i>
+            <i class="fas fa-upload"></i>
+            Deposit Money
+        </a>
+    </td>
+</tr>
 
-                        </td>
-
-                      </tr>
                       <?php $cnt = $cnt + 1;
                     } ?>
                     </tfoot>

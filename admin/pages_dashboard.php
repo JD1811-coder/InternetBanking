@@ -20,7 +20,13 @@ if (isset($_GET['Clear_Notifications'])) {
     $err = "Try Again Later";
   }
 }
-$query = "SELECT acc_type, COUNT(*) as count FROM iB_bankAccounts GROUP BY acc_type";
+$query = "SELECT 
+    at.name AS acc_type,  -- Get actual account type name
+    COUNT(*) AS count 
+FROM iB_bankAccounts ba
+JOIN ib_acc_types at ON ba.acc_type_id = at.acctype_id  -- Join to fetch account type name
+GROUP BY at.name;
+";
 $stmt = $mysqli->prepare($query);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -393,16 +399,18 @@ $stmt->close();
               $totalPages = ceil($totalRows / $limit);
 
               $query = "SELECT 
-                  t.*,  
-                  b.account_number, 
-                  b.acc_type, 
-                  COALESCE(b.acc_name, 'N/A') AS account_owner, 
-                  COALESCE(c.name, 'N/A') AS client_name
-                FROM iB_Transactions t
-                LEFT JOIN ib_bankaccounts b ON t.account_id = b.account_id
-                LEFT JOIN ib_clients c ON t.client_id = c.client_id
-                ORDER BY t.created_at DESC
-                LIMIT ? OFFSET ?";
+    t.*,  
+    b.account_number, 
+    at.name AS acc_type,  -- Get actual account type name
+    COALESCE(b.acc_name, 'N/A') AS account_owner, 
+    COALESCE(c.name, 'N/A') AS client_name
+FROM iB_Transactions t
+LEFT JOIN ib_bankaccounts b ON t.account_id = b.account_id
+LEFT JOIN ib_clients c ON t.client_id = c.client_id
+LEFT JOIN ib_acc_types at ON b.acc_type_id = at.acctype_id  -- Join to get Account Type Name
+ORDER BY t.created_at DESC
+LIMIT ? OFFSET ?;
+";
 
               $stmt = $mysqli->prepare($query);
               if ($stmt) {

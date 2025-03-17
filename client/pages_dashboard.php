@@ -5,15 +5,14 @@ include('conf/checklogin.php');
 check_login();
 $client_id = $_SESSION['client_id'];
 
-/*
-    get all dashboard analytics 
-    and numeric values from distinct 
-    tables
-    */
+
 // Query to get account types and their counts dynamically
-$query = "SELECT acc_type, COUNT(*) as count FROM iB_bankAccounts WHERE client_id = ? GROUP BY acc_type";
+$query = "SELECT t.name AS acc_type, COUNT(*) AS count
+FROM ib_bankaccounts a
+JOIN ib_acc_types t ON a.acc_type_id = t.acctype_id
+GROUP BY t.name;
+";
 $stmt = $mysqli->prepare($query);
-$stmt->bind_param('i', $client_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -342,24 +341,27 @@ $TotalBalInAccount = isset($TotalBalInAccount) ? $TotalBalInAccount : 0;
 
               // Fetch paginated transactions
               $query = "SELECT 
-                  t.*,  
-                  b.account_number, 
-                  b.acc_type, 
-                  COALESCE(b.acc_name, 'N/A') AS account_owner, 
-                  COALESCE(c.name, 'N/A') AS client_name
-                FROM iB_Transactions t
-                LEFT JOIN ib_bankaccounts b ON t.account_id = b.account_id
-                LEFT JOIN ib_clients c ON t.client_id = c.client_id
-                WHERE t.client_id = ?
-                ORDER BY t.created_at DESC
-                LIMIT ? OFFSET ?";
-
-              $stmt = $mysqli->prepare($query);
-              if ($stmt) {
-                $stmt->bind_param("iii", $client_id, $limit, $offset);
-                $stmt->execute();
-                $res = $stmt->get_result();
-
+              t.*,  
+              b.account_number, 
+              COALESCE(bt.name, 'N/A') AS acc_type,  -- Fetching Account Type Name
+              COALESCE(bt.rate, 0) AS acc_rates,     -- Fetching Account Rate
+              COALESCE(b.acc_name, 'N/A') AS account_owner, 
+              COALESCE(c.name, 'N/A') AS client_name
+          FROM iB_Transactions t
+          LEFT JOIN ib_bankaccounts b ON t.account_id = b.account_id
+          LEFT JOIN ib_clients c ON t.client_id = c.client_id
+          LEFT JOIN ib_acc_types bt ON b.acc_type_id = bt.acctype_id  -- Added Join for Account Type
+          WHERE t.client_id = ?  -- Only show transactions for the current client
+          ORDER BY t.created_at DESC
+          LIMIT ? OFFSET ?;
+          ";
+          
+          $stmt = $mysqli->prepare($query);
+          if ($stmt) {
+              $stmt->bind_param("iii", $_SESSION['client_id'], $limit, $offset);
+              $stmt->execute();
+              $res = $stmt->get_result();
+                    
                 while ($row = $res->fetch_object()) {
                   $transTstamp = $row->created_at ?? 'N/A';
 

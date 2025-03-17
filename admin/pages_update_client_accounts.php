@@ -4,55 +4,35 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
-
 if (isset($_POST['update_account'])) {
-    $acc_name = trim($_POST['acc_name']); // Trim to prevent only spaces
     $account_id = $_GET['account_id'];
-    $acc_type = $_POST['acc_type'];
-    $acc_rates = $_POST['acc_rates'];
-    $acc_status = $_POST['acc_status'];
-    $acc_amount = $_POST['acc_amount'];
+    $acc_type_id = $_POST['acc_type_id']; // Account type ID from dropdown
 
-    // Validate Account Name
-    if (empty($acc_name) || strlen(trim($acc_name)) == 0) {
-        $err = "❌ Account Name cannot be empty or only spaces!";
-    } elseif (!preg_match("/^[a-zA-Z ]+$/", $acc_name)) {
-        $err = "❌ Account Name should contain only alphabets and spaces!";
+    // Update only acc_type_id in iB_bankAccounts
+    $query = "UPDATE iB_bankAccounts SET acc_type_id=? WHERE account_id=?";
+    $stmt = $mysqli->prepare($query);
+    $stmt->bind_param('ii', $acc_type_id, $account_id);
+
+    if ($stmt->execute()) {
+        echo "<script>
+            setTimeout(() => {
+                Swal.fire({
+                    title: 'Success!',
+                    text: '✅ Account Type Updated Successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'pages_manage_acc_openings.php';
+                });
+            }, 500);
+        </script>";
     } else {
-        // Check if Account Name already exists (excluding current account)
-        $check_query = "SELECT acc_name FROM iB_bankAccounts WHERE acc_name = ? AND account_id != ?";
-        $stmt_check = $mysqli->prepare($check_query);
-        $stmt_check->bind_param('si', $acc_name, $account_id);
-        $stmt_check->execute();
-        $stmt_check->store_result();
-
-        if ($stmt_check->num_rows > 0) {
-            $err = "❌ This Account Name is already in use! Please choose a different name.";
-        } else {
-            // Update Account if validation passes
-            $query = "UPDATE iB_bankAccounts SET acc_name=?, acc_type=?, acc_rates=?, acc_status=?, acc_amount=? WHERE account_id=?";
-            $stmt = $mysqli->prepare($query);
-            $stmt->bind_param('sssssi', $acc_name, $acc_type, $acc_rates, $acc_status, $acc_amount, $account_id);
-
-            if ($stmt->execute()) {
-                echo "<script>
-                    setTimeout(() => {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: '✅ iBank Account Updated Successfully!',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.href = 'pages_manage_acc_openings.php';
-                        });
-                    }, 500);
-                </script>";
-            } else {
-                $err = "❌ Please Try Again Or Try Later.";
-            }
-        }
+        $err = "❌ Update Failed! Please Try Again.";
     }
 }
+
+
+
 ?>
 
 
@@ -98,7 +78,7 @@ if (isset($_POST['update_account'])) {
             if ($rateRow = $rateResult->fetch_object()) {
                 $accountRate = $rateRow->rate; // Use the correct column 'rate'
             }
-        ?>
+            ?>
             <div class="content-wrapper">
                 <!-- Content Header (Page header) -->
                 <section class="content-header">
@@ -112,7 +92,8 @@ if (isset($_POST['update_account'])) {
                                     <li class="breadcrumb-item"><a href="pages_dashboard.php">Dashboard</a></li>
                                     <li class="breadcrumb-item"><a href="pages_open_acc.php">iBanking Accounts</a></li>
                                     <li class="breadcrumb-item"><a href="pages_open_acc.php">Manage</a></li>
-                                    <li class="breadcrumb-item active"><?php echo htmlspecialchars($row->client_name); ?></li>
+                                    <li class="breadcrumb-item active"><?php echo htmlspecialchars($row->client_name); ?>
+                                    </li>
                                 </ol>
                             </div>
                         </div>
@@ -136,80 +117,110 @@ if (isset($_POST['update_account'])) {
                                             <div class="row">
                                                 <div class="col-md-6 form-group">
                                                     <label for="clientName">Client Name</label>
-                                                    <input type="text" readonly name="client_name" value="<?php echo htmlspecialchars($row->client_name); ?>" required class="form-control" id="clientName">
+                                                    <input type="text" readonly name="client_name"
+                                                        value="<?php echo htmlspecialchars($row->client_name); ?>" required
+                                                        class="form-control" id="clientName">
                                                 </div>
                                                 <div class="col-md-6 form-group">
                                                     <label for="clientNumber">Client Number</label>
-                                                    <input type="text" readonly name="client_number" value="<?php echo htmlspecialchars($row->client_number); ?>" class="form-control" id="clientNumber">
+                                                    <input type="text" readonly name="client_number"
+                                                        value="<?php echo htmlspecialchars($row->client_number); ?>"
+                                                        class="form-control" id="clientNumber">
                                                 </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-md-12 form-group">
                                                     <label for="clientPhone">Client Phone Number</label>
-                                                    <input type="text" readonly name="client_phone" value="<?php echo htmlspecialchars($row->client_phone); ?>" required class="form-control" id="clientPhone">
+                                                    <input type="text" readonly name="client_phone"
+                                                        value="<?php echo htmlspecialchars($row->client_phone); ?>" required
+                                                        class="form-control" id="clientPhone">
                                                 </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-md-6 form-group">
                                                     <label for="clientEmail">Client Email</label>
-                                                    <input type="email" readonly name="client_email" value="<?php echo htmlspecialchars($row->client_email); ?>" required class="form-control" id="clientEmail">
+                                                    <input type="email" readonly name="client_email"
+                                                        value="<?php echo htmlspecialchars($row->client_email); ?>" required
+                                                        class="form-control" id="clientEmail">
                                                 </div>
                                                 <div class="col-md-6 form-group">
                                                     <label for="clientAddress">Client Address</label>
-                                                    <input type="text" name="client_adr" readonly value="<?php echo htmlspecialchars($row->client_adr); ?>" required class="form-control" id="clientAddress">
+                                                    <input type="text" name="client_adr" readonly
+                                                        value="<?php echo htmlspecialchars($row->client_adr); ?>" required
+                                                        class="form-control" id="clientAddress">
                                                 </div>
                                             </div>
 
                                             <!-- Bank Account Details -->
                                             <div class="row">
-                                            <div class="col-md-6 form-group">
-    <label for="accName">Account Name</label>
-    <input type="text" name="acc_name" readonly value="<?php echo htmlspecialchars($row->acc_name); ?>" required class="form-control" id="accName">
-    <small id="accNameError"></small> <!-- Error message appears here -->
-</div>
+                                                <div class="col-md-6 form-group">
+                                                    <label for="accName">Account Name</label>
+                                                    <input type="text" name="acc_name" readonly
+                                                        value="<?php echo htmlspecialchars($row->acc_name); ?>" required
+                                                        class="form-control" id="accName">
+                                                    <small id="accNameError"></small> <!-- Error message appears here -->
+                                                </div>
 
                                                 <div class="col-md-6 form-group">
                                                     <label for="accountNumber">Account Number</label>
-                                                    <input type="text" readonly name="account_number" value="<?php echo htmlspecialchars($row->account_number); ?>" required class="form-control" id="accountNumber">
+                                                    <input type="text" readonly name="account_number"
+                                                        value="<?php echo htmlspecialchars($row->account_number); ?>"
+                                                        required class="form-control" id="accountNumber">
                                                 </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-md-6 form-group">
                                                     <label for="accType">Account Type</label>
-                                                    <select class="form-control" name="acc_type" required>
+                                                    <label for="accType">Select Account Type</label>
+                                                    <select class="form-control" name="acc_type_id" id="accType" required>
                                                         <option value="">Select Any Account Type</option>
                                                         <?php
-                                                        // Fetch all iB_Acc_types
-                                                        $ret = "SELECT * FROM ib_acc_types"; // Adjust this query based on your actual table
+                                                        // Fetch all account types
+                                                        $ret = "SELECT * FROM ib_acc_types";
                                                         $stmt = $mysqli->prepare($ret);
                                                         $stmt->execute();
                                                         $res = $stmt->get_result();
+
                                                         while ($typeRow = $res->fetch_object()) {
-                                                        ?>
-                                                            <option value="<?php echo htmlspecialchars($typeRow->name); ?>" <?php echo ($row->acc_type == $typeRow->name) ? 'selected' : ''; ?>>
+                                                            ?>
+                                                            <option
+                                                                value="<?php echo htmlspecialchars($typeRow->acctype_id); ?>"
+                                                                data-rate="<?php echo htmlspecialchars($typeRow->rate); ?>"
+                                                                <?php echo (isset($row->acc_type_id) && $row->acc_type_id == $typeRow->acctype_id) ? 'selected' : ''; ?>>
                                                                 <?php echo htmlspecialchars($typeRow->name); ?>
                                                             </option>
                                                         <?php } ?>
                                                     </select>
-                                                </div>
-                                                <div class="col-md-6 form-group">
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
                                                     <label for="accRates">Account Type Rates (%)</label>
-                                                    <input type="text" name="acc_rates" value="<?php echo htmlspecialchars($accountRate); ?>" readonly required class="form-control" id="accRates">
-                                                </div>
+                                                    <input type="text" name="acc_rates"
+                                                        value="<?php echo isset($accountRate) ? htmlspecialchars($accountRate) : ''; ?>"
+                                                        readonly required class="form-control" id="accRates">
 
-                                                <div class="col-md-6 form-group" style="display:none">
-                                                    <label for="accStatus">Account Status</label>
-                                                    <input type="text" name="acc_status" value="Active" readonly required class="form-control" id="accStatus">
+                                                    <script>
+                                                        document.getElementById("accType").addEventListener("change", function () {
+                                                            let selectedOption = this.options[this.selectedIndex];
+                                                            let rate = selectedOption.getAttribute("data-rate") || "";
+                                                            document.getElementById("accRates").value = rate;
+                                                        });
+                                                    </script>
+
+                                                    <div class="col-md-6 form-group" style="display:none">
+                                                        <label for="accStatus">Account Status</label>
+                                                        <input type="text" name="acc_status" value="Active" readonly
+                                                            required class="form-control" id="accStatus">
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <!-- /.card-body -->
-                                        <div class="card-footer">
-                                            <button type="submit" name="update_account" class="btn btn-primary">Update Account</button>
-                                        </div>
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button type="submit" name="update_account" class="btn btn-primary">Update
+                                                    Account</button>
+                                            </div>
                                     </form>
                                 </div>
                                 <!-- /.card -->
@@ -238,49 +249,58 @@ if (isset($_POST['update_account'])) {
     <script src="dist/js/adminlte.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-document.querySelector("form").addEventListener("submit", function (event) {
-    let accNameInput = document.getElementById("accName").value.trim();
-    let errorDiv = document.getElementById("accNameError");
+        document.querySelector("form").addEventListener("submit", function (event) {
+            let accNameInput = document.getElementById("accName").value.trim();
+            let errorDiv = document.getElementById("accNameError");
 
-    // Regular expression to allow only alphabets and spaces
-    let nameRegex = /^[a-zA-Z ]+$/;
+            // Regular expression to allow only alphabets and spaces
+            let nameRegex = /^[a-zA-Z ]+$/;
 
-    // Clear previous error message
-    errorDiv.innerHTML = "";
-    errorDiv.style.color = "red";
-    
-    if (accNameInput === "") {
-        errorDiv.innerHTML = "❌ Account Name cannot be empty!";
-        event.preventDefault(); // Stop form submission
-        return;
-    }
+            // Clear previous error message
+            errorDiv.innerHTML = "";
+            errorDiv.style.color = "red";
 
-    if (!nameRegex.test(accNameInput)) {
-        errorDiv.innerHTML = "❌ Account Name should contain only alphabets and spaces!";
-        event.preventDefault();
-        return;
-    }
-
-    if (accNameInput.replace(/\s/g, '') === "") {
-        errorDiv.innerHTML = "❌ Account Name cannot be only spaces!";
-        event.preventDefault();
-        return;
-    }
-
-    // Check for duplicate name using AJAX
-    fetch(`check_duplicate.php?acc_name=${encodeURIComponent(accNameInput)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.exists) {
-                errorDiv.innerHTML = "❌ This Account Name is already in use!";
-                event.preventDefault();
+            if (accNameInput === "") {
+                errorDiv.innerHTML = "❌ Account Name cannot be empty!";
+                event.preventDefault(); // Stop form submission
+                return;
             }
-        })
-        .catch(error => console.error("Error checking duplicate:", error));
-});
+
+            if (!nameRegex.test(accNameInput)) {
+                errorDiv.innerHTML = "❌ Account Name should contain only alphabets and spaces!";
+                event.preventDefault();
+                return;
+            }
+
+            if (accNameInput.replace(/\s/g, '') === "") {
+                errorDiv.innerHTML = "❌ Account Name cannot be only spaces!";
+                event.preventDefault();
+                return;
+            }
+
+            // Check for duplicate name using AJAX
+            fetch(`check_duplicate.php?acc_name=${encodeURIComponent(accNameInput)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        errorDiv.innerHTML = "❌ This Account Name is already in use!";
+                        event.preventDefault();
+                    }
+                })
+                .catch(error => console.error("Error checking duplicate:", error));
+        });
+    </script>
+    <script>
+    document.getElementById("accType").addEventListener("change", function () {
+        let selectedOption = this.options[this.selectedIndex];
+        let rate = selectedOption.getAttribute("data-rate") || "";
+        document.getElementById("accRates").value = rate;
+    });
 </script>
 
 
-    
+
+
 </body>
+
 </html>

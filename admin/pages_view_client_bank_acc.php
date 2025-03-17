@@ -24,7 +24,10 @@ $admin_id = $_SESSION['admin_id'];
         <!-- Content Wrapper. Contains page content -->
         <?php
         $client_id = $_GET['client_id'];
-        $ret = "SELECT * FROM  iB_clients WHERE client_id =? ";
+        $ret = "SELECT a.*, c.name
+        FROM iB_bankAccounts a 
+        JOIN iB_clients c ON a.client_id = c.client_id 
+        WHERE a.client_id = ? ";
         $stmt = $mysqli->prepare($ret);
         $stmt->bind_param('i', $client_id);
         $stmt->execute(); //ok
@@ -79,7 +82,15 @@ $admin_id = $_SESSION['admin_id'];
                                             <?php
                                             //fetch all iB_Accs Which belongs to selected client
                                             $client_id = $_GET['client_id'];
-                                            $ret = "SELECT * FROM  iB_bankAccounts WHERE client_id = ?";
+                                            $ret = "SELECT 
+    a.*, 
+    c.name AS client_name, 
+    at.name AS acc_type,  -- Fetch Account Type Name
+    at.rate AS acc_rates  -- Fetch Interest Rate
+FROM iB_bankAccounts a
+JOIN iB_clients c ON a.client_id = c.client_id
+JOIN ib_acc_types at ON a.acc_type_id = at.acctype_id  -- Join to get Account Type Name & Rate
+WHERE a.client_id = ?";
                                             $stmt = $mysqli->prepare($ret);
                                             $stmt->bind_param('i', $client_id);
                                             $stmt->execute(); //ok

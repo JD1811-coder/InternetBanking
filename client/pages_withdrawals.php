@@ -58,23 +58,26 @@ $client_id = $_SESSION['client_id'];
                       <th>Acc Number</th>
                       <th>Rate</th>
                       <th>Acc Type</th>
-                      <th>Acc Owner</th>
+                      <!-- <th>Acc Owner</th> -->
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     <?php
-                    //fetch all iB_Accs
-                    $client_id = $_SESSION['client_id'];
-                    $ret = "SELECT a.*, c.name AS client_name 
-                    FROM iB_bankAccounts a 
-                    JOIN iB_clients c ON a.client_id = c.client_id 
-                    WHERE a.client_id = ?";
-            
-                    $stmt = $mysqli->prepare($ret);
-                    $stmt->bind_param('i', $client_id);
-                    $stmt->execute(); //ok
-                    $res = $stmt->get_result();
+                    // $client_id = $_GET['client_id']; // Get client_id from URL
+
+$ret = "SELECT a.*, c.name AS acc_owner, t.name AS acc_type, t.rate AS acc_rates
+        FROM ib_bankaccounts a
+        JOIN ib_clients c ON a.client_id = c.client_id
+        JOIN ib_acc_types t ON a.acc_type_id = t.acctype_id
+        WHERE a.client_id = ?";
+        
+$stmt = $mysqli->prepare($ret);
+$stmt->bind_param('i', $client_id); // Bind the client_id
+$stmt->execute();
+$res = $stmt->get_result();
+
+
                     $cnt = 1;
                     while ($row = $res->fetch_object()) {
                       //Trim Timestamp to DD-MM-YYYY : H-M-S
@@ -88,7 +91,7 @@ $client_id = $_SESSION['client_id'];
                         <td><?php echo $row->account_number; ?></td>
                         <td><?php echo $row->acc_rates; ?>%</td>
                         <td><?php echo $row->acc_type; ?></td>
-                        <td><?php echo $row->client_name; ?></td>
+                        <!-- <td><?php echo $row->client_name; ?></td> -->
                         <td>
                           <a class="btn btn-success btn-sm" href="pages_withdraw_money.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>">
                             <i class="fas fa-money-bill-alt"></i>

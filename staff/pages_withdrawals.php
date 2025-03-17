@@ -58,17 +58,18 @@ $staff_id = $_SESSION['staff_id'];
                       <th>Acc Number</th>
                       <th>Rate</th>
                       <th>Acc Type</th>
-                      <th>Acc Owner</th>
+                      <!-- <th>Acc Owner</th> -->
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     <?php
                     //fetch all iB_Accs
-                    $ret = "SELECT a.*, c.name 
-FROM iB_bankAccounts a 
-JOIN iB_clients c ON a.client_id = c.client_id;
- ";
+                    $ret = "SELECT a.*, c.name AS acc_owner, t.name AS acc_type, t.rate AS acc_rates
+        FROM ib_bankaccounts a
+        JOIN ib_clients c ON a.client_id = c.client_id
+        JOIN ib_acc_types t ON a.acc_type_id = t.acctype_id
+        ORDER BY a.created_at DESC";
                     $stmt = $mysqli->prepare($ret);
                     $stmt->execute(); //ok
                     $res = $stmt->get_result();
@@ -85,7 +86,7 @@ JOIN iB_clients c ON a.client_id = c.client_id;
                         <td><?php echo $row->account_number; ?></td>
                         <td><?php echo $row->acc_rates; ?>%</td>
                         <td><?php echo $row->acc_type; ?></td>
-                        <td><?php echo $row->name; ?></td>
+                        <!-- <td><?php echo $row->name; ?></td> -->
                         <td>
                           <a class="btn btn-success btn-sm"
                             href="pages_withdraw_money.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>">

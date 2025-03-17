@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 17, 2025 at 11:23 AM
+-- Generation Time: Mar 17, 2025 at 01:47 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -107,8 +107,7 @@ CREATE TABLE `ib_bankaccounts` (
   `account_id` int(20) NOT NULL,
   `acc_name` varchar(200) NOT NULL,
   `account_number` varchar(200) NOT NULL,
-  `acc_type` varchar(200) NOT NULL,
-  `acc_rates` varchar(200) NOT NULL,
+  `acc_type_id` int(11) DEFAULT NULL,
   `acc_status` varchar(200) NOT NULL,
   `acc_amount` decimal(10,2) NOT NULL,
   `client_id` int(10) UNSIGNED DEFAULT NULL,
@@ -120,12 +119,12 @@ CREATE TABLE `ib_bankaccounts` (
 -- Dumping data for table `ib_bankaccounts`
 --
 
-INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type`, `acc_rates`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
-(14, 'Hari pandya', '357146928', 'Current account ', '0', 'Active', 5290.00, 5, '2025-03-17 10:14:39.279652', 1),
-(15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 660071.00, 8, '2025-04-12 11:32:08.702394', 1),
-(16, 'Harshit Rana', '705239816', 'Recurring deposit Account ', '11', 'Active', 90000.00, 6, '2025-05-15 07:21:53.166519', 1),
-(23, 'Jenil Dhola', '573608192', 'Savings Account', '0', 'Active', 0.00, 11, '2025-03-17 10:08:16.179959', 1),
-(35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 4424.00, 15, '2025-03-15 04:20:31.013899', 1);
+INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type_id`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
+(14, 'Hari pandya', '357146928', 1, 'Active', 5290.00, 5, '2025-03-17 12:27:48.470279', 1),
+(15, 'Arin Gabani', '287359614', 4, 'Active', 660071.00, 8, '2025-03-17 11:19:42.214085', 1),
+(16, 'Harshit Rana', '705239816', 1, 'Active', 90000.00, 6, '2025-03-17 12:26:58.581179', 1),
+(23, 'Jenil Dhola', '573608192', 11, 'Active', 0.00, 11, '2025-03-17 12:17:54.878883', 1),
+(35, 'Sahil Gohil', '964031285', 9, 'Active', 4524.00, 15, '2025-03-17 11:20:29.106492', 1);
 
 -- --------------------------------------------------------
 
@@ -345,7 +344,8 @@ INSERT INTO `ib_notifications` (`notification_id`, `notification_details`, `crea
 (179, 'Jenil Dhola Has Withdrawn Rs. 10 From Bank Account 573608192', '2025-03-17 09:51:13.712417', 1),
 (180, 'Jenil Dhola Has Withdrawn Rs. 10 From Bank Account 573608192', '2025-03-17 10:05:35.899765', 1),
 (181, 'Jenil Dhola Has Withdrawn Rs. 100 From Bank Account 573608192', '2025-03-17 10:06:13.816217', 1),
-(182, 'A deposit of Rs. 100 has been made into Bank Account 357146928', '2025-03-17 10:14:39.280639', 1);
+(182, 'A deposit of Rs. 100 has been made into Bank Account 357146928', '2025-03-17 10:14:39.280639', 1),
+(183, 'A deposit of Rs. 100 has been made into Bank Account 964031285', '2025-03-17 11:20:29.110143', 1);
 
 -- --------------------------------------------------------
 
@@ -645,7 +645,8 @@ ALTER TABLE `ib_admin`
 --
 ALTER TABLE `ib_bankaccounts`
   ADD PRIMARY KEY (`account_id`),
-  ADD KEY `fk_ib_bankaccounts_clients` (`client_id`);
+  ADD KEY `fk_ib_bankaccounts_clients` (`client_id`),
+  ADD KEY `fk_acc_type` (`acc_type_id`);
 
 --
 -- Indexes for table `ib_clients`
@@ -760,7 +761,7 @@ ALTER TABLE `ib_nominees`
 -- AUTO_INCREMENT for table `ib_notifications`
 --
 ALTER TABLE `ib_notifications`
-  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
+  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=184;
 
 --
 -- AUTO_INCREMENT for table `ib_staff`
@@ -778,7 +779,7 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=296;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=297;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`
@@ -818,6 +819,7 @@ ALTER TABLE `client_feedback`
 -- Constraints for table `ib_bankaccounts`
 --
 ALTER TABLE `ib_bankaccounts`
+  ADD CONSTRAINT `fk_acc_type` FOREIGN KEY (`acc_type_id`) REFERENCES `ib_acc_types` (`acctype_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ib_bankaccounts_clients` FOREIGN KEY (`client_id`) REFERENCES `ib_clients` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --

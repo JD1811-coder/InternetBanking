@@ -277,7 +277,7 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
                                                     
 
                                                             <input type="text" name="aadhar_number" required
-                                                                class="form-control" id="inputAadhar"
+                                                                class="form-control" id="inputAadhar" readonly
                                                                 value="<?php echo htmlspecialchars($aadhar_number); ?>">
                                                             <small
                                                                 class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
@@ -290,7 +290,7 @@ $aadhar_number = $user['aadhar_number'] ?? ''; // Use empty string if null
                                                         <label for="pan_number" class="col-sm-2 col-form-label">PAN
                                                             Number</label>
                                                         <div class="col-sm-10">
-                                                            <input type="text" name="pan_number" required
+                                                            <input type="text" name="pan_number" required readonly
                                                                 class="form-control"
                                                                 value="<?php echo htmlspecialchars($row->pan_number ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                                 id="pan_number">

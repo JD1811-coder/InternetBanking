@@ -72,7 +72,7 @@ if (isset($_GET['deleteBankAcc'])) {
     <th>Acc Number</th>
     <th>Rate</th>
     <th>Acc Type</th>
-    <th>Acc Owner</th>
+    <!-- <th>Acc Owner</th> -->
     <th>Balance</th> <!-- New column -->
     <th>Date Opened</th>
     <th>Action</th>
@@ -81,10 +81,17 @@ if (isset($_GET['deleteBankAcc'])) {
 <tbody>
   <?php
   // Fetch all iB_Accs with balance
-  $ret = "SELECT ba.*, c.name, ba.acc_amount  
-          FROM iB_bankAccounts ba 
-          JOIN ib_clients c ON ba.client_id = c.client_id 
-          ORDER BY RAND()";
+  $ret = "SELECT 
+  ba.*, 
+  c.name AS client_name, 
+  ba.acc_amount, 
+  at.name AS acc_type,   -- Fetching Account Type Name
+  at.rate AS acc_rates   -- Fetching Interest Rate
+FROM iB_bankAccounts ba
+JOIN ib_clients c ON ba.client_id = c.client_id
+JOIN ib_acc_types at ON ba.acc_type_id = at.acctype_id  -- Fetch Account Type Name & Rate
+ORDER BY RAND()"; 
+
 
   $stmt = $mysqli->prepare($ret);
   $stmt->execute();
@@ -101,7 +108,7 @@ if (isset($_GET['deleteBankAcc'])) {
       <td><?php echo $row->account_number; ?></td>
       <td><?php echo $row->acc_rates; ?>%</td>
       <td><?php echo $row->acc_type; ?></td>
-      <td><?php echo $row->name; ?></td>
+      <!-- <td><?php echo $row->name; ?></td> -->
       <td><?php echo number_format($row->acc_amount, 2); ?> </td> <!-- Display balance -->
       <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
       <td class="text-center">

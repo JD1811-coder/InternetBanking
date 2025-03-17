@@ -85,11 +85,15 @@ if (isset($_GET['deleteBankAcc'])) {
                                         <?php
                                         // Fetch all iB_Accs
                                         $ret = "SELECT 
-                                        b.*, 
-                                        c.name AS client_name 
-                                    FROM iB_bankAccounts b
-                                    LEFT JOIN ib_clients c ON b.client_id = c.client_id 
-                                    ORDER BY RAND()";
+    b.*, 
+    c.name AS client_name, 
+    at.name AS acc_type,  -- Get actual account type name
+    at.rate AS acc_rates  -- Get interest rate
+FROM iB_bankAccounts b
+LEFT JOIN ib_clients c ON b.client_id = c.client_id
+LEFT JOIN ib_acc_types at ON b.acc_type_id = at.acctype_id  -- Join to fetch account type name & rate
+ORDER BY RAND();
+";
                             
 
                                         $stmt = $mysqli->prepare($ret);
