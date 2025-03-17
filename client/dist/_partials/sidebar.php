@@ -90,12 +90,12 @@
               <p>Finances <i class="fas fa-angle-left right"></i></p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a href="pages_deposits.php" class="nav-link">
                   <i class="fas fa-upload nav-icon"></i>
                   <p>Deposits</p>
                 </a>
-              </li>
+              </li> -->
               <li class="nav-item">
                 <a href="pages_withdrawals.php" class="nav-link">
                   <i class="fas fa-download nav-icon"></i>

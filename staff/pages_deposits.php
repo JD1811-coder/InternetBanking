@@ -65,10 +65,11 @@ $staff_id = $_SESSION['staff_id'];
                   <tbody><!-- Log on to codeastro.com for more projects! -->
                     <?php
                     //fetch all iB_Accs
-                    $ret = "SELECT a.*, c.name 
-FROM iB_bankAccounts a 
-JOIN iB_clients c ON a.client_id = c.client_id;
- ";
+                      $ret = "SELECT a.*, c.name 
+FROM ib_bankaccounts a 
+JOIN ib_clients c ON a.client_id = c.client_id
+ORDER BY a.created_at DESC";
+
                     $stmt = $mysqli->prepare($ret);
                     $stmt->execute(); //ok
                     $res = $stmt->get_result();

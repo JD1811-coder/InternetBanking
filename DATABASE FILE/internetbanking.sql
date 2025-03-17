@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 13, 2025 at 08:01 AM
+-- Generation Time: Mar 17, 2025 at 11:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -95,7 +95,7 @@ CREATE TABLE `ib_admin` (
 --
 
 INSERT INTO `ib_admin` (`admin_id`, `name`, `email`, `number`, `password`, `profile_pic`, `is_active`, `otp`, `otp_expiry`) VALUES
-(2, 'system administrator', 'dholajenil2024.katargam@gmail.com', 'iBank-ADM-0516', '$2y$10$mEBPVimHrR243fyzxkg2M.Icpuru6ITL3vCZeL8vGjvcgx7G6WH5S', 'admin-icn.png', 1, NULL, NULL);
+(2, 'System Administrator', 'dholajenil2024.katargam@gmail.com', 'iBank-ADM-0516', '$2y$10$mEBPVimHrR243fyzxkg2M.Icpuru6ITL3vCZeL8vGjvcgx7G6WH5S', 'admin-icn.png', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -121,12 +121,11 @@ CREATE TABLE `ib_bankaccounts` (
 --
 
 INSERT INTO `ib_bankaccounts` (`account_id`, `acc_name`, `account_number`, `acc_type`, `acc_rates`, `acc_status`, `acc_amount`, `client_id`, `created_at`, `is_active`) VALUES
-(14, 'Hari pandya', '357146928', 'Current account ', '0', 'Active', 9700.00, 5, '2025-03-12 09:01:26.659557', 1),
+(14, 'Hari pandya', '357146928', 'Current account ', '0', 'Active', 5290.00, 5, '2025-03-17 10:14:39.279652', 1),
 (15, 'Arin Gabani', '287359614', 'Recurring deposit ', '15', 'Active', 660071.00, 8, '2025-04-12 11:32:08.702394', 1),
-(16, 'Harshit Rana', '705239816', 'Recurring deposit Account ', '11', 'Active', 10000.00, 6, '2025-03-11 14:36:32.670052', 1),
-(23, 'Jenil Dhola', '573608192', 'Savings', '8.5', 'Active', 96525.00, 11, '2025-05-12 15:06:46.118239', 1),
-(35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 14524.00, 15, '2025-03-11 14:16:30.446626', 1),
-(36, 'utsav chheta', '637895014', ' Retirement Account ', '10', 'Active', 0.00, 18, '2025-03-12 07:51:54.267332', 1);
+(16, 'Harshit Rana', '705239816', 'Recurring deposit Account ', '11', 'Active', 90000.00, 6, '2025-05-15 07:21:53.166519', 1),
+(23, 'Jenil Dhola', '573608192', 'Savings Account', '0', 'Active', 0.00, 11, '2025-03-17 10:08:16.179959', 1),
+(35, 'Sahil Gohil', '964031285', 'Joint Account ', '10', 'Active', 4424.00, 15, '2025-03-15 04:20:31.013899', 1);
 
 -- --------------------------------------------------------
 
@@ -155,12 +154,11 @@ CREATE TABLE `ib_clients` (
 --
 
 INSERT INTO `ib_clients` (`client_id`, `name`, `phone`, `address`, `email`, `aadhar_number`, `pan_number`, `password`, `profile_pic`, `client_number`, `is_active`, `otp`, `otp_expiry`) VALUES
-(5, 'Hari Pandya', '7412560000', '114 Allace Avenue', 'harryden@mail.com', '996544392775', 'FXYYY8710N', '55c3b5386c486feb662a0785f340938f518d547f', 'UCmSSTlG_400x400.jpg', 'iBank-CLIENT-7014', 1, NULL, NULL),
-(6, 'Harshit Rana', '7412545454', '23 Hinkle Deegan Lake Road', 'reyes@mail.com', '489954692767', 'YFGOZ3386S', '55c3b5386c486feb662a0785f340938f518d547f', 'download.jpg', 'iBank-CLIENT-1698', 1, NULL, NULL),
-(8, 'arin gabani', '8799050118', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'jenildhola1811@gmail.com', '234567890355', 'IHXPD1193P', '$2y$10$UAVdv8DrRbL4LrXWZ4nlK.wzJmOEb/WSLl6tnrBEW6NU7KqA2PhGO', '1744559923_arin.jpg', 'iBank-CLIENT-0423', 1, '552614', '2025-04-14 14:35:30'),
-(11, 'Jenil Dhola', '9979735065', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '978546321574', 'PAXEQ2346Q', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', 'JD1.jpeg', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
-(15, 'Sahil Gohil', '6352419645', 'A-103, Riivanta Riverview, Variyav, Surat', 'cleintss2023@gmail.com', '876587658765', 'OPKFW7221P', '$2y$10$tnXEHcPfGDA/hDMbeQd/Z.CFd5AlFASauXVLC7BN7ImCIbogDP/BS', '1741630492_sahil.jpg', 'iBank-CLIENT-0458', 1, '625736', '2025-03-02 22:08:23'),
-(18, 'utsav chheta', '9234567890', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'utsavchheta@gmail.com', '992098725436', 'KJUIA1234J', '$2y$10$i8JEFJw7xFyqHy71UM8.CecoZ3xTgwdqa.LShJByORm8uQo/YR2Rm', '1749620958_JD1.jpeg', 'iBank-CLIENT-9102', 1, '795968', '2025-05-11 10:51:25');
+(5, 'Hari Pandya', '7689564734', '114 Allace Avenue', 'harry@gmail.com', '996544392775', 'FXYYY8710N', '55c3b5386c486feb662a0785f340938f518d547f', 'UCmSSTlG_400x400.jpg', 'iBank-CLIENT-7014', 1, NULL, NULL),
+(6, 'Harshit Rana', '7412545454', '23 Hinkle Deegan Lake Road', 'HarshitR34@gmail.com', '489954692767', 'YFGOZ3386S', '55c3b5386c486feb662a0785f340938f518d547f', 'download.jpg', 'iBank-CLIENT-1698', 1, NULL, NULL),
+(8, 'arin gabani', '8799050118', 'apple complex, jahangirura,surat', 'jenildhola1811@gmail.com', '234567890355', 'IHXPD1193P', '$2y$10$UAVdv8DrRbL4LrXWZ4nlK.wzJmOEb/WSLl6tnrBEW6NU7KqA2PhGO', '1744621056_arin.jpg', 'iBank-CLIENT-0423', 1, '552614', '2025-04-14 14:35:30'),
+(11, 'Jenil Dhola', '7412545454', 'A-2/203,DEVI COMPLEX,DABHOLI CHAR RASTA', 'shreeji.gamer.bot@gmail.com', '987698769876', 'PAXEQ2346Q', '$2y$10$6yxMhsckua3wiAT2cx3rzuTM6Uhr54Safv0nkS/xDymtFPdFDXMkq', '1744698229_1742010849_1749620958_JD1.jpeg', 'iBank-CLIENT-2438', 1, '333165', '2025-02-28 13:39:16'),
+(15, 'Sahil Gohil', '6352419645', 'A-103, Riivanta Riverview, Variyav, Surat', 'cleintss2023@gmail.com', '876587658765', 'OPKFW7221P', '$2y$10$tnXEHcPfGDA/hDMbeQd/Z.CFd5AlFASauXVLC7BN7ImCIbogDP/BS', '1741630492_sahil.jpg', 'iBank-CLIENT-0458', 1, '625736', '2025-03-02 22:08:23');
 
 -- --------------------------------------------------------
 
@@ -325,7 +323,29 @@ INSERT INTO `ib_notifications` (`notification_id`, `notification_details`, `crea
 (157, 'utsav chheta has deposited Rs. 10000 into bank account 36', '2025-03-11 13:52:56.957874', 1),
 (158, 'A deposit of Rs. 10000 has been made into Bank Account 357146928', '2025-03-11 14:35:16.857714', 1),
 (159, 'A deposit of Rs. 10000 has been made into Bank Account 705239816', '2025-03-11 14:36:32.681377', 1),
-(160, 'Jenil Dhola has deposited Rs. 10000 into bank account 23', '2025-04-12 11:19:10.942834', 1);
+(160, 'Jenil Dhola has deposited Rs. 10000 into bank account 23', '2025-04-12 11:19:10.942834', 1),
+(161, 'Jenil Dhola has deposited Rs. 1000 into bank account 23', '2025-03-15 03:55:52.093165', 1),
+(162, 'Hari Pandya Has Withdrawn Rs. 1000 From Bank Account 357146928', '2025-03-15 04:11:37.040563', 1),
+(163, 'Sahil Gohil Has Withdrawn Rs. 100 From Bank Account 964031285', '2025-03-15 04:17:28.306316', 1),
+(164, 'Sahil Gohil Has Withdrawn Rs. 10000 From Bank Account 964031285', '2025-03-15 04:20:31.024712', 1),
+(165, 'Jenil Dhola Has Withdrawn Rs. 1000 From Bank Account 573608192', '2025-03-15 04:27:32.826158', 1),
+(166, 'Jenil Dhola Has Withdrawn Rs. 1000 From Bank Account 573608192', '2025-03-15 04:27:44.902404', 1),
+(167, 'A deposit of Rs. 10000 has been made into Bank Account 705239816', '2025-04-15 04:41:52.723376', 1),
+(168, 'A deposit of Rs. 10000 has been made into Bank Account 705239816', '2025-04-15 04:43:36.776129', 1),
+(169, 'Hari Pandya Has Withdrawn Rs. 1000 From Bank Account 357146928', '2025-04-15 06:49:53.688491', 1),
+(170, 'Hari Pandya Has Withdrawn Rs. 2500 From Bank Account 357146928', '2025-04-15 06:50:09.883209', 1),
+(171, 'Jenil Dhola has deposited Rs. 1000 into bank account 23', '2025-04-15 07:14:37.095598', 1),
+(172, 'A deposit of Rs. 900000 has been made into Bank Account 573608192', '2025-05-15 07:19:55.175864', 1),
+(173, 'Jenil Dhola Has Withdrawn Rs. 1 From Bank Account 573608192', '2025-05-15 07:20:32.288912', 1),
+(174, 'Hari Pandya Has Withdrawn Rs. 10 From Bank Account 357146928', '2025-05-17 09:29:27.575591', 1),
+(175, 'Jenil Dhola Has Withdrawn Rs. 100000 From Bank Account 573608192', '2025-03-17 09:32:51.556243', 1),
+(176, 'Jenil Dhola Has Withdrawn Rs. 829812 From Bank Account 573608192', '2025-03-17 09:33:14.788757', 1),
+(177, 'A deposit of Rs. 10000 has been made into Bank Account 573608192', '2025-03-17 09:49:53.200979', 1),
+(178, 'Jenil Dhola Has Withdrawn Rs. 10 From Bank Account 573608192', '2025-03-17 09:51:03.491673', 1),
+(179, 'Jenil Dhola Has Withdrawn Rs. 10 From Bank Account 573608192', '2025-03-17 09:51:13.712417', 1),
+(180, 'Jenil Dhola Has Withdrawn Rs. 10 From Bank Account 573608192', '2025-03-17 10:05:35.899765', 1),
+(181, 'Jenil Dhola Has Withdrawn Rs. 100 From Bank Account 573608192', '2025-03-17 10:06:13.816217', 1),
+(182, 'A deposit of Rs. 100 has been made into Bank Account 357146928', '2025-03-17 10:14:39.280639', 1);
 
 -- --------------------------------------------------------
 
@@ -355,7 +375,7 @@ CREATE TABLE `ib_staff` (
 
 INSERT INTO `ib_staff` (`staff_id`, `name`, `staff_number`, `phone`, `email`, `password`, `sex`, `profile_pic`, `is_active`, `otp`, `otp_expiry`, `aadhaar_number`, `pan`) VALUES
 (3, 'Jay Shah', 'iBank-STAFF-6785', '7049757429', 'dharmika192@gmail.com', '$2y$10$QFW4Q/CDJoJSnbTGll..Uu3cRxo6UU58S/hn6U7HNq65LJz1uyuXG', 'Male', 'jay shah.jpg', 1, '993417', '2025-03-11 12:25:21', '', ''),
-(4, 'Rahul Dravid', 'iBank-STAFF-6724', '7656789876', 'wall@gmail.com', 'd95d3bbedb4dcba5a8e891968853002354b028e9', 'Male', 'v2.jpg', 1, NULL, NULL, '', '');
+(4, 'Rahul Dravid', 'iBank-STAFF-6724', '7656789876', 'wall@gmail.com', 'd95d3bbedb4dcba5a8e891968853002354b028e9', 'Male', 'rahul.jpg', 1, NULL, NULL, '', '');
 
 -- --------------------------------------------------------
 
@@ -468,9 +488,9 @@ INSERT INTO `ib_transactions` (`tr_id`, `tr_code`, `account_id`, `tr_type`, `tr_
 (226, 'YHkWqvzF6CUV0DZoL1hI', 35, 'Deposit', 'Success', 15, '20000', NULL, '2025-03-10 15:16:21.011716', 1),
 (264, 'eswoK2iWZNvMyhuUJxSm', 14, 'Deposit', 'Success', 5, '10000', NULL, '2025-03-11 14:35:16.855353', 1),
 (268, 'RJ2hjZiaf1t7GQIMXYS9', 14, 'Transfer', 'Success', 5, '100', '573608192', '2025-03-12 09:01:26.000000', 1),
-(269, 'IHtcBliOYvLdmJAjog9X', 23, 'Deposit', 'Success', 11, '10000', NULL, '2025-04-12 11:19:10.941888', 1),
-(270, '4Smps9iQn1NjVMBA2TgY', 15, 'Transfer', 'Success', 8, '30000', '573608192', '2025-04-12 11:28:08.000000', 1),
-(271, 'ixEjO0FUPrJqbcpsvdh4', 15, 'Transfer', 'Success', 8, '100000', '573608192', '2025-04-12 11:32:08.000000', 1);
+(274, 'esONZ7t84MHIiEB3LkPg', 14, 'Withdrawal', 'Success ', 5, '1000', NULL, '2025-03-15 04:11:37.038792', 1),
+(275, 'dEsxjtyZ64cR8ighSkFJ', 35, 'Withdrawal', 'Success ', 15, '100', NULL, '2025-03-15 04:17:28.304574', 1),
+(295, 'Tj1DEyFwHtgYbumlOSq3', 14, 'Deposit', 'Success', 5, '100', NULL, '2025-03-17 10:14:39.280343', 1);
 
 -- --------------------------------------------------------
 
@@ -506,9 +526,8 @@ INSERT INTO `loan_applications` (`id`, `applicant_name`, `loan_amount`, `applica
 (28, 'darshan lakhani', 120000.00, '2025-03-05 13:49:35', 'approved', 3, 2, '2025-03-05 13:50:23', 'good', 'ok', 15, 11, 0, 25000.00, 1, 6),
 (29, 'Arin Gabani', 120000.00, '2025-04-14 14:37:02', 'approved', 3, 2, '2025-03-11 10:08:17', 'yooo', 'barobar', 8, 9, 0, 30000.00, 3, 6),
 (31, 'Arin gabani', 300000.00, '2025-04-14 14:47:07', 'rejected', 3, 2, '2025-03-11 09:43:00', 'reject', 'go study', 8, 5, 0, 30000.00, 7, 0),
-(34, 'UTSAV CHHETA', 200000.00, '2025-05-11 10:54:48', 'approved', 3, 2, '2025-05-11 10:55:49', 'DFY', 'SDHI', 18, 8, 0, 20000.00, 3, 1),
-(36, 'utsav cheta', 100000.00, '2025-03-11 20:28:35', 'pending', NULL, NULL, NULL, 'hee', 'Pending Review', 18, 7, 0, 20000.00, 2, 3),
-(37, 'Jenil Dhola', 100000.00, '2025-04-12 20:35:02', 'approved', 3, 2, '2025-04-12 20:36:16', 'yoo', 'approve', 11, 5, 0, 20000.00, 3, 5);
+(38, 'Jenil Dhola', 100000.00, '2025-03-15 08:58:58', 'recommended', 3, NULL, '2025-03-15 09:01:53', 'good', 'Pending Review', 11, 9, 0, 20000.00, 3, 0),
+(41, 'Jenil Dhola', 100000.00, '2025-04-15 12:46:52', 'approved', 3, 2, '2025-04-15 12:47:34', 'werty', 'erty', 11, 8, 0, 30000.00, 1, 6);
 
 -- --------------------------------------------------------
 
@@ -538,11 +557,10 @@ INSERT INTO `loan_payments` (`id`, `client_id`, `loan_id`, `emi_date`, `amount`,
 (14, 8, 31, '2025-05-19', 5009.00, 'paid', '2025-05-10 09:55:30'),
 (15, 8, 29, '2025-05-27', 3243.00, 'paid', '2025-05-10 10:03:13'),
 (17, 15, 28, '2025-05-10', 7200.00, 'paid', '2025-05-10 10:09:17'),
-(19, 18, 34, '2025-06-27', 7432.00, 'paid', '2025-06-11 05:26:39'),
 (21, 11, 27, '2025-04-26', 11587.00, 'paid', '2025-04-12 11:28:18'),
 (22, 11, 27, '2025-04-10', 11587.00, 'paid', '2025-04-12 11:28:52'),
 (23, 11, 27, '2025-04-25', 11587.00, 'paid', '2025-04-12 11:32:41'),
-(24, 11, 37, '2025-05-26', 2860.00, 'paid', '2025-05-12 15:06:46');
+(26, 11, 41, '2025-05-01', 6250.00, 'paid', '2025-05-15 07:18:07');
 
 -- --------------------------------------------------------
 
@@ -742,13 +760,13 @@ ALTER TABLE `ib_nominees`
 -- AUTO_INCREMENT for table `ib_notifications`
 --
 ALTER TABLE `ib_notifications`
-  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
+  MODIFY `notification_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
 
 --
 -- AUTO_INCREMENT for table `ib_staff`
 --
 ALTER TABLE `ib_staff`
-  MODIFY `staff_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `staff_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `ib_systemsettings`
@@ -760,19 +778,19 @@ ALTER TABLE `ib_systemsettings`
 -- AUTO_INCREMENT for table `ib_transactions`
 --
 ALTER TABLE `ib_transactions`
-  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=272;
+  MODIFY `tr_id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=296;
 
 --
 -- AUTO_INCREMENT for table `loan_applications`
 --
 ALTER TABLE `loan_applications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `loan_payments`
 --
 ALTER TABLE `loan_payments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `loan_types`

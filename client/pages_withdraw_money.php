@@ -18,27 +18,34 @@ if (isset($_POST['withdrawal'])) {
     $transaction_amt = $_POST['transaction_amt'];
     $client_phone = $_POST['client_phone'];
 
-    // Fetch account balance and account type's min balance
-    $query = "SELECT a.acc_amount, t.min_balance 
-FROM ib_bankaccounts a 
-JOIN ib_acc_types t ON a.acc_type = t.name 
-WHERE a.account_id = ?";
-    $stmt = $mysqli->prepare($query);
-    $stmt->bind_param('i', $account_id);
-    $stmt->execute();
-    $stmt->bind_result($acc_amount, $min_balance);
-    $stmt->fetch();
-    $stmt->close();
 
-    // Check if balance is sufficient and does not go below min_balance
-    $remaining_balance = $acc_amount - $transaction_amt;
+    $query = "SELECT a.acc_amount, COALESCE(t.min_balance, 0) AS min_balance 
+    FROM ib_bankaccounts a 
+    LEFT JOIN ib_acc_types t ON a.acc_type = t.name 
+    WHERE a.account_id = ?";
 
-    if ($transaction_amt > $acc_amount) {
-        $err = "Insufficient Balance! Your Current Balance is Rs. $acc_amount";
-    } elseif ($remaining_balance < $min_balance) {
-        $err = "Minimum balance of Rs. $min_balance is required in your account. Your withdrawal exceeds this limit.";
-    } else {
-        // Deduct withdrawal amount from account balance
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param('i', $account_id);
+$stmt->execute();
+$stmt->bind_result($acc_amount, $min_balance);
+$stmt->fetch();
+$stmt->close();
+
+$acc_amount = $acc_amount ?? 0; // Default to 0 if NULL
+$min_balance = $min_balance ?? 0; // Default to 0 if NULL
+
+$remaining_balance = $acc_amount - $transaction_amt;
+
+if ($transaction_amt <= 0) {
+    $err = "Withdrawal amount must be greater than zero.";
+} elseif ($transaction_amt > $acc_amount) {
+    $err = "Insufficient Balance! Your Current Balance is Rs. $acc_amount";
+} elseif ($remaining_balance < $min_balance) { // Ensure validation works here
+    $err = "Minimum balance of Rs. $min_balance is required in your account. Your withdrawal exceeds this limit.";
+} else {
+    // Proceed with withdrawal
+        
+          // Deduct withdrawal amount from account balance
         $update_balance_query = "UPDATE ib_bankaccounts SET acc_amount = ? WHERE account_id = ?";
         $stmt = $mysqli->prepare($update_balance_query);
         $stmt->bind_param('di', $remaining_balance, $account_id);
@@ -63,17 +70,51 @@ WHERE a.account_id = ?";
         // Success message
         $success = "Funds Withdrawn Successfully!";
     }
-
 }
 
+// Enable autocommit again
+$mysqli->autocommit(TRUE);
 
 ?>
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <?php include("dist/_partials/head.php"); ?>
+    <?php if (isset($success)) { ?>
+        <script>
+            setTimeout(function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '<?php echo $success; ?>',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        setTimeout(function () {
+                            window.location.href = "pages_withdrawals.php";
+                        }, 500); // Delay added for better visibility
+                    }
+                });
+            }, 100);
+        </script>
+    <?php } ?>
+
+
+    <?php if (isset($err)) { ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops!',
+                text: '<?php echo $err; ?>',
+                confirmButtonText: 'Try Again'
+            });
+        </script>
+    <?php } ?>
+
+
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
@@ -241,29 +282,27 @@ WHERE a.account_id = ?";
     <script src="dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="dist/js/demo.js"></script>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("form").addEventListener("submit", function (event) {
         var transaction_amt = parseFloat(document.getElementById("transaction_amt").value);
-        var acc_amount = <?php echo $acc_amount; ?>; // Current balance
-        var min_balance = <?php echo $min_balance; ?>; // Minimum balance required
+        var acc_amount = <?php echo json_encode((float)$acc_amount); ?>; 
+        var min_balance = <?php echo json_encode((float)$min_balance); ?>;
         var remaining_balance = acc_amount - transaction_amt;
 
         if (isNaN(transaction_amt) || transaction_amt <= 0) {
-            alert("Error: Please enter a valid positive number greater than zero for withdrawal.");
+            Swal.fire("Error", "Please enter a valid positive number greater than zero for withdrawal.", "error");
             event.preventDefault();
         } else if (transaction_amt > acc_amount) {
-            alert("Error: Insufficient Balance! Your Current Balance is Rs. " + acc_amount);
+            Swal.fire("Error", "Insufficient Balance! Your Current Balance is Rs. " + acc_amount, "error");
             event.preventDefault();
         } else if (remaining_balance < min_balance) {
-            alert("Warning: Minimum balance of Rs. " + min_balance + " is required in your account. Your withdrawal exceeds this limit.");
+            Swal.fire("Warning", "Minimum balance of Rs. " + min_balance + " is required in your account. Your withdrawal exceeds this limit.", "warning");
             event.preventDefault();
         }
     });
 });
-
-    </script>
-
+</script>
 </body>
-
+   
 </html>

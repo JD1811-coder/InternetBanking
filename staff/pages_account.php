@@ -248,7 +248,7 @@ if (isset($_SESSION['staff_id'])) {
                                                     <div class="form-group row">
                                                         <label for="inputName" class="col-sm-2 col-form-label">Name</label>
                                                         <div class="col-sm-10">
-                                                            <input type="text" name="name" required class="form-control"
+                                                            <input type="text" name="name" readonly required class="form-control"
                                                                 value="<?php echo $row->name; ?>" id="inputName" readonlypages_manage_acc_openings
                                                                 pattern="^[a-zA-Z ]{2,50}$">
                                                         </div>
@@ -257,7 +257,7 @@ if (isset($_SESSION['staff_id'])) {
                                                         <label for="inputEmail"
                                                             class="col-sm-2 col-form-label">Email</label>
                                                         <div class="col-sm-10">
-                                                            <input type="email" name="email" required
+                                                            <input type="email" name="email"  required
                                                                 value="<?php echo $row->email; ?>" class="form-control"
                                                                 id="inputEmail">
                                                         </div>
