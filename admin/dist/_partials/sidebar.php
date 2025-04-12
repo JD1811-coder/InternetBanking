@@ -8,10 +8,10 @@
     $stmt->execute();
     $res = $stmt->get_result();
     while ($row = $res->fetch_object()) {
-        // Set default profile picture if none is uploaded
-        $profile_picture = empty($row->profile_pic)
-            ? "<img src='dist/img/user_icon.png' class='img-circle elevation-2' alt='User Image'>"
-            : "<img src='dist/img/$row->profile_pic' class='img-circle elevation-2' alt='User Image'>";
+        $profile_picture = $row->profile_pic 
+        ? "<img src='../admin/dist/img/$row->profile_pic' class='img-fluid rounded-circle elevation-2' alt='User Image' style='width: 40px; height: 40px; object-fit: cover;'>"
+        : "<img src='../admin/dist/img/user_icon.png' class='img-fluid rounded-circle elevation-2' alt='User Image' style='width: 40px; height: 40px; object-fit: cover;'>";
+  
 
         // Fetch system settings
         $sys_query = "SELECT * FROM iB_SystemSettings";

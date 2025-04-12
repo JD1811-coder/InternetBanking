@@ -204,7 +204,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
                                                                     <input type='hidden' name='emi_amount' value='" . $emi . "'>
                                                                   </form>";
 
-                                                            echo "<button class='btn btn-primary btn-sm' onclick='confirmPayment(" . $row->id . ", " . $i . ", " . $emi . ", \"" . $due_date_str . "\")'>Pay Now</button>";
+                                                                  echo "<button class='btn btn-primary btn-sm' 
+                                                                  data-loan-id='" . $row->id . "' 
+                                                                  data-emi-index='" . $i . "' 
+                                                                  onclick='confirmPayment(" . $row->id . ", " . $i . ", " . $emi . ", \"" . $due_date_str . "\")'>
+                                                                  Pay Now
+                                                                  </button>";
+                                                              
                                                         } else {
                                                             echo "<button class='btn btn-secondary btn-sm' disabled>Upcoming</button>";
                                                         }
@@ -237,45 +243,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
     <!-- Your script -->
     <script>
         function confirmPayment(loanId, emiIndex, emiAmount, emiDate) {
-            Swal.fire({
-                title: "Confirm Payment",
-                text: "Are you sure you want to pay ₹" + emiAmount + "?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, Pay Now"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "",
-                        type: "POST",
-                        data: {
-                            pay_emi: '1',  // Send as string
-                            loan_id: loanId,
-                            emi_date: emiDate,
-                            emi_amount: emiAmount
-                        },
-                        dataType: "json",
-                        success: function (response) {
-                            if (response.status === "success") {
-                                Swal.fire("Success!", response.message, "success").then(() => {
-                                    location.reload(); // This will force the page to reload and fetch updated data
-                                });
-                            } else {
-                                Swal.fire("Error!", response.message, "error");
-                            }
-                        },
-
-
-                        error: function (xhr) {
-                            Swal.fire("Error!", "Something went wrong! Try again.", "error");
-                        }
-                    });
+    Swal.fire({
+        title: "Confirm Payment",
+        text: "Are you sure you want to pay ₹" + emiAmount + "?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Pay Now"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "",
+                type: "POST",
+                data: {
+                    pay_emi: '1',
+                    loan_id: loanId,
+                    emi_date: emiDate,
+                    emi_amount: emiAmount
+                },
+                dataType: "json",
+                success: function (response) {
+                    if (response.status === "success") {
+                        Swal.fire("Success!", response.message, "success").then(() => {
+                            // Update the button to "Paid" without refreshing
+                            let button = $("button[data-loan-id='" + loanId + "'][data-emi-index='" + emiIndex + "']");
+                            button.replaceWith("<button class='btn btn-success btn-sm' disabled>Paid</button>");
+                        });
+                    } else {
+                        Swal.fire("Error!", response.message, "error");
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire("Error!", "Something went wrong! Try again.", "error");
                 }
             });
         }
-
+    });
+}
 
     </script>
 

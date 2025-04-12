@@ -11,14 +11,19 @@
   $stmt->execute(); //ok
   $res = $stmt->get_result();
   while ($row = $res->fetch_object()) {
-    //set automatically logged in user default image if they have not updated their pics
-    if ($row->profile_pic == '') {
-      $profile_picture = "<img src='../admin/dist/img/user_icon.png' class=' elevation-2' alt='User Image'>
-                ";
-    } else {
-      $profile_picture = "<img src='../admin/dist/img/$row->profile_pic' class='elevation-2' alt='User Image'>
-                ";
-    }
+    // Set default profile picture if the user has not uploaded one
+if (empty($row->profile_pic)) {
+  $profile_picture = "<img src='../admin/dist/img/user_icon.png' 
+                      class='img-fluid rounded-circle elevation-2' 
+                      alt='User Image' 
+                      style='width: 40px; height: 40px; object-fit: cover;'>";
+} else {
+  $profile_picture = "<img src='../admin/dist/img/$row->profile_pic' 
+                      class='img-fluid rounded-circle elevation-2' 
+                      alt='User Image' 
+                      style='width: 4pages_account0px; height: 40px; object-fit: cover;'>";
+}
+
 
 
     /* Persisit System Settings On Brand */

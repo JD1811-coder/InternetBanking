@@ -112,25 +112,23 @@ if (isset($_SESSION['staff_id'])) {
             $stmt->bind_param('i', $staff_id);
             $stmt->execute(); //ok
             $res = $stmt->get_result();
-            while ($row = $res->fetch_object()) {
-                //set automatically logged in user default image if they have not updated their pics
-                if ($row->profile_pic == '') {
-                    $profile_picture = "
-
-                            <img class='img-fluid'
+                while ($row = $res->fetch_object()) {
+                    // Set default image if profile picture is empty
+                    if (empty($row->profile_pic)) {
+                        $profile_picture = "
+                            <img class='img-fluid rounded-circle'
                             src='../admin/dist/img/user_icon.png'
-                            alt='User profile picture'>
-
-                            ";
-                } else {
-                    $profile_picture = "
-
-                            <img class=' img-fluid'
-                            src='../admin/dist/img/$row->profile_pic'
-                            alt='User profile picture'>
-
-                            ";
-                }
+                            alt='User profile picture'
+                            style='width: 100px; height: 100px; object-fit: cover;'>
+                        ";
+                    } else {
+                        $profile_picture = "
+                            <img class='img-fluid rounded-circle'
+                            src='../admin/dist/img/" . $row->profile_pic . "'
+                            alt='User profile picture'
+                            style='width: 100px; height: 100px; object-fit: cover;'>
+                        ";
+                    }
                 ?>
                 <section class="content-header">
                     <div class="container-fluid">

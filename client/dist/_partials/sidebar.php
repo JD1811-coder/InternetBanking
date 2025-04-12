@@ -9,8 +9,9 @@
     $res = $stmt->get_result();
     while ($row = $res->fetch_object()) {
       $profile_picture = $row->profile_pic 
-        ? "<img src='../admin/dist/img/$row->profile_pic' class='elevation-2' alt='User Image'>"
-        : "<img src='../admin/dist/img/user_icon.png' class='elevation-2' alt='User Image'>";
+          ? "<img src='../admin/dist/img/$row->profile_pic' class='img-fluid rounded-circle elevation-2' alt='User Image' style='width: 40px; height: 40px; object-fit: cover;'>"
+          : "<img src='../admin/dist/img/user_icon.png' class='img-fluid rounded-circle elevation-2' alt='User Image' style='width: 40px; height: 40px; object-fit: cover;'>";
+    
 
       $ret = "SELECT * FROM `iB_SystemSettings`";
       $stmt = $mysqli->prepare($ret);
