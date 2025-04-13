@@ -21,11 +21,38 @@ if (isset($_GET['deleteBankAccType'])) {
     header("Location: pages_manage_accs.php");
     exit();
 }
+if (isset($_GET['toggleBankAccType'])) {
+    $id = intval($_GET['toggleBankAccType']);
+    $currentStatus = intval($_GET['status']);
+    $newStatus = $currentStatus === 1 ? 0 : 1;
+
+    $query = "UPDATE iB_Acc_types SET is_active = ? WHERE acctype_id = ?";
+    $stmt = $mysqli->prepare($query);
+    $stmt->bind_param('ii', $newStatus, $id);
+    $stmt->execute();
+    $stmt->close();
+
+    if ($stmt) {
+        $_SESSION['success'] = $newStatus ? "Account Type Enabled Successfully!" : "Account Type Disabled Successfully!";
+    } else {
+        $_SESSION['error'] = "Failed to update status. Try Again!";
+    }
+    header("Location: pages_manage_accs.php");
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<style>.btn-group .btn {
+    margin-right: 5px;  /* Add spacing between buttons */
+}
+.btn-group .btn:last-child {
+    margin-right: 0;  /* Remove right margin for the last button */
+}
+</style>
 <?php include("dist/_partials/head.php"); ?>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
@@ -84,23 +111,34 @@ if (isset($_GET['deleteBankAccType'])) {
                                         $res = $stmt->get_result();
                                         $cnt = 1;
                                         while ($row = $res->fetch_object()) {
-                                        ?>
+                                            ?>
                                             <tr>
                                                 <td><?php echo $cnt; ?></td>
                                                 <td><?php echo $row->name; ?></td>
                                                 <td><?php echo $row->rate; ?>%</td>
-                                                <td><?php echo number_format($row->min_balance, 2); ?></td> <!-- Display Min Balance -->
+                                                <td><?php echo number_format($row->min_balance, 2); ?></td>
+                                                <!-- Display Min Balance -->
                                                 <td><?php echo $row->code; ?></td>
                                                 <td>
-                                                    <a class="btn btn-success btn-sm" href="pages_update_accs.php?code=<?php echo $row->code; ?>">
-                                                        <i class="fas fa-cogs"></i> Manage
-                                                    </a>
-                                                    <a class="btn btn-danger btn-sm delete-confirm" href="pages_manage_accs.php?deleteBankAccType=<?php echo $row->acctype_id; ?>">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </a>
-                                                </td>
+    <div class="btn-group" role="group">
+        <a class="btn btn-success btn-sm" href="pages_update_accs.php?code=<?php echo $row->code; ?>">
+            <i class="fas fa-cogs"></i> Manage
+        </a>
+
+        <button class="btn btn-<?php echo $row->is_active ? 'warning' : 'primary'; ?> btn-sm"
+            onclick="toggleBankAccType(<?php echo $row->acctype_id; ?>, <?php echo $row->is_active; ?>)">
+            <i class="fas fa-<?php echo $row->is_active ? 'times' : 'check'; ?>"></i>
+            <?php echo $row->is_active ? 'Disable' : 'Enable'; ?>
+        </button>
+
+        <a class="btn btn-danger btn-sm delete-confirm" href="pages_manage_accs.php?deleteBankAccType=<?php echo $row->acctype_id; ?>">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+    </div>
+</td>
                                             </tr>
-                                        <?php $cnt++; } ?>
+                                            <?php $cnt++;
+                                        } ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -109,7 +147,7 @@ if (isset($_GET['deleteBankAccType'])) {
                 </div>
             </section>
         </div>
-        
+
         <?php include("dist/_partials/footer.php"); ?>
     </div>
 
@@ -126,7 +164,7 @@ if (isset($_GET['deleteBankAccType'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(function() {
+        $(function () {
             $("#example1").DataTable();
         });
 
@@ -153,7 +191,7 @@ if (isset($_GET['deleteBankAccType'])) {
         <?php } ?>
 
         // Confirmation before delete
-        $(document).on('click', '.delete-confirm', function(e) {
+        $(document).on('click', '.delete-confirm', function (e) {
             e.preventDefault();
             var url = $(this).attr('href');
 
@@ -169,8 +207,26 @@ if (isset($_GET['deleteBankAccType'])) {
                 if (result.isConfirmed) {
                     window.location.href = url;
                 }
-            });
+            }); 
         });
+        function toggleBankAccType(id, currentStatus) {
+            let actionText = currentStatus ? "disable" : "enable";
+            Swal.fire({
+                title: "Are you sure?",
+                text: `You are about to ${actionText} this account type.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: `Yes, ${actionText} it!`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `pages_manage_accs.php?toggleBankAccType=${id}&status=${currentStatus}`;
+                }
+            });
+        }
+
     </script>
 </body>
+
 </html>

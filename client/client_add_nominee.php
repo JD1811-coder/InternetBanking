@@ -19,9 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
     $stmt->fetch();
     $stmt->close();
 
-    $errors = [];
     if ($nominee_count >= 2) {
-        $errors = "You can only add up to 2 nominees.";
+        $_SESSION['nominee_limit_error'] = "You can only add up to 2 nominees.";
+        // header("Location: client_nominees.php");
+        // exit();
     } else {
         // Trim inputs
         $nominee_name = trim($_POST['nominee_name']);
@@ -31,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
         $nominee_address = trim($_POST['nominee_address']);
         $aadhar_number = trim($_POST['aadhar_number']);
         $pan_number = trim($_POST['pan_number']);
-
-
+        
+        $errors = [];
         // Validation
         if (!preg_match("/^[a-zA-Z ]+$/", $nominee_name)) {
             $errors['nominee_name'] = "Only letters and spaces allowed.";
@@ -53,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
             $errors['nominee_phone'] = "Phone number must start with 6, 7, 8, or 9 and be exactly 10 digits.";
         }
 
-
         // Check for duplicates
         $duplicateQuery = "SELECT COUNT(*) FROM iB_nominees WHERE (nominee_name = ? OR nominee_email = ? OR nominee_phone = ? OR aadhar_number = ? OR pan_number = ?) AND client_id = ?";
         $stmt = $mysqli->prepare($duplicateQuery);
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
         // If no errors, insert nominee
         if (empty($errors)) {
             $query = "INSERT INTO iB_nominees (client_id, nominee_name, relation, nominee_email, nominee_phone, nominee_address, aadhar_number, pan_number) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $mysqli->prepare($query);
             $stmt->bind_param('isssssss', $client_id, $nominee_name, $relation, $nominee_email, $nominee_phone, $nominee_address, $aadhar_number, $pan_number);
 
@@ -84,27 +84,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
                 exit();
             }
         }
-
-
-        $stmt->close();
     }
 }
-
 ?>
 
 <!DOCTYPE html>
 <html>
 <?php include("dist/_partials/head.php"); ?>
-<?php if (isset($success_message)) { ?>
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: '<?php echo $success_message; ?>',
-            confirmButtonColor: '#28a745'
-        }).then(() => { window.location = 'client_nominees.php'; });
-    </script>
-<?php } ?>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
     <div class="wrapper">
@@ -130,40 +116,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
                                 <div class="card-header">
                                     <h3 class="card-title">Fill Nominee Details</h3>
                                 </div>
-                                <form method="post" onsubmit="return validateForm()">
+                                <form method="post">
                                     <div class="card-body">
 
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Nominee Name</label>
-                                                <input type="text" name="nominee_name" id="nominee_name"
-                                                    class="form-control" required>
-                                                <small
-                                                    class="text-danger"><?php echo $errors['nominee_name'] ?? ''; ?></small>
+                                                <input type="text" name="nominee_name" class="form-control" required>
+                                                <small class="text-danger"><?php echo $errors['nominee_name'] ?? ''; ?></small>
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Relation</label>
-                                                <input type="text" name="relation" id="relation" class="form-control"
-                                                    required>
-                                                <small
-                                                    class="text-danger"><?php echo $errors['relation'] ?? ''; ?></small>
+                                                <input type="text" name="relation" class="form-control" required>
+                                                <small class="text-danger"><?php echo $errors['relation'] ?? ''; ?></small>
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Nominee Email</label>
-                                                <input type="email" name="nominee_email" id="nominee_email"
-                                                    class="form-control">
-                                                <small
-                                                    class="text-danger"><?php echo $errors['nominee_email'] ?? ''; ?></small>
+                                                <input type="email" name="nominee_email" class="form-control">
+                                                <small class="text-danger"><?php echo $errors['nominee_email'] ?? ''; ?></small>
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>Nominee Phone</label>
-                                                <input type="text" name="nominee_phone" id="nominee_phone"
-                                                    class="form-control">
-                                                <small
-                                                    class="text-danger"><?php echo $errors['nominee_phone'] ?? ''; ?></small>
+                                                <input type="text" name="nominee_phone" class="form-control">
+                                                <small class="text-danger"><?php echo $errors['nominee_phone'] ?? ''; ?></small>
                                             </div>
                                         </div>
 
@@ -175,17 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <label>Aadhar Card Number</label>
-                                                <input type="text" name="aadhar_number" id="aadhar_number"
-                                                    class="form-control">
-                                                <small
-                                                    class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
+                                                <input type="text" name="aadhar_number" class="form-control">
+                                                <small class="text-danger"><?php echo $errors['aadhar_number'] ?? ''; ?></small>
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <label>PAN Card Number</label>
-                                                <input type="text" name="pan_number" id="pan_number"
-                                                    class="form-control">
-                                                <small
-                                                    class="text-danger"><?php echo $errors['pan_number'] ?? ''; ?></small>
+                                                <input type="text" name="pan_number" class="form-control">
+                                                <small class="text-danger"><?php echo $errors['pan_number'] ?? ''; ?></small>
                                             </div>
                                         </div>
 
@@ -194,8 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="add_nominee" class="btn btn-success">Add
-                                            Nominee</button>
+                                        <button type="submit" name="add_nominee" class="btn btn-success">Add Nominee</button>
                                     </div>
                                 </form>
                             </div>
@@ -207,7 +180,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_nominee'])) {
 
         <?php include("dist/_partials/footer.php"); ?>
     </div>
-</body>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php if (isset($_SESSION['nominee_limit_error'])) { ?>
+        <script>
+            Swal.fire({ icon: 'error', title: 'Limit Exceeded', text: '<?php echo $_SESSION['nominee_limit_error']; ?>' });
+        </script>
+    <?php unset($_SESSION['nominee_limit_error']); } ?>
+
+</body>
 </html>

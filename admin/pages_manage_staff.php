@@ -114,24 +114,24 @@ if (isset($_GET['deleteStaff'])) {
                                                 <td><?php echo $row->email; ?></td>
                                                 <td><?php echo $row->sex; ?></td>
                                                 <td>
-                                                    <a class="btn btn-success btn-sm"
-                                                        href="pages_view_staff.php?staff_number=<?php echo $row->staff_number; ?>">
-                                                        <i class="fas fa-cogs"></i> Manage
-                                                    </a>
+    <div class="btn-group">
+        <a class="btn btn-success btn-sm mr-1"
+            href="pages_view_staff.php?staff_number=<?php echo $row->staff_number; ?>">
+            <i class="fas fa-cogs"></i> Manage
+        </a>
 
-                                                    <button
-                                                        class="btn btn-<?php echo $row->is_active ? 'warning' : 'primary'; ?> btn-sm"
-                                                        onclick="toggleStaff(<?php echo $row->staff_id; ?>, <?php echo $row->is_active; ?>)">
-                                                        <i
-                                                            class="fas fa-<?php echo $row->is_active ? 'times' : 'check'; ?>"></i>
-                                                        <?php echo $row->is_active ? 'Disable' : 'Enable'; ?>
-                                                    </button>
+        <button class="btn btn-<?php echo $row->is_active ? 'warning' : 'primary'; ?> btn-sm mr-1"
+            onclick="toggleStaff(<?php echo $row->staff_id; ?>, <?php echo $row->is_active; ?>)">
+            <i class="fas fa-<?php echo $row->is_active ? 'times' : 'check'; ?>"></i>
+            <?php echo $row->is_active ? 'Disable' : 'Enable'; ?>
+        </button>
 
-                                                    <button class="btn btn-danger btn-sm"
-                                                        onclick="deleteStaff(<?php echo $row->staff_id; ?>)">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </button>
-                                                </td>
+        <button class="btn btn-danger btn-sm"
+            onclick="deleteStaff(<?php echo $row->staff_id; ?>)">
+            <i class="fas fa-trash"></i> Delete
+        </button>
+    </div>
+</td>
 
                                             </tr>
                                             <?php $cnt++;

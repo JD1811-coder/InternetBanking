@@ -126,27 +126,29 @@ $loanTypesResult = $mysqli->query($loanTypesQuery);
                                             <td><?php echo htmlspecialchars($row->interest_rate); ?>%</td>
                                             <!-- <td><?php echo number_format($row->max_amount, 2); ?></td> -->
                                             <td>
-                                                <a class="btn btn-success btn-sm"
-                                                    href="pages_edit_loan_type.php?id=<?php echo $row->id; ?>">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </a>
-                                                <a class="btn btn-danger btn-sm"
-                                                    href="pages_manage_loan_types.php?deleteLoanType=<?php echo $row->id; ?>"
-                                                    onclick="return confirm('Are you sure you want to delete this loan type?');">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </a>
-                                                <?php if ($row->is_active) : ?>
-                                                <a class="btn btn-warning btn-sm"
-                                                    href="pages_manage_loan_types.php?disableLoanType=<?php echo $row->id; ?>">
-                                                    <i class="fas fa-ban"></i> Disable
-                                                </a>
-                                                <?php else : ?>
-                                                <a class="btn btn-info btn-sm"
-                                                    href="pages_manage_loan_types.php?enableLoanType=<?php echo $row->id; ?>">
-                                                    <i class="fas fa-check"></i> Enable
-                                                </a>
-                                                <?php endif; ?>
-                                            </td>
+    <div class="btn-group" role="group">
+        <!-- Edit Button -->
+        <a class="btn btn-success btn-sm" href="pages_edit_loan_type.php?id=<?php echo $row->id; ?>">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+
+        <!-- Enable/Disable Button -->
+        <?php if ($row->is_active) : ?>
+            <a class="btn btn-warning btn-sm" href="pages_manage_loan_types.php?disableLoanType=<?php echo $row->id; ?>">
+                <i class="fas fa-ban"></i> Disable
+            </a>
+        <?php else : ?>
+            <a class="btn btn-info btn-sm" href="pages_manage_loan_types.php?enableLoanType=<?php echo $row->id; ?>">
+                <i class="fas fa-check"></i> Enable
+            </a>
+        <?php endif; ?>
+
+        <!-- Delete Button with Confirmation -->
+        <a class="btn btn-danger btn-sm delete-confirm" href="pages_manage_loan_types.php?deleteLoanType=<?php echo $row->id; ?>">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+    </div>
+</td>
                                         </tr>
                                         <?php
                                             $cnt++;
@@ -168,6 +170,28 @@ $loanTypesResult = $mysqli->query($loanTypesQuery);
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="dist/js/adminlte.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $(document).on('click', '.delete-confirm', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href');
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+</script>
 
 </body>
 

@@ -19,17 +19,33 @@ $account_row = $account_result->fetch_assoc();
 $client_balance = $account_row ? $account_row['acc_amount'] : 0;
 
 
-// Fetch approved loans
+
+// Ensure loan_id is provided
+if (!isset($_GET['loan_id']) || !is_numeric($_GET['loan_id'])) {
+    die("Invalid loan ID!");
+}
+
+$loan_id = $_GET['loan_id']; // Get loan_id from URL
+
+// Fetch the correct loan details
 $query = "SELECT la.id, la.loan_type_id, lt.interest_rate, la.loan_amount, 
-                        la.loan_duration_years, la.loan_duration_months, la.application_date 
-                FROM loan_applications la
-                INNER JOIN loan_types lt ON la.loan_type_id = lt.id 
-                WHERE la.status = 'approved' AND la.client_id = ?";
+                 la.loan_duration_years, la.loan_duration_months, la.application_date 
+          FROM loan_applications la
+          INNER JOIN loan_types lt ON la.loan_type_id = lt.id 
+          WHERE la.id = ? AND la.status = 'approved'";
 
 $stmt = $mysqli->prepare($query);
-$stmt->bind_param('i', $client_id);
+$stmt->bind_param('i', $loan_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// if ($result->num_rows > 0) {
+//     echo ('loan id found');
+// } else {
+//     die("Loan not found!");
+// }
+
+
 
 // Generate EMI due dates function
 function generate_due_dates($start_date, $months)
@@ -187,13 +203,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pay_emi'])) {
                                                                     <input type='hidden' name='emi_date' value='" . $due_date_str . "'>
                                                                     <input type='hidden' name='emi_amount' value='" . $emi . "'>
                                                                   </form>";
-                                                    
+
                                                             echo "<button class='btn btn-primary btn-sm' onclick='confirmPayment(" . $row->id . ", " . $i . ", " . $emi . ", \"" . $due_date_str . "\")'>Pay Now</button>";
                                                         } else {
                                                             echo "<button class='btn btn-secondary btn-sm' disabled>Upcoming</button>";
                                                         }
                                                     }
-                                                    
+
 
 
                                                     echo "</td>";

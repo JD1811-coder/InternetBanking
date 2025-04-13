@@ -118,6 +118,7 @@ $result = $stmt->get_result();
                                                     echo "<td>" . number_format($row->interest_rate, 2) . "</td>";
                                                     echo "<td>" . $loanDuration . "</td>";
                                                     echo "<td><a href='installment_details.php?loan_id=" . $row->id . "' class='btn btn-primary btn-sm'>Installment</a></td>";
+
                                                     echo "</tr>";
                                                     $count++;
                                                 }

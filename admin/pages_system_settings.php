@@ -4,32 +4,66 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 if (isset($_POST['systemSettings'])) {
-  //Error Handling and prevention of posting double entries
   $error = 0;
+  
+  // Validate System Name (only letters & spaces)
   if (isset($_POST['sys_name']) && !empty($_POST['sys_name'])) {
-    $sys_name = mysqli_real_escape_string($mysqli, trim($_POST['sys_name']));
+      $sys_name = trim($_POST['sys_name']); // Trim spaces
+      if (!preg_match("/^[a-zA-Z ]+$/", $sys_name)) {
+          $error = 1;
+          $err = "System Name can only contain letters and spaces.";
+      }
   } else {
-    $error = 1;
-    $err = "System Name Cannot Be Empty";
+      $error = 1;
+      $err = "System Name Cannot Be Empty.";
   }
-  if (!$error) {
-    $id = $_POST['id'];
-    $sys_tagline = $_POST['sys_tagline'];
-    $sys_logo = $_FILES['sys_logo']['name'];
-    move_uploaded_file($_FILES["sys_logo"]["tmp_name"], "dist/img/" . $_FILES["sys_logo"]["name"]);
 
-    $query = "UPDATE iB_SystemSettings SET sys_name =?, sys_logo =?, sys_tagline=? WHERE id = ?";
-    $stmt = $mysqli->prepare($query);
-    $rc = $stmt->bind_param('ssss',  $sys_name,  $sys_logo, $sys_tagline, $id);
-    $stmt->execute();
-    if ($stmt) {
-      $success = "Settings Updated" && header("refresh:1; url=pages_system_settings.php");
-    } else {
-      //inject alert that profile update task failed
-      $info = "Please Try Again Or Try Later";
-    }
+  // Validate System Logo File Type
+  if (!empty($_FILES['sys_logo']['name'])) {
+      $allowed_extensions = ['png', 'jpeg', 'jpg'];
+      $file_extension = strtolower(pathinfo($_FILES['sys_logo']['name'], PATHINFO_EXTENSION));
+
+      if (!in_array($file_extension, $allowed_extensions)) {
+          $error = 1;
+          $err = "Only PNG, JPEG, and JPG file formats are allowed for the logo.";
+      }
+  }
+  if (isset($_POST['sys_tagline']) && !empty(trim($_POST['sys_tagline']))) {
+    $sys_tagline = trim($_POST['sys_tagline']);
+} else {
+    $error = 1;
+    $err = "System Tagline Cannot Be Empty or Just Spaces.";
+}
+
+
+  // If no errors, proceed with database update
+  if (!$error) {
+      $id = $_POST['id'];
+      $sys_tagline = trim($_POST['sys_tagline']);
+
+      // Handle Logo Upload
+      if (!empty($_FILES['sys_logo']['name'])) {
+          $sys_logo = $_FILES['sys_logo']['name'];
+          move_uploaded_file($_FILES["sys_logo"]["tmp_name"], "dist/img/" . $sys_logo);
+      } else {
+          $sys_logo = ""; // Keep existing logo if no new upload
+      }
+
+      $query = "UPDATE iB_SystemSettings SET sys_name =?, sys_logo =?, sys_tagline=? WHERE id = ?";
+      $stmt = $mysqli->prepare($query);
+      $stmt->bind_param('ssss', $sys_name, $sys_logo, $sys_tagline, $id);
+      $stmt->execute();
+
+      if ($stmt) {
+          $_SESSION['success'] = "Settings Updated Successfully!";
+          header("refresh:1; url=pages_system_settings.php");
+          exit();
+      } else {
+          $info = "Please Try Again Later.";
+      }
   }
 }
+
 ?>
 <!-- Log on to codeastro.com for more projects! -->
 <!DOCTYPE html>
@@ -85,24 +119,36 @@ if (isset($_POST['systemSettings'])) {
                   <form method="post" enctype="multipart/form-data" role="form">
                     <div class="card-body">
                       <div class="row">
-                        <div class="form-group col-md-12">
-                          <label for="">Company Name</label>
-                          <input type="text" required name="sys_name" value="<?php echo $sys->sys_name; ?>" class="form-control">
-                          <input type="hidden" required name="id" value="<?php echo $sys->id ?>" class="form-control">
-                        </div>
-                        <div class="form-group col-md-12">
-                          <label for="">Company Tagline</label>
-                          <input type="text" required name="sys_tagline" value="<?php echo $sys->sys_tagline; ?>" class="form-control">
-                        </div>
-                        <div class="form-group col-md-12">
-                          <label for="">System Logo</label>
-                          <div class="input-group">
-                            <div class="custom-file">
-                              <input required name="sys_logo" type="file" class="custom-file-input">
-                              <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                            </div>
-                          </div>
-                        </div>
+                       <div class="form-group col-md-12">
+    <label for="">Company Name</label>
+    <input type="text" required name="sys_name" value="<?php echo $sys->sys_name; ?>" class="form-control">
+    <input type="hidden" required name="id" value="<?php echo $sys->id ?>" class="form-control">
+    <?php if (isset($err) && strpos($err, 'System Name') !== false) : ?>
+        <small class="text-danger"><?php echo $err; ?></small>
+    <?php endif; ?>
+</div>
+
+<div class="form-group col-md-12">
+    <label for="">Company Tagline</label>
+    <input type="text" required name="sys_tagline" value="<?php echo isset($sys->sys_tagline) ? trim($sys->sys_tagline) : ''; ?>" class="form-control">
+    <?php if (isset($err) && strpos($err, 'System Tagline') !== false) : ?>
+        <small class="text-danger"><?php echo $err; ?></small>
+    <?php endif; ?>
+</div>
+
+
+<div class="form-group col-md-12">
+    <label for="">System Logo</label>
+    <div class="input-group">
+        <div class="custom-file">
+            <input required name="sys_logo" type="file" class="custom-file-input">
+            <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+        </div>
+    </div>
+    <?php if (isset($err) && strpos($err, 'Only PNG') !== false) : ?>
+        <small class="text-danger"><?php echo $err; ?></small>
+    <?php endif; ?>
+</div>
                       </div>
                     </div>
                     <div class="text-right">
@@ -161,6 +207,52 @@ if (isset($_POST['systemSettings'])) {
       bsCustomFileInput.init();
     });
   </script>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector("form").addEventListener("submit", function (e) {
+        let sysNameInput = document.querySelector("input[name='sys_name']");
+        let taglineInput = document.querySelector("input[name='sys_tagline']");
+        let fileInput = document.querySelector("input[name='sys_logo']");
+        let file = fileInput.files[0];
+        let error = false;
+
+        // Validate System Name (only letters and spaces)
+        if (!/^[a-zA-Z ]+$/.test(sysNameInput.value.trim())) {
+            sysNameInput.nextElementSibling.textContent = "System Name can only contain letters and spaces.";
+            error = true;
+        } else {
+            sysNameInput.nextElementSibling.textContent = "";
+        }
+
+        // Validate System Tagline (should not be empty or spaces only)
+        if (taglineInput.value.trim() === "") {
+            taglineInput.nextElementSibling.textContent = "System Tagline Cannot Be Empty or Just Spaces.";
+            error = true;
+        } else {
+            taglineInput.nextElementSibling.textContent = "";
+        }
+
+        // Validate Logo File Type
+        if (file) {
+            let allowedExtensions = ["png", "jpeg", "jpg"];
+            let fileExtension = file.name.split('.').pop().toLowerCase();
+            if (!allowedExtensions.includes(fileExtension)) {
+                fileInput.nextElementSibling.textContent = "Only PNG, JPEG, and JPG formats are allowed.";
+                error = true;
+            } else {
+                fileInput.nextElementSibling.textContent = "";
+            }
+        }
+
+        if (error) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+</script>
+
 </body>
 
 </html>

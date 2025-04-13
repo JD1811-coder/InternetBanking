@@ -10,7 +10,21 @@ $client_id = $_SESSION['client_id'];
     and numeric values from distinct 
     tables
     */
+// Query to get account types and their counts dynamically
+$query = "SELECT acc_type, COUNT(*) as count FROM iB_bankAccounts WHERE client_id = ? GROUP BY acc_type";
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param('i', $client_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
+$accountData = [];
+while ($row = $result->fetch_assoc()) {
+    $accountData[] = [
+        "y" => $row['count'],
+        "name" => $row['acc_type'],
+        "exploded" => true
+    ];
+}
 //return total number of ibank clients
 $result = "SELECT count(*) FROM iB_clients";
 $stmt = $mysqli->prepare($result);
@@ -432,98 +446,13 @@ ORDER BY t.created_at DESC
           itemclick: explodePie
         },
         data: [{
-          type: "pie",
-          showInLegend: true,
-          toolTipContent: "{name}: <strong>{y}%</strong>",
-          indexLabel: "{name} - {y}%",
-          dataPoints: [{
-            y: <?php
-            //return total number of accounts opened under savings acc type
-            $client_id = $_SESSION['client_id'];
-            $result = "SELECT count(*) FROM iB_bankAccounts WHERE  acc_type ='Savings' AND client_id =? ";
-            $stmt = $mysqli->prepare($result);
-            $stmt->bind_param('i', $client_id);
-            $stmt->execute();
-            $stmt->bind_result($savings);
-            $stmt->fetch();
-            $stmt->close();
-            echo $savings;
-            ?>,
-            name: "Savings Acc",
-            exploded: true
-          },
-
-          {
-            y: <?php
-            //return total number of accounts opened under  Retirement  acc type
-            $client_id = $_SESSION['client_id'];
-            $result = "SELECT count(*) FROM iB_bankAccounts WHERE  acc_type =' Retirement' AND client_id =? ";
-            $stmt = $mysqli->prepare($result);
-            $stmt->bind_param('i', $client_id);
-            $stmt->execute();
-            $stmt->bind_result($Retirement);
-            $stmt->fetch();
-            $stmt->close();
-            echo $Retirement;
-            ?>,
-            name: " Retirement Acc",
-            exploded: true
-          },
-
-          {
-            y: <?php
-            //return total number of accounts opened under  Recurring deposit  acc type
-            $client_id = $_SESSION['client_id'];
-            $result = "SELECT count(*) FROM iB_bankAccounts WHERE  acc_type ='Recurring deposit' AND client_id =? ";
-            $stmt = $mysqli->prepare($result);
-            $stmt->bind_param('i', $client_id);
-            $stmt->execute();
-            $stmt->bind_result($Recurring);
-            $stmt->fetch();
-            $stmt->close();
-            echo $Recurring;
-            ?>,
-            name: "Recurring deposit Acc ",
-            exploded: true
-          },
-
-          {
-            y: <?php
-            //return total number of accounts opened under  Fixed Deposit Account deposit  acc type
-            $client_id = $_SESSION['client_id'];
-            $result = "SELECT count(*) FROM iB_bankAccounts WHERE  acc_type ='Fixed Deposit Account' AND client_id = ? ";
-            $stmt = $mysqli->prepare($result);
-            $stmt->bind_param('i', $client_id);
-            $stmt->execute();
-            $stmt->bind_result($Fixed);
-            $stmt->fetch();
-            $stmt->close();
-            echo $Fixed;
-            ?>,
-            name: "Fixed Deposit Acc",
-            exploded: true
-          },
-
-          {
-            y: <?php
-
-            //return total number of accounts opened under  Current account deposit  acc type
-            $client_id = $_SESSION['client_id'];
-            $result = "SELECT count(*) FROM iB_bankAccounts WHERE  acc_type ='Current account' AND client_id =? ";
-            $stmt = $mysqli->prepare($result);
-            $stmt->bind_param('i', $client_id);
-            $stmt->execute();
-            $stmt->bind_result($Current);
-            $stmt->fetch();
-            $stmt->close();
-            echo $Current;
-            ?>,
-            name: "Current Acc",
-            exploded: true
-          }
-          ]
+            type: "pie",
+            showInLegend: true,
+            toolTipContent: "{name}: <strong>{y}</strong>",
+            indexLabel: "{name} - {y}",
+            dataPoints: <?php echo json_encode($accountData, JSON_NUMERIC_CHECK); ?>
         }]
-      });
+    });
 
       var AccChart = new CanvasJS.Chart("AccountsPerAccountCategories", {
         exportEnabled: false,

@@ -177,7 +177,7 @@
           <li class="nav-item">
             <a href="pages_feedback.php" class="nav-link">
               <i class="nav-icon fas fa-comments"></i>
-              <p>Complain</p>
+              <p>Complaints</p>
             </a>
           </li>
 
